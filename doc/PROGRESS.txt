@@ -1,0 +1,64 @@
+
+12. January 2015
+
+		believe I added a similarity matrix based on euclidian distance
+		- subclass of 'matrix' object
+		- calls 'super.setMatrix' in constructor method
+
+		Now :
+		- mean normalization? 
+
+		Still to do:
+		- hard coded test of dotproduct
+
+11. January 2015
+
+		reading about interface
+		suggestion was have a 'matrix' interface which both the data matrix and similarity matrix implement seems counterintuitive; i would have to implement methods twice eg. copy and paste matrix multiplication into both classes (these calculations remain identical) . why not just have 'dataMatrix' and 'similarityMatrix' be subclasses of matrix
+
+		if do wish to have matrix calculations be declared in interface such as 'Computable' which declares functions such as 'multiply' and 'inverse' (adhering to interfaces as adjectives and classes has nouns) seems more plausable.. but why do this? Do we intend to :
+		1) create matrices that don't implement matrix calculations?
+		2) have non matrix classes implement matrix calculations?
+
+		maybe i didn't understand suggestion.
+
+		or.. maybe interface is just there to declare methods as api so that eg. in cluster analysis I know what can be done with matrix object
+
+
+		OR : have Matrix interface , then Matrixcalculations class that implements them
+		- further matrix objects such as 'Datatable' and 'Similaritymatrix' have an object Matrixcalculations that can implement methods.. 
+
+
+		--> downloaded human brain ontology used by allen brain project.
+		1) should keep data in a dictionary, with 'id' as key and 'structure object' as value? each structure object has a 'parent_id' field and an array of children?
+		or 2) have each structure have an array of parents and 
+
+
+9. January 2015
+		1) Added matrix matrix multiplication and some unit testing : same as transposition, how thoroughly shoudl results be tested? with matrix of known answer? pos/neg/zero values?
+		2) Added matrix scalar multiplication and some unit testing :
+		Questions : 
+		- how thoroughly is unit testing reasonable? With pre-defined answers, or perform parallel operation and check results? 
+		- should i check for null argument at every step ? 
+
+
+
+8. January 2015
+		1) added addition method to matrix, and corressponding unit testing
+		2) simple transpostion, copying values into new empty matrix : INEFFICIENT! in situs transposition for square matrices
+		**how should one unit test for transposition??
+
+
+
+
+7. January 2015
+		1) Download Allen Brain Atlas
+		http://human.brain-map.org/static/download
+		 
+		.Complete normalized microarray datasets
+
+		Complete microarray datasets for the full complement of six brains are available for download. The datasets contain gene expression values normalized across all brains using an improved normalization process implemented in March 2013.
+
+		Downloadable files containing all normalized microarray expression values as well as probe and sample metadata necessary for analysis: H0351.2001, H0351.2002, H0351.1009, H0351.1012, H0351.1015, H0351.1016.
+
+		An XML or CSV link to meta-information and URL to download each of the raw microarray files. 
