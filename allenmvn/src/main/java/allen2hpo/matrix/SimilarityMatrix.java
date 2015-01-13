@@ -13,24 +13,17 @@ public class SimilarityMatrix extends Matrix{
 		super.setMatrix(new double[m.getRowSize()][m.getRowSize()]);
 		System.out.println("CALCULATING SIMILARITY");
 		computeSimilarity(m);
-		super.print();
+		print();
 
-
-		m.meanNormalize();
-		computeSimilarity(m);
-		super.print();
-
-
-		/*m.featureScale();
-		computeSimilarity(m);
-		super.print();*/
 	}
 
 	private void computeSimilarity(Matrix m){
 	///FOR EACH ROW OF SIMILARITY MATRIX
 			for (int i=0;i<m.getRowSize();i++){
 				///FOR EACH COLUMN OF SIMILARITY MATRIX
-				for(int j=0;j<m.getRowSize();j++){
+				//for(int j=0;j<=m.getColumnSize();j++){
+				for(int j=0;j<=i;j++){
+
 
 					double sum = 0;
 
@@ -47,4 +40,15 @@ public class SimilarityMatrix extends Matrix{
 				}
 			}
 	}
+
+	public void print(){
+        for(int i = 0;i<getRowSize();i++){
+            for(int j = 0;j<=i;j++){
+                System.out.printf("%.5f\t",super.getValueAtIndex(i,j));
+            }
+            System.out.printf("\n");
+        }
+        System.out.printf("\n\n\n");
+
+    }
 }
