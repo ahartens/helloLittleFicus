@@ -2,10 +2,10 @@ package allen2hpo.clustering;
 
 import allen2hpo.matrix.Matrix;
 
-public class GapStat implements GetKable{
+public class GapStat implements GetKable,Kmeansable{
 	
 	int kfinal;
-
+	Kmeans kmeans;
 	/**
 	
 	*	@param n : sample size
@@ -54,4 +54,19 @@ public class GapStat implements GetKable{
 		return 13.0f;
 
 	}
+
+
+
+
+
+	public void setK(){
+
+	}			
+	public void setInitClusters(){
+
+	}					
+	public void beginClustering(int i){
+
+	}
+
 }

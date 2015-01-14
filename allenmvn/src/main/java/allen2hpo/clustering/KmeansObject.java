@@ -8,7 +8,7 @@ public class Kmeans{
 	/**
 	*	The number of clusters
 	*/
-	private int k = null;
+	private int k = 0;
 
 	/**
 	*	An m x n matrix of data to be clustered
@@ -48,36 +48,36 @@ public class Kmeans{
 	*	@param Takes a matrix object of the data that is to be clustered
 
 	*/
-	public Kmeans(Matrix mat, int kval){
+	public Kmeans(Matrix mat){
 		
-		///SET MATRIX FIELD AND INITIALIZE ARRAY STORING CLUSTER INDEX ASSIGNMENT
-		setDataMatrix(mat);
+		///SET MATRIX FIELD
+		this.m = mat;
+		this.ci = new int[mat.getRowSize()];		
 		
-		///SET K VALUE. IN FUTURE CAN BE EXTENDED TO USE GAPSTAT, ELBOW METHOD
-		setK(kval);
-
+	/*	
 		///INIT CLUSTER PROTOTYPES (AT THE MOMENT JUST TAKES FIRST 3 VALUES). CAN BE EXTENDED IN SUBLCASSES
 		BasicInitClusters init = new BasicInitClusters();
 		setInitClusters(init.initClusters(this.m,this.k));
 
 		///BEGINS ITERATIVE CLUSTERING
-		beginClustering(150);
-	}
-
-
-	public void setDataMatrix(Matrix mat){
-		///SET MATRIX FIELD
-		this.m = mat;
-		this.ci = new int[mat.getRowSize()];
+		beginClustering(150);*/
 	}
 
 	public void setK(int kval){
 		this.k = kval;	
 	}
 
-	public void setInitClusters(double[][] clusters){
-		this.cp = clusters;
+	public void setInitClusters(double[][] clusterSeeds){
+		this.cp = clusterSeeds;
 
+	}
+
+	public int getK(){
+		return this.k;
+	}
+
+	public Matrix getData(){
+		return this.m;
 	}
 
 	/**
@@ -88,9 +88,9 @@ public class Kmeans{
 
 	*/
 	public void beginClustering(int x){
-		if (this.m = null)
+		if (this.m == null)
 			throw new IllegalArgumentException("Data not initialized");
-		if (this.k == null)
+		if (this.k == 0)
 			throw new IllegalArgumentException("k not initialized");
 		if (this.cp ==null)
 			throw new IllegalArgumentException("cluster prototypes not initialized");
