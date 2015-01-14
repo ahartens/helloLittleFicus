@@ -14,7 +14,7 @@ public class KmeansTest{
 		double[][] d = { {1d,1d},{2d,2d},{4d,1d}};
 		Matrix m = new Matrix(d);
 
-		Kmeans km = new Kmeans(m);
+		Kmeans km = new Kmeans(m,3);
 	
 	}
 

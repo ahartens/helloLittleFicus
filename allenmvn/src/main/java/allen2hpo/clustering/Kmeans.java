@@ -6,61 +6,79 @@ import allen2hpo.matrix.Matrix;
 public class Kmeans{
 	
 	/**
-	*	The number of clusters , k.
+	*	The number of clusters
 	*/
-	private int k;
+	private int k = null;
 
 	/**
-	*	An m x n matrix of data to be clustered.
+	*	An m x n matrix of data to be clustered
 	*/
 	private Matrix m = null;
 
 	/**
-	*	cp = cluster prototypes. The centroids of the clusters being calculated. A k x n two dimensional array
+	*	cluster prototypes. The centroids of the clusters being calculated. A k x n two dimensional array
 	*/
 	private double[][] cp = null;
 
 	/**
-	*	ci = cluster index. An m x 1 matrix. Stores the index of the cluster to which each data point in matrix belongs to. 
+	*	cluster index. An m x 1 matrix. Stores the index of the cluster to which each data point in matrix belongs to
 	*/
 	private int[] ci = null;
 	
 
+	public Kmeans(){
+
+	}
+
 
 	/**
 
-	*	Constructor method. Takes a matrix object containing data that is to be clustered. Classes subclassing Kmeans are required to call the same methods as found here
+	*	Constructor method. Takes a matrix object containing data that is to be clustered. 
 
-	*	Can call various classes that implement interfaces
+	*	Classes subclassing Kmeans are required to call four methods :					
 	
-	*	1)		GetKable
+	*	1) setDataMatrix(Matrix m).					
 	
-	*	2)		InitializeClusterable
-
-	*	Once k and first clusters are initialized, 
+	*	2) setK(int kval).				
+	
+	*	3) setInitClusters(double[] cp)  cp = cluster prototypes. A k x n two dimensional array. 					
+	
+	*	4) beginClustering(150).				
 
 	*	@param Takes a matrix object of the data that is to be clustered
 
 	*/
-	public Kmeans(Matrix mat){
+	public Kmeans(Matrix mat, int kval){
 		
-		///SET MATRIX FIELD
-		this.m = mat;
-		this.ci = new int[mat.getRowSize()];
+		///SET MATRIX FIELD AND INITIALIZE ARRAY STORING CLUSTER INDEX ASSIGNMENT
+		setDataMatrix(mat);
 		
 		///SET K VALUE. IN FUTURE CAN BE EXTENDED TO USE GAPSTAT, ELBOW METHOD
-		GetKBasic getK = new GetKBasic();
-		this.k = getK.getK();	
-		
+		setK(kval);
+
 		///INIT CLUSTER PROTOTYPES (AT THE MOMENT JUST TAKES FIRST 3 VALUES). CAN BE EXTENDED IN SUBLCASSES
 		BasicInitClusters init = new BasicInitClusters();
-		this.cp = init.initClusters(this.m,this.k);
-
+		setInitClusters(init.initClusters(this.m,this.k));
 
 		///BEGINS ITERATIVE CLUSTERING
 		beginClustering(150);
 	}
 
+
+	public void setDataMatrix(Matrix mat){
+		///SET MATRIX FIELD
+		this.m = mat;
+		this.ci = new int[mat.getRowSize()];
+	}
+
+	public void setK(int kval){
+		this.k = kval;	
+	}
+
+	public void setInitClusters(double[][] clusters){
+		this.cp = clusters;
+
+	}
 
 	/**
 
@@ -70,12 +88,21 @@ public class Kmeans{
 
 	*/
 	public void beginClustering(int x){
+		if (this.m = null)
+			throw new IllegalArgumentException("Data not initialized");
+		if (this.k == null)
+			throw new IllegalArgumentException("k not initialized");
+		if (this.cp ==null)
+			throw new IllegalArgumentException("cluster prototypes not initialized");
+
 		 ///ITERATE CLUSTER ASSIGNMENT AND CLUSTER MEAN RECALCULATION STEPS
 	    for (int i = 0; i<x; i++) {
 	    	assignPointsToCluster();
 	    	calcClusterMean();
 	    }
 	}
+
+
 
 
 
