@@ -21,17 +21,14 @@ public class Kmeans{
 
 	}
 	public Kmeans(Matrix mat){
-		performKMeans(mat);
-	}
-
-	public void performKMeans(Matrix mat){
 		///SET MATRIX FIELD
-		setMatrix(mat);
+		this.m = mat;
 		///SET K VALUE. IN FUTURE CAN BE EXTENDED TO USE GAPSTAT, ELBOW METHOD
 		GetKBasic getK = new GetKBasic();
-		setK(getK.getK());	
+		this.k = getK.getK();	
 		///INIT CLUSTER PROTOTYPES (AT THE MOMENT JUST TAKES FIRST 3 VALUES). CAN BE EXTENDED IN SUBLCASSES
-		initClusters();
+		BasicInitClusters init = new BasicInitClusters();
+		this.cp = init.initClusters(this.m,this.k);
 
 		 ///ITERATE CLUSTER ASSIGNMENT AND CLUSTER MEAN RECALCULATION STEPS
 	    for (int i = 0; i<150; i++) {
@@ -42,50 +39,8 @@ public class Kmeans{
 
 	}
 
-	private int determineK(){
-		System.out.println("PARENT CLASS CALLING DETERMINE K");
-		return 3;
-	}
-
-	///SETTERS
-	
-	/**
-
-	*	@param Takes a matrix object of the data that is to be clustered
-
-	*/
-	public void setMatrix(Matrix mat){
-		this.m = mat;
-	}
-
-	public void setK(int val){
-		this.k = k;
-	}
-
-	public void setClusterProtos(){
-		this.cp = new double[this.k][m.getColumnSize()];
-	}
-
-	
 
 
-	public void initClusters(){
-		///INITIALIZE ARRAY HOLDING CLUSTER PROTYPES WITH LENGTH K (HOLDING VALUES OF MAT.COLUMN SIZE DIMENSIONS)
-		setClusterProtos();
-	    
-	    int i,j;
-	    ///INIT K CLUSTER SEEDS
-	    for (i = 0; i<this.k; i++) {
-	        ///FOR NOW JUST TAKE FIRST 3 POINTS OF DATA TABLE
-	        for (j = 0; j< this.m.getColumnSize(); j++) {
-	            cp[i][j] = this.m.getValueAtIndex(i,j);
-	        }
-	    }
-
-	    System.out.println("CLUST PROTOS");
-	    print();
-
-	}
 
 	
 
