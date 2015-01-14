@@ -4,10 +4,10 @@ import allen2hpo.matrix.Matrix;
 
 public class KmeansGapStat implements Kmeansable{
 	
-	private Kmeans kmeans;
+	private KmeansObject kmeans;
 
 	public KmeansGapStat(Matrix mat){
-		kmeans = new Kmeans(mat);
+		kmeans = new KmeansObject(mat);
 	}
 
 	public void setK(){
@@ -18,10 +18,7 @@ public class KmeansGapStat implements Kmeansable{
 	}	
 	
 	public void setInitClusters(){
-		///INIT CLUSTER PROTOTYPES (AT THE MOMENT JUST TAKES FIRST 3 VALUES). CAN BE EXTENDED IN SUBLCASSES
-		BasicInitClusters init = new BasicInitClusters();
-		kmeans.setInitClusters(init.initClusters(kmeans.getData(),kmeans.getK()));
-
+		
 	}				
 	
 	public void beginClustering(int i){

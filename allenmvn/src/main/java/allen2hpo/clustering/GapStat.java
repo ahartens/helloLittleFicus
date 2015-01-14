@@ -1,6 +1,6 @@
 package allen2hpo.clustering;
 
-import allen2hpo.matrix.Matrix;
+import allen2hpo.matrix.*;
 
 public class GapStat implements GetKable,Kmeansable{
 	
@@ -8,7 +8,8 @@ public class GapStat implements GetKable,Kmeansable{
 	*	K value with lowest Gap between log of expected dispersion and log of actual dispersion
 	*/
 	int kfinal;
-	Kmeans kmeans;
+	int kcurrent;
+	KmeansObject kmeans;
 	
 
 	/**	
@@ -23,7 +24,7 @@ public class GapStat implements GetKable,Kmeansable{
 		int i = 10;							///NUMBER OF ITERATIONS, SO TESTING K 1- 10
 		double[] gap = new double[i];		///EMPTY ARRAY TO STORE GAP VALUES
 
-		kmeans = new Kmeans(m);
+		kmeans = new KmeansObject(m);
 		
 		///CALCULATE THE GAP STATISTIC
 		for (int k = 0;k<i;k++){
@@ -56,7 +57,8 @@ public class GapStat implements GetKable,Kmeansable{
 	private double calcDispersion(int k, Matrix m){
 		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
 		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
-		setK(k);
+		this.kcurrent = k;
+		setK();
 		setInitClusters();
 		beginClustering(10);
 		
@@ -64,7 +66,7 @@ public class GapStat implements GetKable,Kmeansable{
 
 		double wk = 0;
 
-		for(int i;i<k;i++){
+		for(int i=0;i<k;i++){
 			SimilarityMatrix sim = new SimilarityMatrix(clusters[i]);
 			wk += (1/(2*clusters[i].length))*sim.getSumOfPairwiseDistances();
 		}
@@ -74,8 +76,8 @@ public class GapStat implements GetKable,Kmeansable{
 
 	///KMEANS_ABLE INTERFACE METHODS
 
-	public void setK(int k){
-		kmeans.setK(k);
+	public void setK(){
+		kmeans.setK(this.kcurrent);
 	}	
 
 

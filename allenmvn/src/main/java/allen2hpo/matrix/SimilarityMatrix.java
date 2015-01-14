@@ -20,6 +20,18 @@ public class SimilarityMatrix extends Matrix{
 
 	}
 
+	public SimilarityMatrix(double[][] a){
+		
+		///INITIALIZE SIMILARITY MATRIX WITH SIZE CORRESPONDING TO DATA MATRIX
+		Matrix m = new Matrix(a);
+
+		super.setMatrix(new double[m.getRowSize()][m.getRowSize()]);
+		System.out.println("CALCULATING SIMILARITY");
+		computeSimilarity(m);
+		print();
+
+	}
+
 	private void computeSimilarity(Matrix m){
 	///FOR EACH ROW OF SIMILARITY MATRIX
 			for (int i=0;i<m.getRowSize();i++){

@@ -48,7 +48,7 @@ public class KmeansObject{
 	*	@param Takes a matrix object of the data that is to be clustered
 
 	*/
-	public Kmeans(Matrix mat){
+	public KmeansObject(Matrix mat){
 		
 		///SET MATRIX FIELD
 		this.m = mat;
@@ -71,6 +71,13 @@ public class KmeansObject{
 		this.cp = clusterSeeds;
 
 	}
+
+	public void setInitClustersBasic(){
+		///INIT CLUSTER PROTOTYPES (AT THE MOMENT JUST TAKES FIRST 3 VALUES). CAN BE EXTENDED IN SUBLCASSES
+		BasicInitClusters init = new BasicInitClusters();
+		setInitClusters(init.initClusters(this.m,this.k));
+	}
+	
 
 	public int getK(){
 		return this.k;
@@ -171,16 +178,17 @@ public class KmeansObject{
 	            this.cp[i][j] = clusterSums[i][j]/clusterCounts[i];
 	        }
 	    }
-
 	}
 
 	public double[][][] getClusters(){
 		double[][][] clusters = new double[this.k][this.m.getRowSize()][this.m.getColumnSize()];
 		for (int i = 0; i<this.k; i++) {
-			clusters[i] = this.m.getRowAtIndex(this.ci[i]);
-				
-			
+			for(int j = 0; j<this.m.getRowSize();j++){
+				clusters[i][j] = this.m.getRowAtIndex(this.ci[i]);
+
+			}
 		}
+		return clusters;
 	}
 
 
