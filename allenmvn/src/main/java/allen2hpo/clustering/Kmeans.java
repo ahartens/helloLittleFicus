@@ -16,17 +16,36 @@ public class Kmeans{
 	*	@param Takes a matrix object of the data that is to be clustered
 
 	*/
-	public Kmeans(Matrix mat){
 
+	public Kmeans(){
+
+	}
+	public Kmeans(Matrix mat){
+		performKMeans(mat);
+	}
+
+	public void performKMeans(Matrix mat){
 		///SET MATRIX FIELD
 		setMatrix(mat);
 		///SET K VALUE. IN FUTURE CAN BE EXTENDED TO USE GAPSTAT, ELBOW METHOD
-		setK(3);	
+		GetKBasic getK = new GetKBasic();
+		setK(getK.getK());	
 		///INIT CLUSTER PROTOTYPES (AT THE MOMENT JUST TAKES FIRST 3 VALUES). CAN BE EXTENDED IN SUBLCASSES
 		initClusters();
+
+		 ///ITERATE CLUSTER ASSIGNMENT AND CLUSTER MEAN RECALCULATION STEPS
+	    for (int i = 0; i<150; i++) {
+	      //  kmStp1AssignPointToCluster(allData, clusterProtos, dim);
+	       // kmStp2CalcClusterMeans(allData, clusterProtos, dim);
+
+	    }
+
 	}
 
-	
+	private int determineK(){
+		System.out.println("PARENT CLASS CALLING DETERMINE K");
+		return 3;
+	}
 
 	///SETTERS
 	
