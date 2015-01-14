@@ -1,4 +1,21 @@
 
+14. January 2015
+		- added clustering directory parallel to matrix (as well as tests)
+		- added kmeans class. as it stands, kmeans can be relatively subclassed easily
+		- major question :
+				do i want each part of kmeans to be a different class? for example, should 
+				1) calculating k (later gapstat)
+				2) cluster initialization
+				3) calculating distance from cluster center
+				4) recalculating mean
+				all be a separate classes, so that a very basic kmeans calls modular parts
+		as it is now, the entire kmeans class can be subclassed and the parts that one wishes to change can be simply overridden.. but doesn't seem too elegant. hm...  
+
+13. January 2015
+
+		- removed mean normalization + feature scaling : these will be done prior to starting program (matlab, r)
+		- made similarity matrix more efficient (is now a diagonal)
+
 12. January 2015
 
 		believe I added a similarity matrix based on euclidian distance
