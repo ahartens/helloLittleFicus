@@ -3,9 +3,12 @@ package allen2hpo.matrix;
 public class SimilarityMatrix extends Matrix{
 	
 	/**
+	*	Sum of pairwise distances
+	*/
+	private int spw = 0;
 
-	*@param Takes an mxn matrix and creates an mxm similarity matrix, comparing 
-
+	/**
+	*	@param Takes an mxn matrix and creates an mxm similarity matrix, comparing 
 	*/
 	public SimilarityMatrix(Matrix m){
 		
@@ -37,8 +40,13 @@ public class SimilarityMatrix extends Matrix{
 					double dist = Math.sqrt(sum);
 					///SET VALUE IN SIMILARITY MATRIX
 					setValueAtIndex(i,j,dist);
+					this.spw += dist;
 				}
 			}
+	}
+
+	public double getSumOfPairwiseDistances(){
+		return this.spw;
 	}
 
 	public void print(){

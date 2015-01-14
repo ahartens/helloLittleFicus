@@ -3,7 +3,7 @@ package allen2hpo.clustering;
 import allen2hpo.matrix.Matrix;
 
 
-public class Kmeans{
+public class KmeansObject{
 	
 	/**
 	*	The number of clusters
@@ -26,7 +26,7 @@ public class Kmeans{
 	private int[] ci = null;
 	
 
-	public Kmeans(){
+	public KmeansObject(){
 
 	}
 
@@ -173,6 +173,17 @@ public class Kmeans{
 	    }
 
 	}
+
+	public double[][][] getClusters(){
+		double[][][] clusters = new double[this.k][this.m.getRowSize()][this.m.getColumnSize()];
+		for (int i = 0; i<this.k; i++) {
+			clusters[i] = this.m.getRowAtIndex(this.ci[i]);
+				
+			
+		}
+	}
+
+
 
 
 	private void print(){

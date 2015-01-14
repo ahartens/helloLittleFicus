@@ -7,7 +7,7 @@ import org.junit.Assert;
 
 import allen2hpo.matrix.Matrix;
 
-public class KmeansTest{
+public class KmeansObjectTest{
 	
 	@Test
 	public void testInitClusters(){
