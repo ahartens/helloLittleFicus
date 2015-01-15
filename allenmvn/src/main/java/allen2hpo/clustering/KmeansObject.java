@@ -3,6 +3,16 @@ package allen2hpo.clustering;
 import allen2hpo.matrix.Matrix;
 
 
+
+/**
+*	KmeansObject can be used in any class which wishes to perform Kmeans clustering.
+*	To make a class that performs K means :
+*	1) Class must include a KmeansObject as a field
+*	2) Class must implement the Kmeansable interface
+*	3) In Kmeansable methods, calculate corresponding kmeans values (k value, seed clusters, distance equation)
+*	4) Set calculated value in KmeansObject
+*	5) Call beginClustering()
+*/
 public class KmeansObject{
 	
 
@@ -126,6 +136,7 @@ public class KmeansObject{
 
 
 
+	///PRIVATE METHODS
 
 	/**
 	*	STEP 1 of kmeans iterative process. Goes through each data point and finds the closest cluster based on SSE.
