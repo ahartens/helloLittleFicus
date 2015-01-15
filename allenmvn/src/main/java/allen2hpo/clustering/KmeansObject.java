@@ -37,6 +37,10 @@ public class KmeansObject{
 	*/
 	private int[] ci = null;
 
+	/**
+	*
+	*/
+	private DistanceComputable distCalc = null;
 	
 
 
@@ -67,7 +71,10 @@ public class KmeansObject{
 
 	public void setInitClusters(double[][] clusterSeeds){
 		this.cp = clusterSeeds;
+	}
 
+	public void setDistCalc(DistanceComputable d){
+		this.distCalc = d;
 	}
 
 	/**
@@ -99,6 +106,11 @@ public class KmeansObject{
 		///INIT CLUSTER PROTOTYPES (AT THE MOMENT JUST TAKES FIRST 3 VALUES). CAN BE EXTENDED IN SUBLCASSES
 		BasicInitClusters init = new BasicInitClusters();
 		setInitClusters(init.initClusters(this.m,this.k));
+	}
+
+	public void setDistCalcBasic(){
+		DistEuclidean dist = new DistEuclidean();
+		setDistCalc(dist);
 	}
 	
 
@@ -154,12 +166,18 @@ public class KmeansObject{
 	        for (int j=0; j<this.k; j++) {
 	            ///CALCULATE DISTANCE OF EACH DIMENSION FROM SELECTED MEAN
 	            dist = 0;
-	            for(int z=0;z<this.m.getColumnSize();z++){
+
+	            double[] p1 = m.getRowAtIndex(i);
+	            double[] p2 = this.cp[j];
+
+
+	           /* for(int z=0;z<this.m.getColumnSize();z++){
 	                ///DISTANCE OF EACH DIMENSION TO CORRESPONDING DIMENSION OF CLUSTER MEAN.
 	               dist +=  Math.pow(m.getValueAtIndex(i,z) - cp[j][z],2.0);
 	            }
 	            ///CALCULATE SSE AND SAVE IN ARRAY
-	            allSSE[j] = Math.sqrt(dist);
+	            allSSE[j] = Math.sqrt(dist);*/
+	            allSSE[j] = this.distCalc.calculateProximity(p1,p2);
 	        }
 
 	        

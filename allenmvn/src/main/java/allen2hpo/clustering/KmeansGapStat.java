@@ -32,14 +32,19 @@ public class KmeansGapStat implements Kmeansable{
 		int kval = getK.getK();
 		kmeans.setK(kval);
 	}	
-	
 
 	public void setInitClusters(){
 		kmeans.setInitClustersBasic();
-	}				
+	}		
+
+	public void setDistCalc(DistanceComputable d){
+		kmeans.setDistCalcBasic();
+	}
+		
 	
 	public void beginClustering(int i){
 		kmeans.beginClustering(i);
 	}
+
 	
 }

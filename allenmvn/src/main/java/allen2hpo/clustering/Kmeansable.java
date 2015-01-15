@@ -15,4 +15,6 @@ interface Kmeansable{
 	void setK();			
 	void setInitClusters(); 					
 	void beginClustering(int i);
+	void setDistCalc(DistanceComputable d);
+
 }

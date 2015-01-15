@@ -1,4 +1,14 @@
 
+15. January 2015
+	1) I don't think my similarity matrix is a similarity matrix at all. it's a distance matrix..
+	want to either take :
+	- the inner product (dot product)
+	- Pearson Correlation Coefficient : dot product of standardized (ie. centered on their means + scaled by stdev) 
+
+	2) about confusion of yesterday : in book says about kmeans clustering that a proximity matrix isn't needed... so i just feed it the raw (ie. normalized) data?
+
+	3) from tibshirani "estimating the number of clusters in a data set via the gap statistic"
+
 14. January 2015
 		- NOW TOTALLY CONFUSED. how does one cluster pairwise distances? researching spectral clustering, k mediod apparently, kernel kmeans..huh?
 

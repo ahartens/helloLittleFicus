@@ -11,20 +11,22 @@ public class SimilarityMatrix extends Matrix{
 	*	@param Takes an mxn matrix and creates an mxm similarity matrix, comparing 
 	*/
 	public SimilarityMatrix(Matrix m){
-		
-		///INITIALIZE SIMILARITY MATRIX WITH SIZE CORRESPONDING TO DATA MATRIX
-		super.setMatrix(new double[m.getRowSize()][m.getRowSize()]);
-		System.out.println("CALCULATING SIMILARITY");
 		computeSimilarity(m);
-		print();
-
 	}
 
 	public SimilarityMatrix(double[][] a){
 		
 		///INITIALIZE SIMILARITY MATRIX WITH SIZE CORRESPONDING TO DATA MATRIX
 		Matrix m = new Matrix(a);
+		computeSimilarityMatrix(m);
+	}
 
+
+	/**
+	*	Called by Constructor methods to make a similarity matrix
+	*/
+	private void computeSimilarityMatrix(Matrix m){
+		///INITIALIZE SIMILARITY MATRIX WITH SIZE CORRESPONDING TO DATA MATRIX
 		super.setMatrix(new double[m.getRowSize()][m.getRowSize()]);
 		System.out.println("CALCULATING SIMILARITY");
 		computeSimilarity(m);

@@ -2,6 +2,19 @@ package allen2hpo.clustering;
 
 import allen2hpo.matrix.*;
 
+
+/**
+*	GapStat is a method with which to find the optimal K value
+*	It is therefore called by a kmeansable setk() method. 
+*	Confusingly, GapStat itself performs Kmeans, in an iterative fashion.
+*	For each k value for which it performs kmeans, it calculates
+*		1) the expected dispersion given a random distribution with n samples each with p dimensions
+*		2) the actual dispersion W by a given k and data set, Matrix m
+*	
+*	TO USE : 
+*	1) Call constructor method using the data set to be optimized as the argument.
+*	2) call getK(); getter method
+*/
 public class GapStat implements GetKable,Kmeansable{
 	
 	/**
@@ -12,8 +25,16 @@ public class GapStat implements GetKable,Kmeansable{
 	KmeansObject kmeans;
 	
 
+	/**
+	*	Returns k value for which the gap statistic is the greatest
+	*/
+	public int getK(){
+		return this.kfinal;
+	}
+
+
 	/**	
-	*	@param n : sample size
+	*	@param Matrix m of data for which number of clusters k should be optimized
 	*/
 	public GapStat(Matrix m){
 		
@@ -32,28 +53,30 @@ public class GapStat implements GetKable,Kmeansable{
 		}
 
 		///DETERMINE MINIMUM GAP
-		double min = gap[0];
+		double max = gap[0];
 		this.kfinal = 0;
 		for (int j = 1; j<gap.length; j++) {
 			
-			if (gap[j]<min) {
-				min = gap[j];
+			if (gap[j]>max) {
+				max = gap[j];
 				this.kfinal = j;
 			}
 		}
 	}
 
 
-	public int getK(){
-		return this.kfinal;
-	}
-
-
+	/**
+	*	First variable of gap statistic calculation : Calculates expected log of dispersion given n uniform data points in p dimensions with k centers
+	*/
 	private double calcExpectedDispersion(int n, int p, int k){
 		double val = 0;
 		return Math.log(p*n/12)-(2/p)*(Math.log(k))+ val;
 	}
 
+
+	/**
+	*	Second variable of gap statistic calculation : Actual log of dispersion.
+	*/
 	private double calcDispersion(int k, Matrix m){
 		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
 		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
@@ -80,11 +103,13 @@ public class GapStat implements GetKable,Kmeansable{
 		kmeans.setK(this.kcurrent);
 	}	
 
-
 	public void setInitClusters(){
 		kmeans.setInitClustersBasic();
 	}	
 
+	public void setDistCalc(DistanceComputable d){
+		kmeans.setDistCalcBasic();
+	}
 
 	public void beginClustering(int i){
 		kmeans.beginClustering(i);
