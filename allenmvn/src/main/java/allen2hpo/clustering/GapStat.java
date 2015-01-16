@@ -42,13 +42,13 @@ public class GapStat implements GetKable,Kmeansable{
 		int p = m.getColumnSize();
 
 
-		int i = 10;							///NUMBER OF ITERATIONS, SO TESTING K 1- 10
+		int i = 10;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
 		double[] gap = new double[i];		///EMPTY ARRAY TO STORE GAP VALUES
 
 		kmeans = new KmeansObject(m);
 		
 		///CALCULATE THE GAP STATISTIC
-		for (int k = 0;k<i;k++){
+		for (int k = 1;k<=i;k++){
 			gap[k] = calcExpectedDispersion(n,p,k) - calcDispersion(k, m);
 		}
 

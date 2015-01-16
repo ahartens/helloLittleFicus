@@ -1,4 +1,18 @@
 
+
+16. January 2015
+	Thinking about big picture. 
+	At end of whatever clustering is done, will get a cluster vector
+	from an mxn data matrix, receive an m cluster vector
+	each row of matrix has a corresponding value in vector which corresponds to index of cluster it is assigned to
+	From this list of cluster assignments can get indexes of genes assigned to a certain cluster. so :
+
+	1) created Allen directory. will contain classes that hold allen brain atlas data. desired funcitonality :
+		- return gene names of given indexes (eg. all genes belonging to one cluster)
+		- return tissue names
+	to do :
+		- return DATA (not just names??) associated with given tissues..hm... this is different
+
 15. January 2015
 	1) I don't think my similarity matrix is a similarity matrix at all. it's a distance matrix..
 	want to either take :

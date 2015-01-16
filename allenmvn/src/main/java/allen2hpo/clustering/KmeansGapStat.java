@@ -23,6 +23,7 @@ public class KmeansGapStat implements Kmeansable{
 
 
 	///KMEANSABLE METHODS
+	
 	/**
 	*	Implementation of GapStat.
 	*/
@@ -41,7 +42,6 @@ public class KmeansGapStat implements Kmeansable{
 		kmeans.setDistCalcBasic();
 	}
 		
-	
 	public void beginClustering(int i){
 		kmeans.beginClustering(i);
 	}
