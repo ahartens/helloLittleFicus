@@ -12,10 +12,10 @@ public class KmeansBasic implements Kmeansable{
 		setDistCalc();
 		beginClustering();
 
-		int[] clusters = kmeans.getClusterAssignments();
+		/*int[] clusters = kmeans.getClusterAssignments();
 		for (int i =0;i<clusters.length;i++){
 			System.out.println(clusters[i]);
-		}
+		}*/
 
 	}
 

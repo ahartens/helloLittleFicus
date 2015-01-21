@@ -18,6 +18,10 @@ public class KmeansGapStat implements Kmeansable{
 
 	public KmeansGapStat(Matrix mat){
 		kmeans = new KmeansObject(mat);
+		setK();
+		setInitClusters();
+		setDistCalc();
+		beginClustering();
 	}
 
 
@@ -31,6 +35,8 @@ public class KmeansGapStat implements Kmeansable{
 		///SET K VALUE.
 		GetKable getK = new GapStat(kmeans.getData());
 		int kval = getK.getK();
+				System.out.println("THIS IS THE CALCULTED K:"+kval);
+
 		kmeans.setK(kval);
 	}	
 

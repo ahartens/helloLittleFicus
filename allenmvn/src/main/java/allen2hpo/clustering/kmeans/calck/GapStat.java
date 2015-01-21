@@ -42,14 +42,14 @@ public class GapStat implements GetKable,Kmeansable{
 		int p = m.getColumnSize();
 
 
-		int i = 10;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
+		int i = 5;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
 		double[] gap = new double[i];		///EMPTY ARRAY TO STORE GAP VALUES
 
 		kmeans = new KmeansObject(m);
-		
+
 		///CALCULATE THE GAP STATISTIC
-		for (int k = 1;k<=i;k++){
-			gap[k] = calcExpectedDispersion(n,p,k) - calcDispersion(k, m);
+		for (int k = 0;k<i;k++){
+			gap[k] = calcExpectedDispersion(n,p,k+1) - calcDispersion(k+1, m);
 		}
 
 		///DETERMINE MINIMUM GAP
@@ -83,6 +83,7 @@ public class GapStat implements GetKable,Kmeansable{
 		this.kcurrent = k;
 		setK();
 		setInitClusters();
+		setDistCalc();
 		beginClustering();
 		
 		double[][][] clusters = kmeans.getClusters();
