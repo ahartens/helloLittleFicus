@@ -1,6 +1,6 @@
 package allen2hpo.clustering;
 
-public class DistEuclidean implements DistanceComputable{
+public class DistEuclidean implements DistComputable{
 
 	public double calculateProximity(double[] p1, double[] p2){
 		double dist = 0;

@@ -107,7 +107,7 @@ public class GapStat implements GetKable,Kmeansable{
 		kmeans.setInitClustersBasic();
 	}	
 
-	public void setDistCalc(DistanceComputable d){
+	public void setDistCalc(DistComputable d){
 		kmeans.setDistCalcBasic();
 	}
 

@@ -1,6 +1,5 @@
-package allen2hpo.clustering.kmeans;
+package allen2hpo.clustering;
 
-import allen2hpo.clustering.*;
 import allen2hpo.matrix.Matrix;
 
 public class AlgBasic implements Kmeansable{
@@ -18,7 +17,7 @@ public class AlgBasic implements Kmeansable{
 		kmeans.setInitClustersBasic();
 
 	}					
-	public void setDistCalc(DistanceComputable d){
+	public void setDistCalc(DistComputable d){
 		kmeans.setDistCalcBasic();
 
 	}

@@ -40,7 +40,7 @@ public class KmeansObject{
 	/**
 	*
 	*/
-	private DistanceComputable distCalc = null;
+	private DistComputable distCalc = null;
 	
 
 
@@ -73,7 +73,7 @@ public class KmeansObject{
 		this.cp = clusterSeeds;
 	}
 
-	public void setDistCalc(DistanceComputable d){
+	public void setDistCalc(DistComputable d){
 		this.distCalc = d;
 	}
 
