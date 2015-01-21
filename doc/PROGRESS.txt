@@ -1,4 +1,17 @@
+21. January 2015
+	split 'clustering' package into multiple directories. kmeans now a subdirectory split into : 
+	1) algorithm : contains 
+		- kmeanobjects : algorithmic implmentation of kmeans 
+		- variations of kmeans : provide components to kmeanobjects   
+	2) interface : contains all methods that must be implemented by a kmeans algorithm
+	3) components directory 
+		- initclusters
+		- calck
+		- distanceCalc
 
+	- created kmeansbasic test class. tests basic implementation of kmeans with sample file. compared to r file, works. how to test?
+	- did euclidean distance test class
+	- 
 
 16. January 2015
 	Thinking about big picture. 
