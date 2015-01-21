@@ -124,6 +124,24 @@ public class Matrix{
         } 
         return col;
     }
+
+    public double getMeanOfRowAtIndex(int idx){
+        double sum = 0;
+        int n = getColumnSize();
+        for (int i=0;i<n;i++){
+            sum += getValueAtIndex(idx,i);
+        }
+        return sum/n;
+    }
+
+    public double getMeanOfColumnAtIndex(int idx){
+        double sum = 0;
+        int n = getRowSize();
+        for (int i=0;i<n;i++){
+            sum += getValueAtIndex(i,idx);
+        }
+        return sum/n;
+    }
    
 
 
