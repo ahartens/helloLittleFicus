@@ -2,7 +2,7 @@ package allen2hpo.clustering;
 
 import allen2hpo.matrix.Matrix;
 
-interface InitializeClusterable {
+interface InitClusterable {
 	
 	double[][] initClusters(Matrix m, int k);
 

@@ -104,7 +104,7 @@ public class KmeansObject{
 	*/
 	public void setInitClustersBasic(){
 		///INIT CLUSTER PROTOTYPES (AT THE MOMENT JUST TAKES FIRST 3 VALUES). CAN BE EXTENDED IN SUBLCASSES
-		BasicInitClusters init = new BasicInitClusters();
+		InitClustBasic init = new InitClustBasic();
 		setInitClusters(init.initClusters(this.m,this.k));
 	}
 

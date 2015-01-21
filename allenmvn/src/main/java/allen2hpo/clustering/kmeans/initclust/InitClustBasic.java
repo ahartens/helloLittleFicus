@@ -2,7 +2,7 @@ package allen2hpo.clustering;
 
 import allen2hpo.matrix.Matrix;
 
-public class BasicInitClusters implements InitializeClusterable{
+public class InitClustBasic implements InitClusterable{
 	public double[][] initClusters(Matrix m, int k){
 		double[][] cp = new double[k][m.getColumnSize()];
 	    ///INIT K CLUSTER SEEDS
