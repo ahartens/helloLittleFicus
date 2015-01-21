@@ -19,17 +19,21 @@ public class KmeansBasic implements Kmeansable{
 
 	}
 
+
+	/*kmeansable implementation*/
+
 	public void setK(){
 		kmeans.setK(4);
-	}		
+	}	
+
 	public void setInitClusters(){
 		kmeans.setInitClustersBasic();
+	}	
 
-	}					
 	public void setDistCalc(){
 		kmeans.setDistCalcBasic();
-
 	}
+
 	public void beginClustering(){
 		kmeans.beginClustering(30);
 	}

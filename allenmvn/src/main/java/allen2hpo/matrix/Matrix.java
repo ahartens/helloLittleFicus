@@ -245,59 +245,5 @@ public class Matrix{
 
 
 
-    public void meanNormalize(){
-
-        for (int i = 0;i<getRowSize();i++){
-            ///FIRST FIND MAX VALUE
-            double max = getValueAtIndex(i,0);
-            double sum = getValueAtIndex(i,0);
-            for(int j = 1;j<getColumnSize();j++){
-                double val = getValueAtIndex(i,j);
-                sum += val;
-                if (val > max)
-                    max = val;
-            }
-
-            double mean = sum/getColumnSize();
-
-
-
-            for(int j=0;j<getColumnSize();j++){
-                double meanNorm = (getValueAtIndex(i,j) - mean)/max;
-                System.out.printf(" mean norm : %f\n",meanNorm);
-                setValueAtIndex(i,j,meanNorm);
-            }
-            System.out.printf("mean: %f   max : %f  sum: %f \n",mean,max,sum);
-
-        }
-    }
-
-
-
-    public void featureScale(){
-
-        for (int i = 0;i<getRowSize();i++){
-            ///FIRST FIND MAX VALUE
-            double max = getValueAtIndex(i,0);
-            for(int j = 1;j<getColumnSize();j++){
-                double val = getValueAtIndex(i,j);
-                if (val > max)
-                    max = val;
-            }
-
-
-
-
-            for(int j=0;j<getColumnSize();j++){
-                double featScale = getValueAtIndex(i,j)/max;
-                System.out.printf(" featureScaled : %f\n",featScale);
-                setValueAtIndex(i,j,featScale);
-            }
-            System.out.printf("max : %f \n",max);
-
-        }
-    }
-
-
 
 }
