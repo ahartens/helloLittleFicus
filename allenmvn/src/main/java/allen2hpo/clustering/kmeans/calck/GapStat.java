@@ -83,7 +83,7 @@ public class GapStat implements GetKable,Kmeansable{
 		this.kcurrent = k;
 		setK();
 		setInitClusters();
-		beginClustering(10);
+		beginClustering();
 		
 		double[][][] clusters = kmeans.getClusters();
 
@@ -107,12 +107,12 @@ public class GapStat implements GetKable,Kmeansable{
 		kmeans.setInitClustersBasic();
 	}	
 
-	public void setDistCalc(DistComputable d){
+	public void setDistCalc(){
 		kmeans.setDistCalcBasic();
 	}
 
-	public void beginClustering(int i){
-		kmeans.beginClustering(i);
+	public void beginClustering(){
+		kmeans.beginClustering(10);
 	}
 
 }

@@ -146,6 +146,10 @@ public class KmeansObject{
 		return clusters;
 	}
 
+	public int[] getClusterAssignments(){
+		return this.ci;
+	}
+
 
 
 	///PRIVATE METHODS
