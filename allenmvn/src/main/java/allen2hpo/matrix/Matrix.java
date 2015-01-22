@@ -125,7 +125,7 @@ public class Matrix{
         return col;
     }
 
-    public double getMeanOfRowAtIndex(int idx){
+    public double getMeanOfRow(int idx){
         double sum = 0;
         int n = getColumnSize();
         for (int i=0;i<n;i++){
@@ -134,7 +134,7 @@ public class Matrix{
         return sum/n;
     }
 
-    public double getMeanOfColumnAtIndex(int idx){
+    public double getMeanOfColumn(int idx){
         double sum = 0;
         int n = getRowSize();
         for (int i=0;i<n;i++){
@@ -143,6 +143,35 @@ public class Matrix{
         return sum/n;
     }
    
+
+    /**
+    *
+    *   @return Array or arrays. 1st row means, 2nd array = column means, 3rd array = single value, mean of entire matrix
+    */
+    public double[][] getAllMeans(){
+        double [] rowMeans = new double[getRowSize()];
+        double allSum = 0;
+        double [] columnSums = new double[getColumnSize()];
+
+        for (int i = 0;i<getRowSize();i++){
+            double rowSum = 0;
+            for(int j = 0;j<getColumnSize();j++){
+                rowSum += getValueAtIndex(i,j);
+                columnSums[j] += getValueAtIndex(i,j);
+                allSum += getValueAtIndex(i,j);
+            }
+            rowMeans[i] = rowSum/getColumnSize();
+        }
+
+
+        for (int i=0;i<getColumnSize();i++){
+            columnSums[i] = columnSums[i]/getRowSize();
+        }
+
+        double allMean = allSum/(getColumnSize()*getRowSize());
+        double[][] allMeanInfo = {rowMeans,columnSums,{allMean}};
+        return allMeanInfo;
+    }
 
 
     /**

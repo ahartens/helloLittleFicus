@@ -263,6 +263,22 @@ public class MatrixTest {
 	}
 
 
+	///GET ALL MEAN DATA
+	@Test
+	public void testGetMatrixMeanData(){
+		double [][] d = {{1,2,3,4,5,6},{1,2,3,4,5,6},{1,2,3,4,5,6},{1,2,3,4,5,6}};
+		Matrix m = new Matrix(d);
+		double [][] allMeans = m.getAllMeans();
+
+		double [][] answer = {{3.5,3.5,3.5,3.5,3.5,3.5},{1d,2d,3d,4d,5d,6d},{3.5}};
+
+		for(int i = 0;i<allMeans.length;i++){
+			for (int j= 0;j<allMeans[i].length;j++){
+				Assert.assertEquals(allMeans[i][j],answer[i][j],.01);
+
+			}
+		}
+	}
 
 
 

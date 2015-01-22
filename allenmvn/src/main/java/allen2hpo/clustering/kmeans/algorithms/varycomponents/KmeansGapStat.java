@@ -33,9 +33,10 @@ public class KmeansGapStat implements Kmeansable{
 	*/
 	public void setK(){
 		///SET K VALUE.
+
 		GetKable getK = new GapStat(kmeans.getData());
 		int kval = getK.getK();
-				System.out.println("THIS IS THE CALCULTED K:"+kval);
+		System.out.println("THIS IS THE CALCULTED K:"+kval);
 
 		kmeans.setK(kval);
 	}	

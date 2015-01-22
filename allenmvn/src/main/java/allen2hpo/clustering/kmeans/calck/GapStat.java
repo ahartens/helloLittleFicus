@@ -42,17 +42,21 @@ public class GapStat implements GetKable,Kmeansable{
 		int p = m.getColumnSize();
 
 
-		int i = 5;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
+		int i = 10;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
 		double[] gap = new double[i];		///EMPTY ARRAY TO STORE GAP VALUES
 
 		kmeans = new KmeansObject(m);
 
+
 		///CALCULATE THE GAP STATISTIC
 		for (int k = 0;k<i;k++){
-			gap[k] = calcExpectedDispersion(n,p,k+1) - calcDispersion(k+1, m);
+			double expected = calcExpectedDispersion(n,p,k+1); 
+			double actual = calcDispersion(k+1, m);
+			gap[k] = Math.abs(expected) - Math.abs(actual);
+			System.out.printf("Gap = %f - %f = %f\n\n",expected,actual, gap[k]);
 		}
 
-		///DETERMINE MINIMUM GAP
+		///DETERMINE MAXIMUM GAP
 		double max = gap[0];
 		this.kfinal = 0;
 		for (int j = 1; j<gap.length; j++) {
@@ -80,21 +84,22 @@ public class GapStat implements GetKable,Kmeansable{
 	private double calcDispersion(int k, Matrix m){
 		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
 		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
+		
 		this.kcurrent = k;
 		setK();
 		setInitClusters();
 		setDistCalc();
 		beginClustering();
 		
-		double[][][] clusters = kmeans.getClusters();
+		Matrix[] clusters = kmeans.getClusters();
 
 		double wk = 0;
 
 		for(int i=0;i<k;i++){
 			SimilarityMatrix sim = new SimilarityMatrix(clusters[i]);
-			wk += (1/(2*clusters[i].length))*sim.getSumOfPairwiseDistances();
+			wk += (1.0/(clusters[i].getRowSize()))*sim.getSumOfPairwiseDistances();
 		}
-		return wk;
+		return Math.log(wk);
 	}
 
 
@@ -113,7 +118,7 @@ public class GapStat implements GetKable,Kmeansable{
 	}
 
 	public void beginClustering(){
-		kmeans.beginClustering(10);
+		kmeans.beginClustering(20);
 	}
 
 }

@@ -38,6 +38,11 @@ public class KmeansObject{
 	private int[] ci = null;
 
 	/**
+	*	Stores size of clusters are they are created;
+	*/
+	private int[] cs = null;
+
+	/**
 	*
 	*/
 	private DistComputable distCalc = null;
@@ -57,7 +62,7 @@ public class KmeansObject{
 		///SET MATRIX FIELD
 		this.m = mat;
 		///Initialize cluster index array. While iterative clustering, the cluster to which a data point belongs to will be stored here.
-		this.ci = new int[mat.getRowSize()];		
+		this.ci = new int[mat.getRowSize()];
 	}
 
 
@@ -67,6 +72,8 @@ public class KmeansObject{
 
 	public void setK(int kval){
 		this.k = kval;	
+		this.cs = new int[kval];		
+
 	}
 
 	public void setInitClusters(double[][] clusterSeeds){
@@ -133,16 +140,33 @@ public class KmeansObject{
 	}
 
 	/**
-	*	@return array of 2d arrays corresponding to the data matrix split into k clusters.
+	*	@return array of Matrix objects corresponding to the data matrix split into k clusters.
 	*/
-	public double[][][] getClusters(){
-		double[][][] clusters = new double[this.k][this.m.getRowSize()][this.m.getColumnSize()];
-		for (int i = 0; i<this.k; i++) {
-			for(int j = 0; j<this.m.getRowSize();j++){
-				clusters[i][j] = this.m.getRowAtIndex(this.ci[i]);
+	public Matrix[] getClusters(){
 
+		///INITIALIZE ARRAY OF MATRICES OF LENGTH K (ONE MATRIX PER CLUSTER)
+       	Matrix [] clusters = new Matrix[this.k];
+   
+       	///INITALIZE MATRIX OBJECT FOR EACH CLUSTER AND PLACE IN ARRAY OF MATRICES
+        for (int i = 0;i<this.k;i++){
+        	///INITALIZE ARRAY OF PROPER SIZE FROM VALUE HELD IN THIS. CLUSTER SIZE
+        	double[][] ca = new double[this.cs[i]][this.m.getColumnSize()];
+        	Matrix cm = new Matrix(ca);
+        	clusters[i] = cm;
+        }	
+        
+        ///INITIALIZE ARRAY HOLDING COUNTER FOR EACH CLUSTER (INCREMENTED AS ADD ROW TO MATRIX)
+       	int [] inClustCount = new int[this.k];	
+
+
+       	///FOR EACH VALUE IN ALL DATA MATRIX, CHECK WHAT CLUSTER IT BELONGS TO AND PLACE IN CORRESPONDING MATRIX
+		for (int i=0;i<this.m.getRowSize();i++){
+			for(int j=0; j<this.m.getColumnSize(); j++){
+				clusters[this.ci[i]].setValueAtIndex(inClustCount[this.ci[i]],j,this.m.getValueAtIndex(i,j));
 			}
+			inClustCount[this.ci[i]]++;
 		}
+
 		return clusters;
 	}
 
@@ -162,6 +186,12 @@ public class KmeansObject{
 	   	///INIT ARRAY WHERE ALL CALCULATED SSES WILL BE STORED (REUSED FOR EACH DATA POINT)
 	    double[] allSSE = new double[this.k];
 	    double dist;
+	     
+	     
+	    ///CLEAR CLUSTER SIZE ARRAY AS CLUSTERS ARE REASSIGNED
+        for (int i =0;i<this.cs.length;i++){
+        	this.cs[i] = 0;
+        }
 
 	    ///GO THROUGH EACH DATA POINT
 	    for (int i=0; i<this.m.getRowSize(); i++) {
@@ -190,17 +220,21 @@ public class KmeansObject{
 	        double minSSE = allSSE[0];
 	        int indexOfMinSSE = 0;
 	        
+	     
 	        ///ENUMERATE THROUGH REMAINING SSES AND COMPARE
+
 	        for (int j = 1; j<this.k; j++) {
 	            if (allSSE[j]<minSSE) {
 	                minSSE = allSSE[j];
 	                indexOfMinSSE = j;
-
 	            }
 	        }
 	    
 	        ///SAVE INDEX OF JUST ASSIGNED CLUSTER TO DATA POINT
 	        this.ci[i] = indexOfMinSSE;
+	        ///INCREMENT SIZE OF SSE
+	       	this.cs[indexOfMinSSE]+=1;
+
 	    }
 	}
 
