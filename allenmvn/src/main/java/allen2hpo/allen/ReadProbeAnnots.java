@@ -28,10 +28,6 @@ public class ReadProbeAnnots{
 		openFile(file);
 		readFile();
 		scanner.close();
-
-		for(int i = 0;i<dim;i++){
-			System.out.println(geneNames[i]);
-		}
 	}
 
 
@@ -67,7 +63,7 @@ public class ReadProbeAnnots{
 	private void readFile(){
 
 		///FIRST LINE IS A HEADER : REMOVE IT
-		scanner.next();
+		scanner.nextLine();
 		///EACH FOLLOWING ROW IS READ
 		int ri = 0; 
 	    while (scanner.hasNext()) {
@@ -86,7 +82,6 @@ public class ReadProbeAnnots{
 		
 		///ADD GENE NAME TO ARRAY OF GENE NAMES
 		int i = 0;
-	    
 	    while (lineSc.hasNext()) {
 	    	///ADD PROBE ID TO ID LIST
 	    	if(i==0){
@@ -101,6 +96,7 @@ public class ReadProbeAnnots{
 	    	}
 			i++;
         }
+
      }
 
 

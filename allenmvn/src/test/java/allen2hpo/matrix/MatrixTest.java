@@ -99,7 +99,6 @@ public class MatrixTest {
 
     	for (int i = 0;i<m.getColumnSize();i++){
     		Assert.assertEquals(d[idx][i],val[i],0);
-    		//System.out.println("Row"+val[i]);
     	}
     }
 

@@ -21,12 +21,16 @@ public class ReadExpression{
 
 
 
-	public ReadExpression(String filename){
+	/**
+	*	Opens file and reads data into Matrix object, gene ids into separate 1d array
+	*/	
+	public ReadExpression(String filename, int dim){
 		String file = filename+"/MicroarrayExpression.csv";
 		openFile(file);
-		readFile();
+		readFile(dim);
 		scanner.close();
 	}
+
 
 
 	/**
@@ -59,11 +63,11 @@ public class ReadExpression{
 	*	Reads file in line by line, passing handling of the line the private method handleRow. 
 	*	Stores data in a matrix object
 	*/
-	private void readFile(){
+	private void readFile(int dim){
 		matrix = new Matrix();
 		
 		///FIRST LINE IS READ TO DETERMINE NUMBER OF COLUMNS
-		handleFirstRow(scanner.nextLine(),matrix);
+		handleFirstRow(scanner.nextLine(),matrix, dim);
 		
 		///EACH FOLLOWING ROW IS READ
 		int ri = 1; 
@@ -75,6 +79,9 @@ public class ReadExpression{
 
 
 
+	/**
+	*	Stores data in a line to a matrix object andthe gene id to the ids array
+	*/
 	private void handleRow(String line, Matrix matrix, int ri){
 		///INIT SCANNER TO READ LINE
 		Scanner lineSc = new Scanner(line);
@@ -86,14 +93,16 @@ public class ReadExpression{
 		int i = 0;
 	    while (lineSc.hasNext()) {
 	    	matrix.setValueAtIndex(ri,i,lineSc.nextDouble());
-	    	//System.out.println(line);
 			i++;
         }
      }
 
 
 
-	private void handleFirstRow(String line, Matrix matrix){
+    /**
+    *	Determines number of columns of array and sets data matrix to that value. Stores first line of data into matrix;
+    */
+	private void handleFirstRow(String line, Matrix matrix, int dim){
 		
 		///PURPOSE : DETERMINE NUMBER OF COLUMNS (SO THAT MATRIX DIMENSIONS FIT FILE)
 		///INIT LINE SCANNER
@@ -120,7 +129,6 @@ public class ReadExpression{
 
         ///SAVE ALL VALUES IN MATRIX (COPY FROM TEMPORARY)
         ///***
-        int dim = 99;
        	this.matrix.setMatrixSize(dim,i);
        	this.ids = new int[dim];
 		this.ids[0] = geneID;

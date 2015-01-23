@@ -5,19 +5,31 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Assert;
 
+
+import allen2hpo.matrix.Matrix;
+import allen2hpo.clustering.*;
+import allen2hpo.allen.*;
 public class AllenDataTest{
 
 	@Test
 	public void getGeneNamesTest(){
-		String[] genes = {"Apple", "Bear", "Cat","Dog","Eagle","Falcon","Grizzly","Hell","Insiduous","Jalapeno","Kantankerous"};
-		String[] tissues = {"zoloft", "yersinia", "xylophone","violence","uvula"};
 
-		AllenData mngr = new AllenData(genes, tissues);
+
+		AllenData mngr = new AllenData("/Users/ahartens/Desktop/AllenTest",99);
 		
-		int[] indexes = {0,4,8};
-		for(String s:mngr.getGenesAtIndexes(indexes)){
-			System.out.println(s);
+
+		KmeansBasic kmeans = new KmeansBasic(mngr.getData());
+
+		String[][] clusters = mngr.getGeneClusters(kmeans.getClusterIndices());
+
+		for(int i =0;i<clusters.length;i++){
+			System.out.printf("Cluster %d",i);
+			for(int j=0; j<clusters[i].length; j++){
+				System.out.printf(" %s,",clusters[i][j]);
+			}
+			System.out.printf("\ncount of : %d\n\n",clusters[i].length);
 		}
+
 	}
 
 }

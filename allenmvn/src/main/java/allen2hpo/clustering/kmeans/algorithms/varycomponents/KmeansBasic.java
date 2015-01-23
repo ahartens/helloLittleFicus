@@ -30,7 +30,10 @@ public class KmeansBasic implements Kmeansable{
 
 	}
 
+	public int[][] getClusterIndices(){
+		return kmeans.getClusterIndices();
 
+	}
 	/*kmeansable implementation*/
 
 	public void setK(){
@@ -48,4 +51,6 @@ public class KmeansBasic implements Kmeansable{
 	public void beginClustering(){
 		kmeans.beginClustering(30);
 	}
+
+	
 }
