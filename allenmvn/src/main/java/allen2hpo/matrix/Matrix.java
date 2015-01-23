@@ -43,6 +43,10 @@ public class Matrix{
 
     }
 
+    public void setMatrixSize(int row, int col){
+        this.dat = new double[row][col];
+    }
+
 
     /**
 

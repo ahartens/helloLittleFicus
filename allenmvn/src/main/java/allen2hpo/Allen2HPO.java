@@ -1,13 +1,12 @@
 package allen2hpo;
 
-
+import allen2hpo.allen.*;
 
 public class Allen2HPO {
 
 
     public static void main(String[] args) {
-	System.out.println("Hi I JUST MADE CHANGES");
-	
+		//ReadExpression reader = new ReadExpression("/Users/ahartens/Desktop/AllenTest");
     }
 
 }

@@ -174,6 +174,26 @@ public class KmeansObject{
 		return this.ci;
 	}
 
+	public int[][] getClusterIndices(){
+		///INITIALIZE ARRAY OF MATRICES OF LENGTH K (ONE MATRIX PER CLUSTER)
+       	int [][] clusterIndices = new int[this.k][];
+   
+       	///INITALIZE MATRIX OBJECT FOR EACH CLUSTER AND PLACE IN ARRAY OF MATRICES
+        for (int i = 0;i<this.k;i++){
+        	///INITALIZE ARRAY OF PROPER SIZE FROM VALUE HELD IN THIS. CLUSTER SIZE
+        	int[] ci = new int[this.cs[i]];
+        	clusterIndices[i] = ci;
+        }	
+
+
+		int [] cc = new int[this.k];
+		for (int i=0; i<this.ci.length; i++){
+			clusterIndices[this.ci[i]][cc[this.ci[i]]] = i;
+			cc[this.ci[i]] ++;
+		}
+		return clusterIndices;
+	}
+
 
 
 	///PRIVATE METHODS
