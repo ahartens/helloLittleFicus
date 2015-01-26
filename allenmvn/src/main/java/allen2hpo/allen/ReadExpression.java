@@ -24,11 +24,12 @@ public class ReadExpression{
 	/**
 	*	Opens file and reads data into Matrix object, gene ids into separate 1d array
 	*/	
-	public ReadExpression(String filename, int dim){
+	public ReadExpression(String filename, int r, int c){
 		String file = filename+"/MicroarrayExpression.csv";
 		openFile(file);
-		readFile(dim);
+		readFile(r,c);
 		scanner.close();
+		System.out.println("BEFORRRRRE : "+c);
 	}
 
 
@@ -39,7 +40,8 @@ public class ReadExpression{
 	public Matrix getData(){
 		return this.matrix;
 	}
-	
+
+
 
 
 	///PRIVATE METHODS
@@ -63,16 +65,18 @@ public class ReadExpression{
 	*	Reads file in line by line, passing handling of the line the private method handleRow. 
 	*	Stores data in a matrix object
 	*/
-	private void readFile(int dim){
-		matrix = new Matrix();
-		
-		///FIRST LINE IS READ TO DETERMINE NUMBER OF COLUMNS
+	private void readFile(int r, int c){
+		double [][] array = new double[r][c];
+		this.matrix = new Matrix(array);
+		this.ids = new int[r];
+		/*///FIRST LINE IS READ TO DETERMINE NUMBER OF COLUMNS
 		handleFirstRow(scanner.nextLine(),matrix, dim);
 		
 		///EACH FOLLOWING ROW IS READ
-		int ri = 1; 
+		int ri = 1;*/
+		int ri = 0; 
 	    while (scanner.hasNext()) {
-	    	handleRow(scanner.nextLine(),matrix,ri);
+	    	handleRow(scanner.nextLine(),this.matrix,ri);
 	    	ri++;
 	    }
 	}
@@ -95,6 +99,7 @@ public class ReadExpression{
 	    	matrix.setValueAtIndex(ri,i,lineSc.nextDouble());
 			i++;
         }
+        System.out.println("FINAL COUNT BBIS : "+i);
      }
 
 

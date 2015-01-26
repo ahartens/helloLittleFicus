@@ -27,9 +27,12 @@ public class AllenData{
 
 
 	public AllenData(String directory, int dim){
+		String dir = "/Users/ahartens/Desktop/AllenTest";
 		
-		ReadExpression expression = new ReadExpression("/Users/ahartens/Desktop/AllenTest",dim);
-		ReadProbeAnnots probes = new ReadProbeAnnots("/Users/ahartens/Desktop/AllenTest",dim);
+		ReadProbeAnnots probes = new ReadProbeAnnots(dir,dim);
+		ReadTissueAnnots tissues = new ReadTissueAnnots(dir,1840);
+
+		ReadExpression expression = new ReadExpression(dir,probes.getCount(),tissues.getCount());
 
 
 		this.geneNames = probes.getData();

@@ -1,3 +1,8 @@
+24. January 2015
+	given a gene or group of geens, get matrix of gene expression across all tissues
+	also get list of tissues with high/low expression for given cut off
+	
+
 22. January 2015
 	Kmeans class can now return clustered data points. getClusters() returns an array of matrices.
 	used by gapstat to make distance matrix and calculate pairwise distance
