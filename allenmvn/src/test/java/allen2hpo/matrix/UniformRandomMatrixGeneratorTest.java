@@ -15,6 +15,7 @@ public class UniformRandomMatrixGeneratorTest {
 	///CONSTRUCTOR TESTING
 	@Test
 	public void UniformRandomGeneratorTest(){
+		///Test to see if random gene generated
 		double [][] d = {{1,2,3,4,5,6},{7,8,9,10,11,12},{18,17,16,15,14,13},{12,11,10,9,8,1}};
 		Matrix m = new Matrix(d);
 		UniformRandomMatrixGenerator g = new UniformRandomMatrixGenerator(m);

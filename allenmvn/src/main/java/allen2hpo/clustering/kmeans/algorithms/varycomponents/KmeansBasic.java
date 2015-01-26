@@ -7,10 +7,10 @@ public class KmeansBasic implements Kmeansable{
 	
 	public KmeansBasic(Matrix m){
 		kmeans = new KmeansObject(m);
-		setK();
-		setInitClusters();
-		setDistCalc();
-		beginClustering();
+		setK(kmeans);
+		setInitClusters(kmeans);
+		setDistCalc(kmeans);
+		beginClustering(kmeans);
 
 		int[] clusters = kmeans.getClusterAssignments();
 		int[][] clusterIndics = kmeans.getClusterIndices();
@@ -36,20 +36,20 @@ public class KmeansBasic implements Kmeansable{
 	}
 	/*kmeansable implementation*/
 
-	public void setK(){
-		kmeans.setK(4);
+	public void setK(KmeansObject kmo){
+		kmo.setK(4);
 	}	
 
-	public void setInitClusters(){
-		kmeans.setInitClustersBasic();
+	public void setInitClusters(KmeansObject kmo){
+		kmo.setInitClustersBasic();
 	}	
 
-	public void setDistCalc(){
-		kmeans.setDistCalcBasic();
+	public void setDistCalc(KmeansObject kmo){
+		kmo.setDistCalcBasic();
 	}
 
-	public void beginClustering(){
-		kmeans.beginClustering(30);
+	public void beginClustering(KmeansObject kmo){
+		kmo.beginClustering(30);
 	}
 
 	

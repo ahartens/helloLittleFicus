@@ -1,7 +1,6 @@
 package allen2hpo.clustering;
 
 
-
 /**
 *	Kmeansable can be used in any class which wishes to perform Kmeans clustering.
 *	To make a class that performs K means :
@@ -12,9 +11,9 @@ package allen2hpo.clustering;
 *	5) Call beginClustering()
 */
 interface Kmeansable{
-	void setK();			
-	void setInitClusters(); 					
-	void beginClustering();
-	void setDistCalc();
+	void setK(KmeansObject kmo);			
+	void setInitClusters(KmeansObject kmo); 					
+	void beginClustering(KmeansObject kmo);
+	void setDistCalc(KmeansObject kmo);
 
 }

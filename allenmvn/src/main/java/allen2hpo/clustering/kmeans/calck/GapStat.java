@@ -23,7 +23,17 @@ public class GapStat implements GetKable,Kmeansable{
 	int kfinal;
 	int kcurrent;
 	KmeansObject kmeans;
-	UniformRandomMatrixGenerator generator;
+
+	/**
+	*	Array number of tested K long, containing calculated dispersion for given matrix for index i clusters. 
+	*/
+	double [] wk = null;
+
+	/**
+	*	Array of arrays containing calculated dispersion of a uniform random matrix B
+	*	Array #tested K long by B (# of uniform random matrices created)
+	*/
+	double [][] wkb_star = null;
 
 	/**
 	*	Returns k value for which the gap statistic is the greatest
@@ -42,55 +52,125 @@ public class GapStat implements GetKable,Kmeansable{
 		int p = m.getColumnSize();
 
 
-		int i = 10;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
-		double[] gap = new double[i];		///EMPTY ARRAY TO STORE GAP VALUES
+		int k = 10;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
+		int b = 10;							///Number of uniform random distributions created for each k for which dispersion is calculated
 
+		double[] gap_k = stepOneTwo(k,b,m);
+		double[] s_k = stepThree(k,b);
+
+		this.kfinal = stepFour(gap_k,s_k,b);
+	}
+
+
+
+	/**
+	*	Step one of gap stat, returns an array capital K, with a a gap value corresponding index + 1
+	*	@param first int is capital K, the number of k values to be tested
+	*	@param second int is capital B, the number of random uniform distributions to be created
+	*/
+	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m){
+		
 		this.kmeans = new KmeansObject(m);
 
-		this.generator = new UniformRandomMatrixGenerator(m);
+		UniformRandomMatrixGenerator generator = new UniformRandomMatrixGenerator(m);
 
-		///CALCULATE THE GAP STATISTIC
-		for (int k = 0;k<i;k++){
-			double expected = calcExpectedDispersion(n,p,k+1); 
-			double actual = calcDispersion(k+1, m);
-			gap[k] = Math.abs(expected) - Math.abs(actual);
-			System.out.printf("Gap = %f - %f = %f\n\n",expected,actual, gap[k]);
+		double [] gap = new double[cap_k];
+
+		this.wk = new double[cap_k];
+		this.wkb_star = new double[cap_k][cap_b];
+
+		for (int k = 0; k<cap_k; k++){
+			
+			///Calculate actual log(Wk) for given k value 
+			wk[k] = calcDispersion(k+1, m);
+
+			///Reset sum of gaps
+			double gapSum_k = 0;
+
+			
+			///Calculate log(Wkb_star) for given k for B uniform random matrices. 
+			for (int b = 0; b<cap_b; b++){
+				///Create random uniform matrix
+				wkb_star[k][b] = calcDispersionForRandomUniform(k+1,generator.generateUniformRand());
+
+				///Calculate gap and add to sum
+				gapSum_k += wkb_star[k][b] - wk[k];
+				//System.out.printf("k = %d, b + %d : %f - %f =  %f \n",k, b,wkb_star[k][b], wk[k],gapSum_k);
+
+			}
+
+			///Calculate actual gap by dividing by capital B (number of random distributions created)
+			gap[k] = gapSum_k/cap_b;
 		}
 
-		///DETERMINE MAXIMUM GAP
-		double max = gap[0];
-		this.kfinal = 0;
-		for (int j = 1; j<gap.length; j++) {
-			
-			if (gap[j]>max) {
-				max = gap[j];
-				this.kfinal = j;
+		return gap;
+	}
+
+
+
+	/**
+	*
+	*/
+	private double[] stepThree( int cap_k, int cap_b){
+
+		///PART ONE : Calculate l_bar for each value k
+		double[] lbar_k = new double[cap_k];
+		
+		for (int k = 0; k<cap_k; k++){
+			for (int b = 0; b<cap_b; b++){
+				lbar_k[k] += this.wkb_star[k][b];
+			}
+			lbar_k[k] /= cap_b;
+		}
+
+		///PART TWO : Calculate standard deviation for each value k, using l_bar
+		double[] sd_k = new double[cap_k];
+		double[] s_k = new double[cap_k];
+
+		for (int k = 0; k<cap_k; k++){
+			for (int b = 0; b<cap_b; b++){
+				sd_k[k] += Math.pow(this.wkb_star[k][b] - lbar_k[k],2);
+			}
+			sd_k[k] = Math.sqrt(sd_k[k]/cap_b);
+			s_k[k] = Math.sqrt(1+(1/cap_b))*sd_k[k];
+		}
+		return s_k;
+	}
+
+
+
+	/**
+	*
+	*/
+	private int stepFour(double[] gap, double[] s, int cap_k){
+		
+		for(int k = 0; k< cap_k - 1; k++){
+
+			if (gap[k] > 0 && gap[k] >= gap[k+1] - s[k+1] ){
+				return k+1;
 			}
 		}
+		return 0;
 	}
 
 
-	/**
-	*	First variable of gap statistic calculation : Calculates expected log of dispersion given n uniform data points in p dimensions with k centers
-	*/
-	private double calcExpectedDispersion(int n, int p, int k){
-		double val = 0;
-		return Math.log(p*n/12)-(2/p)*(Math.log(k))+ val;
-	}
-
 
 	/**
-	*	Second variable of gap statistic calculation : Actual log of dispersion.
+	* 	@param takes data matrix for which optimal number of clusters should be found and current iteration of k
+	*	Performs kmeans clustering
+	*	Calculates D, the sum of pairwise distances between points in one cluster, for each cluster
+	*	Calculates W, the pooled within-cluster sum of squares around the cluster means (sum from 1 to k of ((1/2n)*D))
+	*	Returns log of W.
 	*/
 	private double calcDispersion(int k, Matrix m){
 		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
 		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
-		
+
 		this.kcurrent = k;
-		setK();
-		setInitClusters();
-		setDistCalc();
-		beginClustering();
+		setK(this.kmeans);
+		setInitClusters(this.kmeans);
+		setDistCalc(this.kmeans);
+		beginClustering(this.kmeans);
 		
 		Matrix[] clusters = kmeans.getClusters();
 
@@ -104,22 +184,49 @@ public class GapStat implements GetKable,Kmeansable{
 	}
 
 
-	///KMEANS_ABLE INTERFACE METHODS
+	/**
+	* 	@param takes random uniform matrix should be found and current iteration of k
+	*	Performs The same calculation as calcDispersion, except for a random uniform distribution
+	*/
+	private double calcDispersionForRandomUniform(int k, Matrix m){
+		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
+		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
+		KmeansObject kmo = new KmeansObject(m);
 
-	public void setK(){
-		kmeans.setK(this.kcurrent);
-	}	
+		setK(kmo);
+		setInitClusters(kmo);
+		setDistCalc(kmo);
+		beginClustering(kmo);
+		
+		Matrix[] clusters = kmo.getClusters();
 
-	public void setInitClusters(){
-		kmeans.setInitClustersBasic();
-	}	
+		double wk = 0;
 
-	public void setDistCalc(){
-		kmeans.setDistCalcBasic();
+		for(int i=0;i<k;i++){
+			SimilarityMatrix sim = new SimilarityMatrix(clusters[i]);
+			wk += (1.0/(clusters[i].getRowSize()))*sim.getSumOfPairwiseDistances();
+		}
+		return Math.log(wk);
 	}
 
-	public void beginClustering(){
-		kmeans.beginClustering(20);
+
+
+	///KMEANS_ABLE INTERFACE METHODS
+
+	public void setK(KmeansObject kmo){
+		kmo.setK(this.kcurrent);
+	}	
+
+	public void setInitClusters(KmeansObject kmo){
+		kmo.setInitClustersBasic();
+	}	
+
+	public void setDistCalc(KmeansObject kmo){
+		kmo.setDistCalcBasic();
+	}
+
+	public void beginClustering(KmeansObject kmo){
+		kmo.beginClustering(20);
 	}
 
 }
