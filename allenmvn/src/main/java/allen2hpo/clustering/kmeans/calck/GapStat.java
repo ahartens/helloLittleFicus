@@ -23,7 +23,7 @@ public class GapStat implements GetKable,Kmeansable{
 	int kfinal;
 	int kcurrent;
 	KmeansObject kmeans;
-	
+	UniformRandomMatrixGenerator generator;
 
 	/**
 	*	Returns k value for which the gap statistic is the greatest
@@ -45,8 +45,9 @@ public class GapStat implements GetKable,Kmeansable{
 		int i = 10;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
 		double[] gap = new double[i];		///EMPTY ARRAY TO STORE GAP VALUES
 
-		kmeans = new KmeansObject(m);
+		this.kmeans = new KmeansObject(m);
 
+		this.generator = new UniformRandomMatrixGenerator(m);
 
 		///CALCULATE THE GAP STATISTIC
 		for (int k = 0;k<i;k++){

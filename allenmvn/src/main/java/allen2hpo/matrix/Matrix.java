@@ -7,6 +7,13 @@ public class Matrix{
 
     private double[][] dat=null;
     
+    private double[] colMeans = null;
+    private double[] colMax = null;
+    private double[] colMin = null;
+
+    private double[] rowMeans = null;
+    private double[] rowMax = null;
+    private double[] rowMin = null;
 
     public Matrix(){
     }
@@ -129,7 +136,7 @@ public class Matrix{
         return col;
     }
 
-    public double getMeanOfRow(int idx){
+    /*public double getMeanOfRow(int idx){
         double sum = 0;
         int n = getColumnSize();
         for (int i=0;i<n;i++){
@@ -145,12 +152,13 @@ public class Matrix{
             sum += getValueAtIndex(i,idx);
         }
         return sum/n;
-    }
+    }*/
    
 
     /**
     *
     *   @return Array or arrays. 1st row means, 2nd array = column means, 3rd array = single value, mean of entire matrix
+    *   26.1.2015 : ADDED GETSUMMARY WHICH CALCULATES MEANS FO ROWS AND SUMS. THSI IS REDUNDANT
     */
     public double[][] getAllMeans(){
         double [] rowMeans = new double[getRowSize()];
@@ -295,6 +303,115 @@ public class Matrix{
     }
 
 
+    /**
+    *
+    */
+    public void calcSummary(){
+        
+        this.colMeans = new double[getColumnSize()];
+        this.colMax = new double[getColumnSize()];
+        this.colMin = new double[getColumnSize()];
+
+        this.rowMeans = new double[getRowSize()];
+        this.rowMax = new double[getRowSize()];
+        this.rowMin = new double[getRowSize()];  
+
+        double []columnSums = new double[this.getColumnSize()];
+      
+        //Initialize columne max/mins with values in first row
+        for(int j = 0; j<getColumnSize(); j++){
+            columnSums[j] = this.dat[0][j];
+            this.colMax[j] = this.dat[0][j];
+            this.colMin[j] = this.dat[0][j];
+        }
+
+        ///Initialize row max/mins with value in first cell
+        double rowSum = this.dat[0][0];
+        this.rowMin[0] = this.dat[0][0];
+        this.rowMax[0] = this.dat[0][0];
+        
+
+        ///Handle first row in totality IS THIS NECESSARY!??! WILL LOOK AT LATER SICK OF HTIS
+        for(int j = 1;j<getColumnSize();j++){
+            ///Handle row sum/max/min
+            rowSum += this.dat[0][j];
+            if(this.dat[0][j]<this.rowMin[0]){
+                this.rowMin[0] = this.dat[0][j];
+            }
+            if(this.dat[0][j]>this.rowMax[0]){
+                this.rowMax[0] = this.dat[0][j];
+            }        
+        }
+        this.rowMeans[0] = rowSum/getColumnSize();
+
+
+
+
+
+        //from second row onwards, iterate through each row
+        for(int i = 1;i<getRowSize();i++){
+            ///Initialize row max/mins with value in first cell
+            this.rowMin[i] = this.dat[i][0];
+            this.rowMax[i] = this.dat[i][0];
+
+            ///Reset row sum to zero
+            rowSum = 0;
+
+
+            ///From second column onwards, Iterate through each column
+            for(int j = 0;j<getColumnSize();j++){
+
+                ///Handle row sum/max/min
+                rowSum += this.dat[i][j];
+                if(this.dat[i][j]<this.rowMin[i]){
+                    this.rowMin[i] = this.dat[i][j];
+                }
+                if(this.dat[i][j]>this.rowMax[i]){
+                    this.rowMax[i] = this.dat[i][j];
+                }            
+
+                ///Handle column sum/max/min
+                columnSums[j] += this.dat[i][j];
+                if(this.dat[i][j]<this.colMin[j]){
+                    this.colMin[j] = this.dat[i][j];
+                }
+                if(this.dat[i][j]>this.colMax[j]){
+                    this.colMax[j] = this.dat[i][j];
+                }  
+            }
+            this.rowMeans[i] = rowSum/getColumnSize();
+        }
+
+
+        ///Calculate Means for each column
+        for(int j = 0; j<getColumnSize(); j++){
+            this.colMeans[j] = columnSums[j]/getRowSize();
+        }
+    }
+
+    public double getColumnMin(int idx){
+        return this.colMin[idx];
+    }
+   
+    public double getColumnMax(int idx){
+        return this.colMax[idx];
+    }
+
+    public double getRowMin(int idx){
+        return this.rowMin[idx];
+    }
+
+    public double getRowMax(int idx){
+        return this.rowMax[idx];
+    }
+
+    public double getRowMean(int idx){
+        return this.rowMeans[idx];
+    }
+
+    public double getColumnMean(int idx){
+        return this.colMeans[idx];
+    }
 
 
 }

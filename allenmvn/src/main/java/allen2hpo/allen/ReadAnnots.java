@@ -24,7 +24,6 @@ abstract class ReadAnnots{
 	public void StartReading(String filename, int dim){
 		this.ids = new int[dim];
 		this.names = new String[dim];
-		System.out.println(filename+"BOOOGIE");
 		openFile(filename);
 		readFile();
 		scanner.close();
@@ -51,11 +50,9 @@ abstract class ReadAnnots{
 	*	private method. opens file with scanner or fails.
 	*/
 	private void openFile(String filename){
-				System.out.println("OPNENING FILE");
-
 		try{
 			scanner = new Scanner(new File(filename));
-			System.out.println("file Opened 123geeso");
+			System.out.println("file Opened");
 		}	
 		catch (Exception e){
 			System.out.println("File could not be opened");
@@ -68,7 +65,6 @@ abstract class ReadAnnots{
 	*	Reads file in line by line, passing handling of the line the private method handleRow. 
 	*/
 	private void readFile(){
-		System.out.println("READING FILE");
 		///FIRST LINE IS A HEADER : REMOVE IT
 		scanner.nextLine();
 		///EACH FOLLOWING ROW IS READ

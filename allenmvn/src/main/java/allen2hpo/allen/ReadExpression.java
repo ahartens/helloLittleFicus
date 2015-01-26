@@ -29,7 +29,6 @@ public class ReadExpression{
 		openFile(file);
 		readFile(r,c);
 		scanner.close();
-		System.out.println("BEFORRRRRE : "+c);
 	}
 
 
@@ -99,7 +98,6 @@ public class ReadExpression{
 	    	matrix.setValueAtIndex(ri,i,lineSc.nextDouble());
 			i++;
         }
-        System.out.println("FINAL COUNT BBIS : "+i);
      }
 
 

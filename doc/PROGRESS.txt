@@ -1,7 +1,18 @@
+25. January 2015
+	making uniform random matrix generator object for gapstat
+	- in order to do so requires max/min of each tissue (column). therfore added calcSummary method to matrix. calculates max/min of each row and column, storing in private field of matrix class
+	- ALSO calculates mean of each row/min
+
+	to do : getAllMeans ( i think that was for biclustering?) calculates all means as well, is superfluous if have dataSummary method
+
+
+	- unsure as where to call 'dataSummary': only when wish to create uniform random distributions?
+
+
 24. January 2015
 	given a gene or group of geens, get matrix of gene expression across all tissues
 	also get list of tissues with high/low expression for given cut off
-	
+
 
 22. January 2015
 	Kmeans class can now return clustered data points. getClusters() returns an array of matrices.
