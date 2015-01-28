@@ -15,10 +15,10 @@ public class AllenDataTest{
 	public void getGeneNamesTest(){
 
 
-		AllenData mngr = new AllenData("/Users/ahartens/Desktop/AllenTest",99);
+		AllenData mngr = new AllenData("/Users/ahartens/Desktop/AllenTest",63000);
 		
 
-		KmeansBasic kmeans = new KmeansBasic(mngr.getData());
+		KmeansGapStat kmeans = new KmeansGapStat(mngr.getData());
 
 		String[][] clusters = mngr.getGeneClusters(kmeans.getClusterIndices());
 

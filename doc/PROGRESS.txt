@@ -6,7 +6,13 @@
 	to do : getAllMeans ( i think that was for biclustering?) calculates all means as well, is superfluous if have dataSummary method
 
 
-	- unsure as where to call 'dataSummary': only when wish to create uniform random distributions?
+	- unsure as where/when to call 'dataSummary': only when wish to create uniform random distributions?. could theoretically also be calculated while reading in data.
+
+
+	THOUGHTS : 
+	1) Do 3 vesicles of brain development leave footprints ... Mean across across structure and compare means.. is that at all reasonable?
+
+	2) Compare neighboring structure and distant structure.. should probably use r for that.  
 
 
 24. January 2015

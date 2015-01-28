@@ -184,6 +184,7 @@ public class GapStat implements GetKable,Kmeansable{
 	}
 
 
+
 	/**
 	* 	@param takes random uniform matrix should be found and current iteration of k
 	*	Performs The same calculation as calcDispersion, except for a random uniform distribution

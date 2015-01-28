@@ -1,13 +1,18 @@
 package allen2hpo.allen;
 
-import allen2hpo.matrix.Matrix;
+import allen2hpo.matrix.*;
 
 
 
 /**
 *	Should store and handle all allen data for one brain. All functions relating to that brain go through here.
 */
+
 public class AllenData{
+	
+
+
+
 	/**
 	*	Ordered list of all gene abbreviations derived from probes.csv file. Order == gene expression matrix rows
 	*/
@@ -26,8 +31,9 @@ public class AllenData{
 
 
 
-	public AllenData(String directory, int dim){
-		String dir = "/Users/ahartens/Desktop/AllenTest";
+
+
+	public AllenData(String dir, int dim){
 		
 		ReadProbeAnnots probes = new ReadProbeAnnots(dir,dim);
 		ReadTissueAnnots tissues = new ReadTissueAnnots(dir,1840);
@@ -37,6 +43,10 @@ public class AllenData{
 
 		this.geneNames = probes.getData();
 		this.data = expression.getData();
+
+		//CovarMatrix cm = new CovarMatrix();
+		//cm.covarCalcMatrix(this.data,1);
+
 
 	}
 
@@ -67,6 +77,19 @@ public class AllenData{
 			}
 		}
 		return gc;
+	}
+
+
+
+	public Matrix getExpressionDataForTissues(int[] tissueIndices){
+		double[][] e = new double[this.data.getRowSize()][tissueIndices.length];
+		for (int i=0; i<e.length; i++){
+			for (int j=0; j<e[0].length; j++){
+				e[i][j] = this.data.getValueAtIndex(i,tissueIndices[j]);
+			}
+		}
+		Matrix m = new Matrix(e);
+		return m;
 	}
 
 

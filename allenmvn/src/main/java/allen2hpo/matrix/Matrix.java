@@ -14,6 +14,7 @@ public class Matrix{
     private double[] rowMeans = null;
     private double[] rowMax = null;
     private double[] rowMin = null;
+    
 
     public Matrix(){
     }
