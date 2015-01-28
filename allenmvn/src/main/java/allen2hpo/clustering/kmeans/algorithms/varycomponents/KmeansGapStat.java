@@ -53,5 +53,8 @@ public class KmeansGapStat implements Kmeansable{
 		kmo.beginClustering(10);
 	}
 
+	public int[][] getClusterIndices(){
+		return kmeans.getClusterIndices();
+	}
 	
 }

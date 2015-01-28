@@ -15,5 +15,5 @@ interface Kmeansable{
 	void setInitClusters(KmeansObject kmo); 					
 	void beginClustering(KmeansObject kmo);
 	void setDistCalc(KmeansObject kmo);
-
+	int[][] getClusterIndices();
 }

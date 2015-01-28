@@ -18,7 +18,7 @@ public class AllenDataTest{
 		AllenData mngr = new AllenData("/Users/ahartens/Desktop/AllenTest",63000);
 		
 
-		KmeansGapStat kmeans = new KmeansGapStat(mngr.getData());
+		KmeansBasic kmeans = new KmeansBasic(mngr.getData());
 
 		String[][] clusters = mngr.getGeneClusters(kmeans.getClusterIndices());
 

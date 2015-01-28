@@ -230,4 +230,8 @@ public class GapStat implements GetKable,Kmeansable{
 		kmo.beginClustering(20);
 	}
 
+	public int[][] getClusterIndices(){
+		return kmeans.getClusterIndices();
+	}
+
 }
