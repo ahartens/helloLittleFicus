@@ -15,14 +15,14 @@ import allen2hpo.matrix.*;
 *	1) Call constructor method using the data set to be optimized as the argument.
 *	2) call getK(); getter method
 */
-public class GapStat implements GetKable,Kmeansable{
+public class GapStat implements GetKable{
 
 	/**
 	*	K value with lowest Gap between log of expected dispersion and log of actual dispersion
 	*/
 	int kfinal;
 	int kcurrent;
-	KmeansObject kmeans;
+	KmeansPrototype kmeans;
 
 	/**
 	*	Array number of tested K long, containing calculated dispersion for given matrix for index i clusters.
@@ -70,7 +70,7 @@ public class GapStat implements GetKable,Kmeansable{
 	*/
 	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m){
 
-		this.kmeans = new KmeansObject(m);
+		this.kmeans = new KmeansPrototype(m);
 
 		UniformRandomMatrixGenerator generator = new UniformRandomMatrixGenerator(m);
 
@@ -158,7 +158,7 @@ public class GapStat implements GetKable,Kmeansable{
 	*	@param realOrRandom, third arguement : if 0 cluster real data, else cluster random uniform data
 	*/
 	private double calcMeanDispersion(int k, Matrix m, int realOrRandom){
-		int repeat = 20;
+		int repeat = 5;
 		double sumW = 0;
 
 		for (int j=0; j<repeat ; j++){
@@ -184,13 +184,11 @@ public class GapStat implements GetKable,Kmeansable{
 		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
 		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
 
-		this.kcurrent = k;
-		setK(this.kmeans);
-		setInitClusters(this.kmeans);
-		setDistCalc(this.kmeans);
-		beginClustering(this.kmeans);
+		this.kmeans.setK(k);
+		this.kmeans.setInitClustersBasic();
+		this.kmeans.beginClustering(5);
 
-		Matrix[] clusters = kmeans.getClusters();
+		Matrix[] clusters = this.kmeans.getClusters();
 
 		double wk = 0;
 
@@ -210,12 +208,11 @@ public class GapStat implements GetKable,Kmeansable{
 	private double calcDispersionForRandomUniform(int k, Matrix m){
 		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
 		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
-		KmeansObject kmo = new KmeansObject(m);
+		KmeansPrototype kmo = new KmeansPrototype(m);
 
-		setK(kmo);
-		setInitClusters(kmo);
-		setDistCalc(kmo);
-		beginClustering(kmo);
+		kmo.setK(k);
+		kmo.setInitClustersBasic();
+		kmo.beginClustering(5);
 
 		Matrix[] clusters = kmo.getClusters();
 
@@ -227,29 +224,4 @@ public class GapStat implements GetKable,Kmeansable{
 		}
 		return Math.log(wk);
 	}
-
-
-
-	///KMEANS_ABLE INTERFACE METHODS
-
-	public void setK(KmeansObject kmo){
-		kmo.setK(this.kcurrent);
-	}
-
-	public void setInitClusters(KmeansObject kmo){
-		kmo.setInitClustersBasic();
-	}
-
-	public void setDistCalc(KmeansObject kmo){
-		kmo.setDistCalcBasic();
-	}
-
-	public void beginClustering(KmeansObject kmo){
-		kmo.beginClustering(20);
-	}
-
-	public int[][] getClusterIndices(){
-		return kmeans.getClusterIndices();
-	}
-
 }

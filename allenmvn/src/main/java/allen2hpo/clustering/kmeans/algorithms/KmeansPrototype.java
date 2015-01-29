@@ -60,6 +60,11 @@ public class KmeansPrototype{
         this.distCalc = d;
     }
 
+
+    public KmeansPrototype(Matrix mat){
+        setData(mat,1);
+    }
+
     /**
     *	@param Takes a matrix object of the data that is to be clustered
     */
@@ -122,6 +127,8 @@ public class KmeansPrototype{
         if (this.cp == null){
             setInitClustersBasic();
         }
+
+        //is this actually covered by the things?
     }
 
 

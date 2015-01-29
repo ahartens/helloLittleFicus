@@ -11,9 +11,12 @@ package allen2hpo.clustering;
 *	5) Call beginClustering()
 */
 interface Kmeansable{
-	void setK(KmeansObject kmo);			
-	void setInitClusters(KmeansObject kmo); 					
+	void setK(KmeansObject kmo);
+	void setInitClusters(KmeansObject kmo);
 	void beginClustering(KmeansObject kmo);
 	void setDistCalc(KmeansObject kmo);
 	int[][] getClusterIndices();
+
+
+	
 }
