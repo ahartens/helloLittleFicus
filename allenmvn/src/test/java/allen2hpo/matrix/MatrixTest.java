@@ -17,7 +17,8 @@ public class MatrixTest {
     	Matrix m = new Matrix(d);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+   /*THESE CONDITIONS WERE REMOVED ON 27.1.2015 BC OF EMPTY CLUSTER ISSUE.. MAYBE PUT BACK 
+	@Test(expected = IllegalArgumentException.class)
     public void testMatrixArgZeroHeight(){
     	double[][] d = {};
     	Matrix m = new Matrix(d);
@@ -29,19 +30,19 @@ public class MatrixTest {
     	double[][] d = {{},{}};
     	Matrix m = new Matrix(d);
     }
-
+*/
 
 
     ///GETTER TESTING
-    @Test 
+    @Test
     public void testMatrixRowSize(){
 		double[][] d = { {1d,2d},{3d,4d}};
 		Matrix m = new Matrix(d);
 		int rowsize = m.getRowSize();
 		Assert.assertEquals(2,rowsize);
     }
-    
-    @Test 
+
+    @Test
     public void testMatrixColumnSize(){
     	double[][] d = {{1d,2d},{3d,4d}};
     	Matrix m = new Matrix(d);
@@ -92,7 +93,7 @@ public class MatrixTest {
     public void testGetRow(){
 		double[][] d = {{1d,2d},{3d,4d},{3d,4d},{3d,4d},{3d,4d},{3d,4d},{3d,4d}};
     	Matrix m = new Matrix(d);
-    	
+
     	int idx = 0;
     	double val[] = m.getRowAtIndex(idx);
 
@@ -186,13 +187,13 @@ public class MatrixTest {
 	///ADDITION : RESULT
 	@Test
 	public void testAdd(){
-		
+
 		double[][] d = {{1d,2d},{3d,4d}};
 		Matrix m = new Matrix(d);
 		Matrix a = new Matrix(d);
-		
+
 		double[][] b = {{10d,20d},{30d,40d}};
-		
+
 		a.add(b);
 
 		for (int i=0;i<d.length;i++){
@@ -210,7 +211,7 @@ public class MatrixTest {
 		m.multiply(b);
 
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void testMultiplyDimAgreeGreater(){
 		double[][] a = {{1d,2d},{3d,4d}};
@@ -257,8 +258,8 @@ public class MatrixTest {
 	@Test
 	public void testTranspose(){
 		double[][] d = {{1d,2d},{3d,4d}};
-		Matrix m = new Matrix(d);	
-		m.transpose();	
+		Matrix m = new Matrix(d);
+		m.transpose();
 	}
 
 
@@ -279,7 +280,7 @@ public class MatrixTest {
 		}
 	}
 
-	@Test 
+	@Test
 	public void testCalcSummary(){
 		double [][] d = {{1,2,3,4,5,6},{1,2,3,4,5,6},{1,2,3,4,5,6},{1,2,3,4,5,6},{1,2,3,4,5,6},{1,2,3,4,5,6}};
 		Matrix m = new Matrix(d);
@@ -290,7 +291,7 @@ public class MatrixTest {
 		for(int i = 0;i<d[0].length;i++){
 			Assert.assertEquals(answer[1][i],m.getColumnMean(i),.001);
 		}
-		
+
 		for(int i = 0;i<d.length;i++){
 			Assert.assertEquals(answer[0][i],m.getRowMean(i),.001);
 		}

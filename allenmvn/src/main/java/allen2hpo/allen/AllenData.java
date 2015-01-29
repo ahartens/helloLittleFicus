@@ -9,7 +9,7 @@ import allen2hpo.matrix.*;
 */
 
 public class AllenData{
-	
+
 
 
 
@@ -34,7 +34,7 @@ public class AllenData{
 
 
 	public AllenData(String dir, int dim){
-		
+
 		ReadProbeAnnots probes = new ReadProbeAnnots(dir,dim);
 		ReadTissueAnnots tissues = new ReadTissueAnnots(dir,1840);
 
@@ -63,7 +63,7 @@ public class AllenData{
 
 	/**
 	*	@return array of arrays of gene ids corresponding to index assignments.
-	*	@param array of arrays of indices of clustered genes 
+	*	@param array of arrays of indices of clustered genes
 	*/
 	public String[][] getGeneClusters(int[][] ci){
 		///ci = cluster indicies

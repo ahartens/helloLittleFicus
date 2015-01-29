@@ -5,18 +5,18 @@ import allen2hpo.matrix.*;
 
 /**
 *	GapStat is a method with which to find the optimal K value
-*	It is therefore called by a kmeansable setk() method. 
+*	It is therefore called by a kmeansable setk() method.
 *	Confusingly, GapStat itself performs Kmeans, in an iterative fashion.
 *	For each k value for which it performs kmeans, it calculates
 *		1) the expected dispersion given a random distribution with n samples each with p dimensions
 *		2) the actual dispersion W by a given k and data set, Matrix m
-*	
-*	TO USE : 
+*
+*	TO USE :
 *	1) Call constructor method using the data set to be optimized as the argument.
 *	2) call getK(); getter method
 */
 public class GapStat implements GetKable,Kmeansable{
-	
+
 	/**
 	*	K value with lowest Gap between log of expected dispersion and log of actual dispersion
 	*/
@@ -25,7 +25,7 @@ public class GapStat implements GetKable,Kmeansable{
 	KmeansObject kmeans;
 
 	/**
-	*	Array number of tested K long, containing calculated dispersion for given matrix for index i clusters. 
+	*	Array number of tested K long, containing calculated dispersion for given matrix for index i clusters.
 	*/
 	double [] wk = null;
 
@@ -43,11 +43,11 @@ public class GapStat implements GetKable,Kmeansable{
 	}
 
 
-	/**	
+	/**
 	*	@param Matrix m of data for which number of clusters k should be optimized
 	*/
 	public GapStat(Matrix m){
-		
+
 		int n = m.getRowSize();
 		int p = m.getColumnSize();
 
@@ -69,7 +69,7 @@ public class GapStat implements GetKable,Kmeansable{
 	*	@param second int is capital B, the number of random uniform distributions to be created
 	*/
 	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m){
-		
+
 		this.kmeans = new KmeansObject(m);
 
 		UniformRandomMatrixGenerator generator = new UniformRandomMatrixGenerator(m);
@@ -80,23 +80,22 @@ public class GapStat implements GetKable,Kmeansable{
 		this.wkb_star = new double[cap_k][cap_b];
 
 		for (int k = 0; k<cap_k; k++){
-			
-			///Calculate actual log(Wk) for given k value 
-			wk[k] = calcDispersion(k+1, m);
+
+			///Calculate actual log(Wk) for given k value
+			wk[k] = calcMeanDispersion(k+1, m,0);
 
 			///Reset sum of gaps
 			double gapSum_k = 0;
 
-			
-			///Calculate log(Wkb_star) for given k for B uniform random matrices. 
+
+			///Calculate log(Wkb_star) for given k for B uniform random matrices.
 			for (int b = 0; b<cap_b; b++){
 				///Create random uniform matrix
-				wkb_star[k][b] = calcDispersionForRandomUniform(k+1,generator.generateUniformRand());
+				wkb_star[k][b] = calcMeanDispersion(k+1,generator.generateUniformRand(),1);
 
 				///Calculate gap and add to sum
 				gapSum_k += wkb_star[k][b] - wk[k];
 				//System.out.printf("k = %d, b + %d : %f - %f =  %f \n",k, b,wkb_star[k][b], wk[k],gapSum_k);
-
 			}
 
 			///Calculate actual gap by dividing by capital B (number of random distributions created)
@@ -115,7 +114,7 @@ public class GapStat implements GetKable,Kmeansable{
 
 		///PART ONE : Calculate l_bar for each value k
 		double[] lbar_k = new double[cap_k];
-		
+
 		for (int k = 0; k<cap_k; k++){
 			for (int b = 0; b<cap_b; b++){
 				lbar_k[k] += this.wkb_star[k][b];
@@ -143,7 +142,7 @@ public class GapStat implements GetKable,Kmeansable{
 	*
 	*/
 	private int stepFour(double[] gap, double[] s, int cap_k){
-		
+
 		for(int k = 0; k< cap_k - 1; k++){
 
 			if (gap[k] > 0 && gap[k] >= gap[k+1] - s[k+1] ){
@@ -153,6 +152,25 @@ public class GapStat implements GetKable,Kmeansable{
 		return 0;
 	}
 
+
+	/**
+	*	@param k value, data matrix xto be clustered
+	*	@param realOrRandom, third arguement : if 0 cluster real data, else cluster random uniform data
+	*/
+	private double calcMeanDispersion(int k, Matrix m, int realOrRandom){
+		int repeat = 20;
+		double sumW = 0;
+
+		for (int j=0; j<repeat ; j++){
+			if (realOrRandom == 0){
+				sumW += calcDispersion(k,m);
+			}
+			else{
+				sumW += calcDispersionForRandomUniform(k,m);
+			}
+		}
+		return sumW/repeat;
+	}
 
 
 	/**
@@ -171,7 +189,7 @@ public class GapStat implements GetKable,Kmeansable{
 		setInitClusters(this.kmeans);
 		setDistCalc(this.kmeans);
 		beginClustering(this.kmeans);
-		
+
 		Matrix[] clusters = kmeans.getClusters();
 
 		double wk = 0;
@@ -198,7 +216,7 @@ public class GapStat implements GetKable,Kmeansable{
 		setInitClusters(kmo);
 		setDistCalc(kmo);
 		beginClustering(kmo);
-		
+
 		Matrix[] clusters = kmo.getClusters();
 
 		double wk = 0;
@@ -216,11 +234,11 @@ public class GapStat implements GetKable,Kmeansable{
 
 	public void setK(KmeansObject kmo){
 		kmo.setK(this.kcurrent);
-	}	
+	}
 
 	public void setInitClusters(KmeansObject kmo){
 		kmo.setInitClustersBasic();
-	}	
+	}
 
 	public void setDistCalc(KmeansObject kmo){
 		kmo.setDistCalcBasic();

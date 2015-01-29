@@ -1,3 +1,9 @@
+28. January 2015
+    To do:
+    When to stop clustering? when <1% clusters change cluster assignment
+
+    2) cluster initialization :
+    pick sample
 25. January 2015
 	making uniform random matrix generator object for gapstat
 	- in order to do so requires max/min of each tissue (column). therfore added calcSummary method to matrix. calculates max/min of each row and column, storing in private field of matrix class

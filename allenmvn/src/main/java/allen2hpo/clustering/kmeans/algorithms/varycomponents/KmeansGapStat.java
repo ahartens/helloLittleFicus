@@ -8,9 +8,9 @@ import allen2hpo.matrix.Matrix;
 *	@param takes a Matrix object as an argument
 */
 public class KmeansGapStat implements Kmeansable{
-	
+
 	/**
-	*	Required kmeansobject for any class that implements interface kmeansable. 
+	*	Required kmeansobject for any class that implements interface kmeansable.
 	*/
 	private KmeansObject kmeans;
 
@@ -27,7 +27,7 @@ public class KmeansGapStat implements Kmeansable{
 
 
 	///KMEANSABLE METHODS
-	
+
 	/**
 	*	Implementation of GapStat.
 	*/
@@ -36,25 +36,25 @@ public class KmeansGapStat implements Kmeansable{
 
 		GetKable getK = new GapStat(kmo.getData());
 		int kval = getK.getK();
-		System.out.println("THIS IS THE CALCULTED K:"+kval);
+		System.out.printf("The calculated K is : %d\n\n\n\n\n\n\n\n\n\n\n\n",kval);
 
 		kmo.setK(kval);
-	}	
+	}
 
 	public void setInitClusters(KmeansObject kmo){
 		kmo.setInitClustersBasic();
-	}		
+	}
 
 	public void setDistCalc(KmeansObject kmo){
 		kmo.setDistCalcBasic();
 	}
-		
+
 	public void beginClustering(KmeansObject kmo){
-		kmo.beginClustering(10);
+		kmo.beginClustering(5);
 	}
 
 	public int[][] getClusterIndices(){
 		return kmeans.getClusterIndices();
 	}
-	
+
 }

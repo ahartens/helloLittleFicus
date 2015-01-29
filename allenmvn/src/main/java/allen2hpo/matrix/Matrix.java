@@ -22,44 +22,45 @@ public class Matrix{
 
  
     /**
-    
-    *
-    
     *@param requires initialized 2d data array of non zero column and row size
-    
     */
     public Matrix(double[][] data) {
 	   setMatrix(data);
     }
 
 
+    
     /**
-
     *   Sets data of matrix object. Can be called by subclasses using 'super.setMatrix'
-
     */
     public void setMatrix(double[][] data){
-        this.dat = data;
         
+        this.dat = data;
 
         if (this.dat==null)
            throw new IllegalArgumentException("Data not initialized");
-        if (this.dat.length == 0)
-           throw new IllegalArgumentException("data matrix is empty");
-        if (this.dat[0].length == 0)
-           throw new IllegalArgumentException("data matrix has 0 columns");
+        if (this.dat.length == 0){
+           System.out.println("data matrix is empty");
+            this.dat = new double[1][1];
+        }
+        if (this.dat[0].length == 0){
+           System.out.println("data matrix has 0 columns");
+            this.dat = new double[1][1];
 
+        }
     }
 
+    
+    /**
+     *
+     */
     public void setMatrixSize(int row, int col){
         this.dat = new double[row][col];
     }
 
 
     /**
-
     *   Set value
-
     */
     public void setValueAtIndex(int r, int c, double val){
         this.dat[r][c] = val;
@@ -68,9 +69,7 @@ public class Matrix{
     
 
     /**
-    
-     * @return number of rows of the data matrix
-    
+     *  @return number of rows of the data matrix
      */
     public int getRowSize() {
 	   return this.dat.length;
@@ -79,9 +78,7 @@ public class Matrix{
     
 
     /**
-    
      *  @return number of columns of the data matrix
-    
      */
     public int getColumnSize() {
        return this.dat[0].length;
@@ -90,11 +87,8 @@ public class Matrix{
    
 
     /**
-    
     *   @param requires index [row,column], from 0<= {r,c} < dim
-    
     *   @return double value of data array and indx
-    
     */
     public double getValueAtIndex(int row, int col){
         if (row >= getRowSize() || col >= getColumnSize())
@@ -104,11 +98,8 @@ public class Matrix{
 
 
     /**
-
     *   @param takes index of row. Start from 0
-
     *   @return returns array of doubles. COPY of matrix row
-
     */
     public double[] getRowAtIndex(int idx){
         if (idx >= getRowSize() || idx < 0)
@@ -121,11 +112,8 @@ public class Matrix{
 
 
     /**
-
     *   @param takes index of column. Start from 0
-
     *   @return returns array of doubles. COPY of matrix row
-
     */
     public double[] getColumnAtIndex(int idx){
         if (idx >= getColumnSize() || idx < 0)
@@ -187,12 +175,10 @@ public class Matrix{
     }
 
 
+    
     /**
-    
-    *   Adds a 2d array to matrix. 
-    
+    *   Adds a 2d array to matrix.
     *   @param requires initialized 2d array with same dimensions as matrix object
-    
     */
     public void add(double[][] b){
         if (b==null)
@@ -212,11 +198,8 @@ public class Matrix{
 
     
     /**
-
     *   Matrix matrix multiplication. Performs dotproduct of rows and columns
-
     *   @param initialized array of which number of rows are equal to number of columns of matrix object
-
     */
     public void multiply(double[][] b){
        
@@ -251,13 +234,9 @@ public class Matrix{
 
     
     /**
-
     *   Matrix Scalar multiplication
-
     *   @param double
-
     *   @return scalar multiplication of matrix by given value
-
     */
     public void multiply(double b){
         for(int i=0;i<getRowSize();i++){
@@ -270,9 +249,7 @@ public class Matrix{
     
 
     /**
-    
     *   Transpose matrix
-    
     */
     public void transpose(){
         double[][] t = new double[getColumnSize()][getRowSize()];
@@ -288,9 +265,7 @@ public class Matrix{
 
 
     /**
-
-    *   Print matrix 
-
+    *   Print matrix
     */
     public void print(){
         for(int i = 0;i<getRowSize();i++){
@@ -299,11 +274,11 @@ public class Matrix{
             }
             System.out.printf("\n");
         }
-                    System.out.printf("\n\n\n");
-
+        System.out.printf("\n\n\n");
     }
 
 
+    
     /**
     *
     */

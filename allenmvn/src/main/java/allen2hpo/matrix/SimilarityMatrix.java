@@ -48,7 +48,6 @@ public class SimilarityMatrix extends Matrix{
 					for (int z =0;z<m.getColumnSize();z++){
 						///CALCULATE DISTANCE OF DIMENSION
 						sum += Math.pow(m.getValueAtIndex(i,z) - m.getValueAtIndex(j,z),2);
-						//System.out.println(m.getValueAtIndex(i,z)+" ^2 - "+m.getValueAtIndex(j,z)+" ^2   =   "+sum);
 					}
 					///CALCULATE EUCLIDEAN DISTANCE
 					double dist = Math.sqrt(sum);
