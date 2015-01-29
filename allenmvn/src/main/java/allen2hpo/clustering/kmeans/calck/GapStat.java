@@ -22,7 +22,7 @@ public class GapStat implements GetKable{
 	*/
 	int kfinal;
 	int kcurrent;
-	KmeansPrototype kmeans;
+	Kmeans kmeans;
 
 	/**
 	*	Array number of tested K long, containing calculated dispersion for given matrix for index i clusters.
@@ -70,7 +70,7 @@ public class GapStat implements GetKable{
 	*/
 	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m){
 
-		this.kmeans = new KmeansPrototype(m);
+		this.kmeans = new Kmeans(m);
 
 		UniformRandomMatrixGenerator generator = new UniformRandomMatrixGenerator(m);
 
@@ -208,7 +208,7 @@ public class GapStat implements GetKable{
 	private double calcDispersionForRandomUniform(int k, Matrix m){
 		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
 		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
-		KmeansPrototype kmo = new KmeansPrototype(m);
+		Kmeans kmo = new Kmeans(m);
 
 		kmo.setK(k);
 		kmo.setInitClustersBasic();

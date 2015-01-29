@@ -7,7 +7,7 @@ import org.junit.Assert;
 
 import allen2hpo.matrix.Matrix;
 
-public class KmeansPrototypeTest{
+public class KmeansTest{
 
     @Test
     public void testInitClusters(){
@@ -21,7 +21,7 @@ public class KmeansPrototypeTest{
 
         GapStat gap = new GapStat(m);
 
-        KmeansPrototype km = new KmeansPrototype(m,gap.getK());
+        Kmeans km = new Kmeans(m,gap.getK());
         km.beginClustering(10);
         double [][] protos = km.getClusterPrototypes();
 
