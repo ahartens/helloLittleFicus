@@ -158,7 +158,7 @@ public class GapStat implements GetKable{
 	*	@param realOrRandom, third arguement : if 0 cluster real data, else cluster random uniform data
 	*/
 	private double calcMeanDispersion(int k, Matrix m, int realOrRandom){
-		int repeat = 5;
+		int repeat = 1;
 		double sumW = 0;
 
 		for (int j=0; j<repeat ; j++){

@@ -12,15 +12,15 @@ import java.io.*;
 *	Probe ID number is stored in ids array
 */
 abstract class ReadAnnots{
-	
+
 	private Scanner scanner = null;
 	private String [] names = null;
 	private int []ids = null;
 	private int count;
 
 	public abstract void handleRow(String line, int ri);
-		
-	
+
+
 	public void StartReading(String filename, int dim){
 		this.ids = new int[dim];
 		this.names = new String[dim];
@@ -40,8 +40,8 @@ abstract class ReadAnnots{
 	public int getCount(){
 		return this.count;
 	}
-	
-	
+
+
 
 
 	///PRIVATE METHODS
@@ -53,7 +53,7 @@ abstract class ReadAnnots{
 		try{
 			scanner = new Scanner(new File(filename));
 			System.out.println("file Opened");
-		}	
+		}
 		catch (Exception e){
 			System.out.println("File could not be opened");
 		}
@@ -62,13 +62,13 @@ abstract class ReadAnnots{
 
 
 	/**
-	*	Reads file in line by line, passing handling of the line the private method handleRow. 
+	*	Reads file in line by line, passing handling of the line the private method handleRow.
 	*/
 	private void readFile(){
 		///FIRST LINE IS A HEADER : REMOVE IT
 		scanner.nextLine();
 		///EACH FOLLOWING ROW IS READ
-		this.count = 0; 
+		this.count = 0;
 	    while (scanner.hasNext()) {
 	    	handleRow(scanner.nextLine(),this.count);
 	    	this.count++;

@@ -44,6 +44,7 @@ public class AllenData{
 		this.geneNames = probes.getData();
 		this.data = expression.getData();
 
+
 		//CovarMatrix cm = new CovarMatrix();
 		//cm.covarCalcMatrix(this.data,1);
 

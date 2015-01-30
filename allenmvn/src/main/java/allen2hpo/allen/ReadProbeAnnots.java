@@ -12,13 +12,11 @@ import allen2hpo.Allen.*;
 *	Probe ID number is stored in ids array
 */
 public class ReadProbeAnnots extends ReadAnnots{
-	
+
 
 	public ReadProbeAnnots(String dir, int dim){
 		String file = dir+"/Probes.csv";
-
 		super.StartReading(file,dim);
-
 	}
 
 
@@ -27,7 +25,7 @@ public class ReadProbeAnnots extends ReadAnnots{
 		///INIT SCANNER TO READ LINE
 		Scanner lineSc = new Scanner(line);
         lineSc.useDelimiter(",");
-		
+
 		///ADD GENE NAME TO ARRAY OF GENE NAMES
 		int i = 0;
 	    while (lineSc.hasNext()) {
@@ -37,7 +35,7 @@ public class ReadProbeAnnots extends ReadAnnots{
 	    	}
 	    	///ADD GENE SYMBOL TO ARRAY
 	    	else if(i==3){
-	    		super.setNameAtIndex(lineSc.next(),ri);
+	    		super.setNameAtIndex(lineSc.next().replace("\"",""),ri);
 	    	}
 	    	else{
 	    		lineSc.next();
@@ -46,6 +44,4 @@ public class ReadProbeAnnots extends ReadAnnots{
         }
 
      }
-
-
 }

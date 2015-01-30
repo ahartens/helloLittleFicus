@@ -13,26 +13,12 @@ public class InitClustBasic implements InitClusterable{
 
 	    ///INIT K CLUSTER SEEDS
 	    for (int i = 0; i<k; i++) {
-	        ///FOR NOW JUST TAKE FIRST 3 POINTS OF DATA TABLE
+	        ///RANDOMLY SELECT A ROW FROM DATA TABLE AND SET THAT AS A CLUSTER POINT
 	       	int randVal = (int)(m.getRowSize() * rand.nextDouble());
 	        for (int j = 0; j< m.getColumnSize(); j++) {
 	            cp[i][j] = m.getValueAtIndex(randVal,j);
-				System.out.printf("rand falue is %d : %.5f\n",randVal, cp[i][j]);
-
 	        }
-			System.out.printf("\n\n");
 	    }
-
-		for (int i = 0; i<k; i++) {
-			///FOR NOW JUST TAKE FIRST 3 POINTS OF DATA TABLE
-
-			for (int j = 0; j< m.getColumnSize(); j++) {
-				System.out.printf("%.0f \t",cp[i][j]);
-			}
-			System.out.printf("\n");
-
-		}
-
 
 		return cp;
 	}
