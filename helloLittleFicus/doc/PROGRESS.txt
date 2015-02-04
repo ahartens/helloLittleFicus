@@ -1,6 +1,7 @@
 30. January 2015
 	DONE TODAY :
 	uploaded everything to svn, as well as cleaned up svn directory
+	2) checked that my pearsons correlation coefficeint is correct with r : get same minimum value (0.7773679), first line looks the same! (is further checkign necessary?)
 
 
 

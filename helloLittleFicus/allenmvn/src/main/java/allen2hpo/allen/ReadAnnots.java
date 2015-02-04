@@ -24,8 +24,24 @@ abstract class ReadAnnots{
 	public void StartReading(String filename, int dim){
 		this.ids = new int[dim];
 		this.names = new String[dim];
+
 		openFile(filename);
 		readFile();
+
+		if (this.count != dim){
+
+			int[] tempIds = new int[this.count];
+			String [] tempNames = new String[this.count];
+
+			for (int i=0; i<this.count; i++){
+				tempIds[i] = this.ids[i];
+				tempNames[i] = this.names[i];
+
+			}
+			this.ids = tempIds;
+			this.names = tempNames;
+
+		}
 		scanner.close();
 	}
 

@@ -4,7 +4,7 @@ import java.util.*;
 import java.io.*;
 
 
-import allen2hpo.Allen.*;
+import allen2hpo.allen.*;
 
 
 /**

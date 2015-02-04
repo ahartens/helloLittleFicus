@@ -18,7 +18,7 @@ public class FileWriter{
 	}
 
 	public void writeDouble(double d){
-		writer.printf("%.15f,",d);
+		writer.printf("%.8f",d);
 	}
 
 	public void writeDelimit(){

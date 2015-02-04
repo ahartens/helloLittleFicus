@@ -5,7 +5,10 @@ import allen2hpo.matrix.*;
 
 
 /**
-*	Should store and handle all allen data for one brain. All functions relating to that brain go through here.
+*	This class is responsible for handling all data corresponding to one brain.
+*	It is able to parse all data corresponding to an allen brain directory (Expression, Gene/ Tissue Annotations)
+*	Has getters to return all required values
+*	@author Alex Hartenstein.
 */
 
 public class AllenData{
@@ -13,14 +16,10 @@ public class AllenData{
 
 
 
-	/**
-	*	Ordered list of all gene abbreviations derived from probes.csv file. Order == gene expression matrix rows
-	*/
+	/**Ordered list of all gene abbreviations derived from probes.csv file. Order == gene expression matrix rows*/
 	private String[] geneNames = null;
 
-	/**
-	*	still nothing
-	*/
+	/**Not being used at present*/
 	private String[] tissueNames = null;
 
 	/**
@@ -41,14 +40,26 @@ public class AllenData{
 		ReadExpression expression = new ReadExpression(dir,probes.getCount(),tissues.getCount());
 
 
+
+
 		this.geneNames = probes.getData();
 		this.data = expression.getData();
-
+		this.data.meanNormalizeAcrossGenesAndSamples();
 
 		//CovarMatrix cm = new CovarMatrix();
 		//cm.covarCalcMatrix(this.data,1);
 
 
+	}
+
+	private void collapseGeneData(){
+		String previousName = "";
+
+		for (int i=0; i<this.geneNames.length; i++){
+			if (this.geneNames[i].equals(previousName)){
+
+			}
+		}
 	}
 
 
@@ -58,6 +69,10 @@ public class AllenData{
 	*/
 	public Matrix getData(){
 		return this.data;
+	}
+
+	public String[] getAllGenes(){
+		return this.geneNames;
 	}
 
 
