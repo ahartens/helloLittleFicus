@@ -16,14 +16,10 @@ import allen2hpo.matrix.*;
 
 public class Allen2HPO {
 
-    /**
-    *   Required input parsed from command line. Directory that contains Probes.csv, MicroarrayExpression.csv, SampleAnnot.csv
-    */
+    /** Required input parsed from command line. Directory that contains Probes.csv, MicroarrayExpression.csv, SampleAnnot.csv*/
     private String dataPath = null;
 
-    /**
-    *   Optional input parsed from command line. If not specified will print into dataPath given in Clusters_OUTPUT.csv
-    */
+    /** Optional input parsed from command line. If not specified will print into dataPath given in Clusters_OUTPUT.csv*/
     private String outputPath = null;
 
 
@@ -36,7 +32,7 @@ public class Allen2HPO {
     /**
     *   Performs kmeans on MicroarrayExpression.csv contained in directory passed in -D option of command line. Outputs clusters into a file
     */
-    public  Allen2HPO(String argv[]) {
+    public Allen2HPO(String argv[]) {
 
     	parseCommandLine(argv);
 
@@ -46,120 +42,135 @@ public class Allen2HPO {
         ///Read all data
         AllenData mngr = new AllenData(this.dataPath,numberOfProbes);
 
-        ///Initialize kmeans object and cluster data
-        GapStat gap = new GapStat(mngr.getData());
-        Kmeans kmeans = new Kmeans(mngr.getData(),gap.getK());
 
-        kmeans.beginClustering();
+        Cluster clust = new Cluster(mngr);
 
-        ///Print clusters
-        writeOutputToFile(mngr, kmeans);
+
     }
-
-
 
     /**
-    *   Prints names of genes in a cluster into a csv file
+    *   Cluster nested class is responsible for
+    *   1) performing cluster analysis on a single brain
+    *   2) printing output to cl/file
     */
-    private void writeOutputToFile(AllenData mngr, Kmeans kmeans){
+    class Cluster{
 
-        ///Get gene names corresponding to indices in the clustering
-        String[][] clusters = mngr.getGeneClusters(kmeans.getClusterIndices());
+        /**
+        *   Constructor method performs cluster method and prints
+        *   @param AllenData object (contains fully parsed brain microarray expression/annotations)
+        */
+        public Cluster(AllenData mngr){
+            ///Initialize kmeans object and cluster data
+            GapStat gap = new GapStat(mngr.getData());
+            Kmeans kmeans = new Kmeans(mngr.getData(),gap.getK());
 
-        ///Init 2d array k elements long containing cluster prototypes
-        double [][] protos = kmeans.getClusterPrototypes();
-
-
-        ///Write gene names to file
-        FileWriter writer = new FileWriter();
-        writer.createFileWithName(this.outputPath);
-        writeAllClustersGenesToOneFile(writer,clusters);
-        writeClusterPrototypesToFile(writer,protos);
-        writer.closeFile();
-
-
-        writeClusterGenesToFile(this.dataPath,clusters);
-        writePopulationGenesToFile(this.dataPath,mngr.getAllGenes());
-
-        ///Print clusters in terminal
-        printClusterPrototypesInTerminal(protos);
-        printClusterGenesInTerminal(clusters);
-
-    }
-
-    private void printClusterGenesInTerminal(String[][] clusters){
-        for(int i =0;i<clusters.length;i++){
-            System.out.printf("Cluster %d",i);
-            for(int j=0; j<clusters[i].length-1; j++){
-                System.out.printf(" %s,",clusters[i][j]);
-            }
-            System.out.printf(" %s,",clusters[i][clusters[i].length-1]);
-            System.out.printf("\ncount of : %d\n\n",clusters[i].length);
+            kmeans.beginClustering();
+            ///Print clusters
+            writeOutputToFile(mngr, kmeans);
         }
-    }
 
 
-    private void writeClusterPrototypesToFile(FileWriter writer, double[][] protos){
+        /**
+        *   Prints names of genes in a cluster into a csv file
+        */
+        private void writeOutputToFile(AllenData mngr, Kmeans kmeans){
 
-        ///Write cluster prototypes to file
-        for(int i =0;i<protos.length;i++){
-            for(int j=0; j<protos[i].length-1; j++){
-                writer.writeDouble(protos[i][j]);
-                writer.writeDelimit();
-            }
-            writer.writeDouble(protos[i][protos[i].length-1]);
-            writer.writeNextLine();
+            ///Get gene names corresponding to indices in the clustering
+            String[][] clusters = mngr.getGeneClusters(kmeans.getClusterIndices());
+
+            ///Init 2d array k elements long containing cluster prototypes
+            double [][] protos = kmeans.getClusterPrototypes();
+
+
+            ///Write gene names to file
+            FileWriter writer = new FileWriter();
+            writer.createFileWithName(outputPath);
+            writeAllClustersGenesToOneFile(writer,clusters);
+            writeClusterPrototypesToFile(writer,protos);
+            writer.closeFile();
+
+
+            writeClusterGenesToFile(dataPath,clusters);
+            writePopulationGenesToFile(dataPath,mngr.getAllGenes());
+
+            ///Print clusters in terminal
+            printClusterPrototypesInTerminal(protos);
+            printClusterGenesInTerminal(clusters);
+
         }
-    }
 
-    private void writeClusterGenesToFile(String dir, String[][] clusters){
-        for(int i =0;i<clusters.length;i++){
+        private void printClusterGenesInTerminal(String[][] clusters){
+            for(int i =0;i<clusters.length;i++){
+                System.out.printf("Cluster %d",i);
+                for(int j=0; j<clusters[i].length-1; j++){
+                    System.out.printf(" %s,",clusters[i][j]);
+                }
+                System.out.printf(" %s,",clusters[i][clusters[i].length-1]);
+                System.out.printf("\ncount of : %d\n\n",clusters[i].length);
+            }
+        }
+
+        private void writeClusterPrototypesToFile(FileWriter writer, double[][] protos){
+
+            ///Write cluster prototypes to file
+            for(int i =0;i<protos.length;i++){
+                for(int j=0; j<protos[i].length-1; j++){
+                    writer.writeDouble(protos[i][j]);
+                    writer.writeDelimit();
+                }
+                writer.writeDouble(protos[i][protos[i].length-1]);
+                writer.writeNextLine();
+            }
+        }
+
+        private void writeClusterGenesToFile(String dir, String[][] clusters){
+            for(int i =0;i<clusters.length;i++){
+                FileWriter newFile = new FileWriter();
+                newFile.createFileWithName(dir+"/cluster_"+String.valueOf(i)+".txt");
+
+                for(int j=0; j<clusters[i].length; j++){
+                    newFile.writeString(clusters[i][j]);
+                    newFile.writeNextLine();
+                }
+                newFile.closeFile();
+            }
+        }
+
+        private void writePopulationGenesToFile(String dir, String[] array){
+
             FileWriter newFile = new FileWriter();
-            newFile.createFileWithName(dir+"/cluster_"+String.valueOf(i)+".txt");
+            newFile.createFileWithName(dir+"/population.txt");
 
-            for(int j=0; j<clusters[i].length; j++){
-                newFile.writeString(clusters[i][j]);
+            for(int i=0; i<array.length; i++){
+                newFile.writeString(array[i]);
                 newFile.writeNextLine();
             }
             newFile.closeFile();
         }
-    }
 
-    private void writePopulationGenesToFile(String dir, String[] array){
-
-        FileWriter newFile = new FileWriter();
-        newFile.createFileWithName(dir+"/population.txt");
-
-        for(int i=0; i<array.length; i++){
-            newFile.writeString(array[i]);
-            newFile.writeNextLine();
-        }
-        newFile.closeFile();
-    }
-
-
-
-    private void writeAllClustersGenesToOneFile(FileWriter writer, String[][] clusters){
-        for(int i =0;i<clusters.length;i++){
-            for(int j=0; j<clusters[i].length-1; j++){
-                writer.writeString(clusters[i][j]);
-                writer.writeDelimit();
+        private void writeAllClustersGenesToOneFile(FileWriter writer, String[][] clusters){
+            for(int i =0;i<clusters.length;i++){
+                for(int j=0; j<clusters[i].length-1; j++){
+                    writer.writeString(clusters[i][j]);
+                    writer.writeDelimit();
+                }
+                writer.writeString(clusters[i][clusters[i].length-1]);
+                writer.writeNextLine();
             }
-            writer.writeString(clusters[i][clusters[i].length-1]);
-            writer.writeNextLine();
         }
-    }
 
-    private void printClusterPrototypesInTerminal(double [][]protos){
-        ///Print cluster prototypes in command line
-        System.out.println("CLUSTER PROTOTYPES:");
-        for(int i=0; i<protos.length; i++){
-            System.out.printf("%d HAS THE PROTOTYPE : \n",i);
-            for(int j=0; j<protos[0].length; j++){
-                System.out.printf("(%d) : %.3f\t",j,protos[i][j]);
+        private void printClusterPrototypesInTerminal(double [][]protos){
+            ///Print cluster prototypes in command line
+            System.out.println("CLUSTER PROTOTYPES:");
+            for(int i=0; i<protos.length; i++){
+                System.out.printf("%d HAS THE PROTOTYPE : \n",i);
+                for(int j=0; j<protos[0].length; j++){
+                    System.out.printf("(%d) : %.3f\t",j,protos[i][j]);
+                }
+                System.out.printf("\n\n\n\n\n");
             }
-            System.out.printf("\n\n\n\n\n");
         }
+
     }
 
 
