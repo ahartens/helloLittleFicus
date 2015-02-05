@@ -13,7 +13,6 @@ public class OntologyData{
     }
 
     public void printStructureAtIndex(int i){
-        System.out.println("GOT THIS FAR TO ONTOLOGY DATA");
     	this.structures[i].printLeveled();
     }
 

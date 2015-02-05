@@ -25,14 +25,6 @@ public class ReadOntology{
         this.structures = new Structure[dim];
         this.currentParents = new Structure[40];
         StartReading(file,dim);
-
-
-
-        /*for (int i=0; i<count; i++){
-            this.structures[i].printLeveled();
-        }*/
-
-        System.out.println("This is number 100 and its children : ");
     }
 
     public Structure[] getData(){
@@ -41,7 +33,6 @@ public class ReadOntology{
 
 
     public void StartReading(String filename, int dim){
-        System.out.println("started reading");
         openFile(filename);
         readFile();
         scanner.close();
@@ -55,7 +46,7 @@ public class ReadOntology{
     private void openFile(String filename){
         try{
             scanner = new Scanner(new File(filename));
-            System.out.println("file Opened");
+            System.out.println("Ontology file Opened");
         }
         catch (Exception e){
             System.out.println("File could not be opened");
@@ -164,22 +155,18 @@ public class ReadOntology{
      *  Assigns current brain structure as child of all preceding brain structures in the hierarchy
      */
      private void handleChildAssignment(Structure s, int pathLength){
-         ///Path length of this s is shorter than the previous path length
-         ///This means that this cluster is a new parent structure/ is a node higher than preceding structure
-         if (pathLength < this.previousPathLength){
-         }
-         else if (pathLength > this.previousPathLength){
-             this.currentParents[pathLength] = s;
-         }
+
+         this.currentParents[pathLength-1] = s;
 
          ///Structure is a child of preceding node
-         ///Add structure
-         for(int i=1; i<pathLength; i++){
-             if(this.previousPathLength>=1){
+         ///Add structure as child to all its parents
+         if (this.previousPathLength != 0){
+             for(int i=0; i<pathLength-1; i++){
+                 this.currentParents[i].addChild(s);
              }
-             this.currentParents[i].addChild(s);
          }
          this.previousPathLength = pathLength;
+
 
      }
 

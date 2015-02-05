@@ -65,7 +65,6 @@ public class Structure{
      }
 
      public void printLeveled(){
-         System.out.println("GOT THIS FAR");
          for (int j=0; j<this.level; j++){
              System.out.printf(":    ");
          }
