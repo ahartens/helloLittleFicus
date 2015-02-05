@@ -34,17 +34,17 @@ public class AllenData{
 
 	public AllenData(String dir, int dim){
 
-		ReadProbeAnnots probes = new ReadProbeAnnots(dir,dim);
-		ReadTissueAnnots tissues = new ReadTissueAnnots(dir,1840);
-
-		ReadExpression expression = new ReadExpression(dir,probes.getCount(),tissues.getCount());
-
-
+		//ReadProbeAnnots probes = new ReadProbeAnnots(dir,dim);
+		//ReadTissueAnnots tissues = new ReadTissueAnnots(dir,1840);
+		ReadOntology ontology = new ReadOntology(dir,dim);
+		//ReadExpression expression = new ReadExpression(dir,probes.getCount(),tissues.getCount());
 
 
-		this.geneNames = probes.getData();
-		this.data = expression.getData();
-		this.data.meanNormalizeAcrossGenesAndSamples();
+
+			//this.geneNames = probes.getData();
+		//this.data = expression.getData();
+
+		//this.data.meanNormalizeAcrossGenesAndSamples();
 
 		//CovarMatrix cm = new CovarMatrix();
 		//cm.covarCalcMatrix(this.data,1);

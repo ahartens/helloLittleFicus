@@ -27,8 +27,6 @@ public class Allen2HPO {
     	Allen2HPO allen=new Allen2HPO(args);
     }
 
-
-
     /**
     *   Performs kmeans on MicroarrayExpression.csv contained in directory passed in -D option of command line. Outputs clusters into a file
     */
@@ -41,9 +39,9 @@ public class Allen2HPO {
 
         ///Read all data
         AllenData mngr = new AllenData(this.dataPath,numberOfProbes);
+        
 
-
-        Cluster clust = new Cluster(mngr);
+        //Cluster clust = new Cluster(mngr);
 
 
     }

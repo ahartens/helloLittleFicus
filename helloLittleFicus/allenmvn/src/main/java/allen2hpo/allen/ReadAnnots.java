@@ -24,7 +24,7 @@ abstract class ReadAnnots{
 	public void StartReading(String filename, int dim){
 		this.ids = new int[dim];
 		this.names = new String[dim];
-
+		System.out.println("started reading");
 		openFile(filename);
 		readFile();
 
