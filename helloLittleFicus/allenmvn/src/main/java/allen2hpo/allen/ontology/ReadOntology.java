@@ -31,6 +31,10 @@ public class ReadOntology{
         return this.structures;
     }
 
+    public int getDataLength(){
+        return count;
+    }
+
 
     public void StartReading(String filename, int dim){
         openFile(filename);
