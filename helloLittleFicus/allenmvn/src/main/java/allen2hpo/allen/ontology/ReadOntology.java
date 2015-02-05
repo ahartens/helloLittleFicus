@@ -12,18 +12,19 @@ import allen2hpo.allen.*;
 *	remember to set the size of the matrix rows : must know size of data file before (marked by ***)
 *	Probe ID number is stored in ids array
 */
-public class ReadOntology extends ReadAnnots{
+public class ReadOntology{
+    private Scanner scanner = null;
+
     Structure[] structures = null;
     Structure[] currentParents = null;
     int previousPathLength = 0;
     int count = 0;
-    int maxQuotes = 0;
     ///max number of items in ontology is 8
     public ReadOntology(String dir, int dim){
         String file = dir+"/Ontology.csv";
-        this.structures = new Structure[1840];
+        this.structures = new Structure[dim];
         this.currentParents = new Structure[40];
-        super.StartReading(file,dim);
+        StartReading(file,dim);
 
 
 
@@ -32,11 +33,57 @@ public class ReadOntology extends ReadAnnots{
         }*/
 
         System.out.println("This is number 100 and its children : ");
-        this.structures[100].printLeveled();
+    }
+
+    public Structure[] getData(){
+        return this.structures;
     }
 
 
-    @Override public void handleRow(String line, int ri){
+    public void StartReading(String filename, int dim){
+        System.out.println("started reading");
+        openFile(filename);
+        readFile();
+        scanner.close();
+    }
+
+    ///PRIVATE METHODS
+
+    /**
+    *	private method. opens file with scanner or fails.
+    */
+    private void openFile(String filename){
+        try{
+            scanner = new Scanner(new File(filename));
+            System.out.println("file Opened");
+        }
+        catch (Exception e){
+            System.out.println("File could not be opened");
+        }
+    }
+
+
+
+    /**
+    *	Reads file in line by line, passing handling of the line the private method handleRow.
+    */
+    private void readFile(){
+        ///FIRST LINE IS A HEADER : REMOVE IT
+        scanner.nextLine();
+        ///EACH FOLLOWING ROW IS READ
+        this.count = 0;
+        while (scanner.hasNext()) {
+            handleRow(scanner.nextLine(),this.count);
+            this.count++;
+        }
+    }
+
+    public void handleRow(String line, int ri){
+
+        this.structures[this.count] = new Structure(this.count);
+
+        ///Input is a csv and some cells may contain further commas. These cells have quotes
+        ///Thus first split line into components separated by commas. Handle results separately
         Scanner quoteSc = new Scanner(line);
         quoteSc.useDelimiter("\"");
         String[] lineSplitByQuotes = new String[3];
@@ -46,7 +93,6 @@ public class ReadOntology extends ReadAnnots{
             quoteCount ++;
         }
 
-        this.structures[this.count] = new Structure(this.count);
 
         ///There are no commas within the name. Read each cell sequentially
         if (quoteCount == 1){
@@ -112,12 +158,6 @@ public class ReadOntology extends ReadAnnots{
             }
 
         }
-
-
-
-
-
-        this.count ++;
      }
 
      /**
@@ -127,22 +167,15 @@ public class ReadOntology extends ReadAnnots{
          ///Path length of this s is shorter than the previous path length
          ///This means that this cluster is a new parent structure/ is a node higher than preceding structure
          if (pathLength < this.previousPathLength){
-             System.out.println("less than");
          }
          else if (pathLength > this.previousPathLength){
-             System.out.println("greater than");
-
              this.currentParents[pathLength] = s;
          }
-         else{
-             System.out.println("equal to ");
 
-         }
          ///Structure is a child of preceding node
          ///Add structure
          for(int i=1; i<pathLength; i++){
              if(this.previousPathLength>=1){
-
              }
              this.currentParents[i].addChild(s);
          }
@@ -197,92 +230,4 @@ public class ReadOntology extends ReadAnnots{
 
          return p;
      }
-
-
-
-
-     class Structure{
-
-         int id = 0;
-         int parentid = 0;
-         String name;
-         String acronym;
-         int[] path = null;
-         int index = 0;
-
-         int level = 0;
-         Structure[] children = null;
-         int childCount = 0;
-
-         public Structure(int i){
-             this.children = new Structure[2000];
-             this.index = i;
-         }
-
-         public void setAcronym(String s){
-             this.acronym = s;
-         }
-
-         public void setName(String s){
-             this.name = s;
-         }
-
-         public void setIndex(int i){
-             this.index = i;
-         }
-
-         public void setID(int i){
-             this.id = i;
-         }
-
-         public void setParentID(int i){
-             this.parentid = i;
-         }
-
-         public void setPath(int[] p){
-             this.path = p;
-         }
-
-         public void setLevel(int l){
-             this.level = l;
-         }
-
-         public void addChild(Structure child){
-             this.children[childCount] = child;
-             childCount++;
-         }
-
-
-
-         public int getPathLength(){
-             return this.path.length;
-         }
-
-         public int getChildCount(){
-             return childCount;
-         }
-
-         public String getName(){
-             return this.name;
-         }
-
-         public void printLeveled(){
-             for (int j=0; j<this.level; j++){
-                 System.out.printf(":    ");
-             }
-             System.out.printf("%s\n%d children\n",getName(),this.childCount);
-
-             for (int i = 0; i<this.childCount; i++){
-                 for (int j=0; j<this.children[i].level; j++){
-                     System.out.printf(":    ");
-                 }
-                 System.out.printf("%s\n",this.children[i].getName());
-             }
-             System.out.printf("\n");
-
-         }
-
-
-     }
-
 }

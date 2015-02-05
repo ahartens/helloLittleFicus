@@ -1,5 +1,7 @@
 package allen2hpo;
 
+import java.util.Scanner;
+
 
 /** Command line parser from apache */
 import org.apache.commons.cli.CommandLine;
@@ -30,7 +32,7 @@ public class Allen2HPO {
     /**
     *   Performs kmeans on MicroarrayExpression.csv contained in directory passed in -D option of command line. Outputs clusters into a file
     */
-    public Allen2HPO(String argv[]) {
+    public Allen2HPO(String[] argv) {
 
     	parseCommandLine(argv);
 
@@ -39,11 +41,22 @@ public class Allen2HPO {
 
         ///Read all data
         AllenData mngr = new AllenData(this.dataPath,numberOfProbes);
-        
 
+        interactive(argv,mngr);
         //Cluster clust = new Cluster(mngr);
 
 
+    }
+
+    private void interactive(String argv[], AllenData mngr){
+
+       Scanner in = new Scanner(System.in);
+       int val = 0;
+       while(val != -1){
+           val = in.nextInt();
+           System.out.println("YOU PRINTED : "+val);
+           mngr.printStructureAtIndex(val);
+       }
     }
 
     /**

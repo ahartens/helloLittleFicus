@@ -22,6 +22,7 @@ public class AllenData{
 	/**Not being used at present*/
 	private String[] tissueNames = null;
 
+	private OntologyData ontology = null;
 	/**
 	*	Matrix object containing all expression data. each row is a gene, each column a tissue sample;
 	*	Number of rows (genes) must be specified! is 'dim' in constructor method of allen data
@@ -36,12 +37,12 @@ public class AllenData{
 
 		//ReadProbeAnnots probes = new ReadProbeAnnots(dir,dim);
 		//ReadTissueAnnots tissues = new ReadTissueAnnots(dir,1840);
-		ReadOntology ontology = new ReadOntology(dir,dim);
+		this.ontology = new OntologyData(dir,dim);
 		//ReadExpression expression = new ReadExpression(dir,probes.getCount(),tissues.getCount());
 
 
 
-			//this.geneNames = probes.getData();
+		//this.geneNames = probes.getData();
 		//this.data = expression.getData();
 
 		//this.data.meanNormalizeAcrossGenesAndSamples();
@@ -73,6 +74,10 @@ public class AllenData{
 
 	public String[] getAllGenes(){
 		return this.geneNames;
+	}
+
+	public void printStructureAtIndex(int i){
+		this.ontology.printStructureAtIndex(i);
 	}
 
 
