@@ -10,28 +10,35 @@ import allen2hpo.matrix.Matrix;
 
 /**
 *	Reads /MicroarrayExpression.csv file line by line, storing doubles in a data array
-*	remember to set the size of the matrix rows : must know size of data file before (marked by ***)
+*	remember to set the size of the matrix rows : must know size of data file before
 *	Probe ID number is stored in ids array
+*	@author Alex Hartenstein
 */
-public class ReadExpression{
-	
-	private Scanner scanner = null;
-	private Matrix matrix = null;
-	private int []ids = null;
 
+public class ReadExpression{
+
+	/** Scanner object reads line by line through file */
+	private Scanner scanner = null;
+
+	/** Matrix object is wrapper around 2d array where data is stored */
+	private Matrix matrix = null;
+
+	/** Stores probe id, which can be used to find corresponding gene */
+	private int []ids = null;
 
 
 	/**
 	*	Opens file and reads data into Matrix object, gene ids into separate 1d array
-	*/	
-	public ReadExpression(String filename, int r, int c){
-		String file = filename+"/MicroarrayExpression.csv";
+	*	@param String corresponding to exact file from expression should be read
+	*	@param int number of rows in the file
+	*	@param int number of columns in file (excluding first column)
+	*	@param boolean yes = clip first column and store as id, no = don't clip
+	*/
+	public ReadExpression(String file, int r, int c, boolean clip){
 		openFile(file);
-		readFile(r,c);
+		readFile(r,c,clip);
 		scanner.close();
 	}
-
-
 
 	/**
 	*	@return Returns matrix object filled with data
@@ -52,7 +59,7 @@ public class ReadExpression{
 		try{
 			scanner = new Scanner(new File(filename));
 			System.out.println("file Opened");
-		}	
+		}
 		catch (Exception e){
 			System.out.println("File could not be opened");
 		}
@@ -61,21 +68,22 @@ public class ReadExpression{
 
 
 	/**
-	*	Reads file in line by line, passing handling of the line the private method handleRow. 
+	*	Reads file in line by line, passing handling of the line the private method handleRow.
 	*	Stores data in a matrix object
 	*/
-	private void readFile(int r, int c){
+	private void readFile(int r, int c, boolean clip){
 		double [][] array = new double[r][c];
 		this.matrix = new Matrix(array);
 		this.ids = new int[r];
+
 		/*///FIRST LINE IS READ TO DETERMINE NUMBER OF COLUMNS
 		handleFirstRow(scanner.nextLine(),matrix, dim);
-		
+
 		///EACH FOLLOWING ROW IS READ
 		int ri = 1;*/
-		int ri = 0; 
+		int ri = 0;
 	    while (scanner.hasNext()) {
-	    	handleRow(scanner.nextLine(),this.matrix,ri);
+	    	handleRow(scanner.nextLine(), this.matrix, ri, clip);
 	    	ri++;
 	    }
 	}
@@ -85,13 +93,15 @@ public class ReadExpression{
 	/**
 	*	Stores data in a line to a matrix object andthe gene id to the ids array
 	*/
-	private void handleRow(String line, Matrix matrix, int ri){
+	private void handleRow(String line, Matrix matrix, int ri, boolean clip){
 		///INIT SCANNER TO READ LINE
 		Scanner lineSc = new Scanner(line);
         lineSc.useDelimiter(",");
-		
+
 		///ADD GENE NAME TO ARRAY OF GENE NAMES
-        this.ids[ri] = lineSc.nextInt();
+		if (clip){
+			this.ids[ri] = lineSc.nextInt();
+		}
         ///SAVE ALL VALUES IN MATRIX
 		int i = 0;
 	    while (lineSc.hasNext()) {
@@ -106,18 +116,18 @@ public class ReadExpression{
     *	Determines number of columns of array and sets data matrix to that value. Stores first line of data into matrix;
     */
 	private void handleFirstRow(String line, Matrix matrix, int dim){
-		
+
 		///PURPOSE : DETERMINE NUMBER OF COLUMNS (SO THAT MATRIX DIMENSIONS FIT FILE)
 		///INIT LINE SCANNER
 		Scanner lineSc = new Scanner(line);
 		lineSc.useDelimiter(",");
 
 
-		///SAVE FIRST LINE IN TEMPORARY ARRAYS 
+		///SAVE FIRST LINE IN TEMPORARY ARRAYS
 		int maxColumns = 10000;
 		int geneID = lineSc.nextInt();
 		double temporaryData[] = new double[maxColumns];
-		
+
 		///ITERATE THROUGH COLUMNS, COUNTING NUMBER AND SAVING TEMPORARYILY
 		int i = 0;
 		while(lineSc.hasNext()){

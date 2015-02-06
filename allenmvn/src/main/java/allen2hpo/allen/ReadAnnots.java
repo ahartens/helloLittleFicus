@@ -24,8 +24,24 @@ abstract class ReadAnnots{
 	public void StartReading(String filename, int dim){
 		this.ids = new int[dim];
 		this.names = new String[dim];
+		System.out.println("started reading");
 		openFile(filename);
 		readFile();
+
+		if (this.count != dim){
+
+			int[] tempIds = new int[this.count];
+			String [] tempNames = new String[this.count];
+
+			for (int i=0; i<this.count; i++){
+				tempIds[i] = this.ids[i];
+				tempNames[i] = this.names[i];
+
+			}
+			this.ids = tempIds;
+			this.names = tempNames;
+
+		}
 		scanner.close();
 	}
 
@@ -35,6 +51,12 @@ abstract class ReadAnnots{
 	*/
 	public String[] getData(){
 		return this.names;
+	}
+	public String[] getNames(){
+		return this.names;
+	}
+	public int[] getIds(){
+		return this.ids;
 	}
 
 	public int getCount(){
@@ -77,6 +99,7 @@ abstract class ReadAnnots{
 
 
 	public void setNameAtIndex(String name, int i){
+		System.out.println(name);
 		this.names[i] = name;
 	}
 

@@ -102,19 +102,24 @@ public class Kmeans{
     *	Goes through each data point, assigning data points to nearest cluster. Then recalculates cluster means
     *	@param takes an int for number of iterations to be run
     */
-    public void beginClustering(int x){
+    public void beginClustering(){
         if (this.m == null)
         throw new IllegalArgumentException("Data not initialized");
         if (this.k == 0)
         throw new IllegalArgumentException("k not initialized");
 
-
+        ///Ensure that all components of kmeans algorithm have been set
         preclusterCheck();
-        ///ITERATE CLUSTER ASSIGNMENT AND CLUSTER MEAN RECALCULATION STEPS
-        for (int i = 0; i<x; i++) {
-            int repeat;
-            repeat = assignPointsToCluster();
+
+        int maxRep = 100;
+        int finishClustering = 0;
+        int i = 0;
+
+        ///Iterate cluster assignments until less than 1% of points move during cluster assignment, or maximum repetition number is reached
+        while(finishClustering ==0 && i< maxRep){
+            finishClustering = assignPointsToCluster();
             calcClusterMean();
+            i++;
         }
     }
 
@@ -125,12 +130,12 @@ public class Kmeans{
         if (this.cp == null){
             setInitClustersBasic();
         }
-
-        //is this actually covered by the things?
     }
 
 
+
     ///BASIC IMPLEMENTATIONS OF KMEANS AVAILABLE. CALL THROUGH INTERFACE METHODS
+
     /**
     *	Most basic implimentation of Kmeans cluster initialzation, just takes first 3 values of matrix.
     */
@@ -242,133 +247,145 @@ public class Kmeans{
     *	STEP 1 of kmeans iterative process. Goes through each data point and assigns it to the nearest cluster.
     */
     private int assignPointsToCluster(){
-        int repeat = 0;
+        int empty = 0;
         ///INIT ARRAY WHERE ALL CALCULATED DISTANCES WILL BE STORED (REUSED FOR EACH DATA POINT)
         double[] allDists = new double[this.k];
         this.cs = new int[this.k];
         this.sses = new double[this.k];
         double dist;
 
-
+        int countUnmoved = 0;
         /*///CLEAR CLUSTER SIZE AND SSE ARRAY AS CLUSTERS ARE REASSIGNED
         for (int i =0;i<this.cs.length;i++){
         this.cs[i] = 0;
         this.sses[i] = 0;
-    }*/
+        }*/
 
-    ///GO THROUGH EACH DATA POINT, ASSIGNING THEM TO CLUSTERS
-    for (int i=0; i<this.m.getRowSize(); i++) {
+        ///GO THROUGH EACH DATA POINT, ASSIGNING THEM TO CLUSTERS
+        for (int i=0; i<this.m.getRowSize(); i++) {
 
-        ///FOR EACH DATA POINT CALCULATE THE DISTANCE FROM ALL CLUSTER CENTERS(SEED POINTS)
-        for (int j=0; j<this.k; j++) {
-            ///CALCULATE DISTANCE OF EACH DIMENSION FROM SELECTED MEAN
-            dist = 0;
+            ///FOR EACH DATA POINT CALCULATE THE DISTANCE FROM ALL CLUSTER CENTERS(SEED POINTS)
+            for (int j=0; j<this.k; j++) {
+                ///CALCULATE DISTANCE OF EACH DIMENSION FROM SELECTED MEAN
+                dist = 0;
 
-            double[] p1 = m.getRowAtIndex(i);///DATA POINT TO BE CLUSTERED
-            double[] p2 = this.cp[j];///CLUSTER PROTOTYPE
+                double[] p1 = m.getRowAtIndex(i);///DATA POINT TO BE CLUSTERED
+                double[] p2 = this.cp[j];///CLUSTER PROTOTYPE
 
-            allDists[j] = this.distCalc.calculateProximity(p1,p2);///CALCULATE 'DISTANCE' FROM CLUSTER PROTOTYPE
-        }
-
-
-        ///FIND OUT WHICH MEAN IS THE CLOSEST
-        ///INIT minDist AS THE FIRST VALUE
-        double minDist = allDists[0];
-        int indexOfMinDist = 0;
-
-
-        ///ENUMERATE THROUGH REMAINING DISTANCES FIND THE MINIMUM
-
-        for (int j = 1; j<this.k; j++) {
-            if (allDists[j] < minDist) {
-                minDist = allDists[j];
-                indexOfMinDist = j;
+                allDists[j] = this.distCalc.calculateProximity(p1,p2);///CALCULATE 'DISTANCE' FROM CLUSTER PROTOTYPE
             }
-        }
-
-        ///SAVE INDEX OF JUST ASSIGNED CLUSTER TO DATA POINT
-        this.ci[i] = indexOfMinDist;
-
-        ///INCREMENT SIZE OF CLUSTER
-        this.cs[indexOfMinDist]+=1;
-
-        ///ADD SQUARED ERROR (THE DISTANCE SQUARED) TO SUM OF SQUARED ERROR
-        this.sses[indexOfMinDist] += Math.pow(minDist,2);
-    }
 
 
-    ///CHECK IF ANY OF THE CLUSTERS ARE EMPTY
-    for (int i=0; i<this.cs.length; i++){
-        ///IF A CLUSTER IS EMPTY, REINITIALIZE CLUSTER PROTOTYPE WITH A POINT BELONGING TO CLUSTER WITH HIGHEST SSE (BIGGEST SCATTER)
-        if (this.cs[i] == 0 ){
-            ///FIRST FIND CLUSTER WITH MAX SSE
-            double maxSSE = this.sses[0];
-            int idxMaxSSE = 0;
-            for (int j=1; j<this.sses.length; j++){
-                if (this.sses[j] > maxSSE){
-                    maxSSE = this.sses[j];
-                    idxMaxSSE = j;
+            ///FIND OUT WHICH MEAN IS THE CLOSEST
+            ///INIT minDist AS THE FIRST VALUE
+            double minDist = allDists[0];
+            int indexOfMinDist = 0;
+
+
+            ///ENUMERATE THROUGH REMAINING DISTANCES FIND THE MINIMUM
+
+            for (int j = 1; j<this.k; j++) {
+                if (allDists[j] < minDist) {
+                    minDist = allDists[j];
+                    indexOfMinDist = j;
                 }
             }
 
-            ///PICK A RANDOM DATA POINT FROM CLUSTER WITH LARGEST SSE
-            Random rand = new Random();
-            int idxRand = (int)(this.cs[idxMaxSSE] * rand.nextDouble());
-
-            ///ASSIGN CLUSTER PROTOTYPE TO THAT POINT
-            for (int j=0; j<this.cp[0].length; j++){
-                this.cp[i][j] = this.cp[idxMaxSSE][j];
+            ///SAVE INDEX OF JUST ASSIGNED CLUSTER TO DATA POINT
+            if(this.ci[i] == indexOfMinDist){
+                countUnmoved ++;
             }
-            repeat = 1;
+            else{
+                this.ci[i] = indexOfMinDist;
+            }
+
+            ///INCREMENT SIZE OF CLUSTER
+            this.cs[indexOfMinDist]+=1;
+
+            ///ADD SQUARED ERROR (THE DISTANCE SQUARED) TO SUM OF SQUARED ERROR
+            this.sses[indexOfMinDist] += Math.pow(minDist,2);
+        }
+
+
+        ///CHECK IF ANY OF THE CLUSTERS ARE EMPTY
+        for (int i=0; i<this.cs.length; i++){
+            ///IF A CLUSTER IS EMPTY, REINITIALIZE CLUSTER PROTOTYPE WITH A POINT BELONGING TO CLUSTER WITH HIGHEST SSE (BIGGEST SCATTER)
+            if (this.cs[i] == 0 ){
+                ///FIRST FIND CLUSTER WITH MAX SSE
+                double maxSSE = this.sses[0];
+                int idxMaxSSE = 0;
+                for (int j=1; j<this.sses.length; j++){
+                    if (this.sses[j] > maxSSE){
+                        maxSSE = this.sses[j];
+                        idxMaxSSE = j;
+                    }
+                }
+
+                ///PICK A RANDOM DATA POINT FROM CLUSTER WITH LARGEST SSE
+                Random rand = new Random();
+                int idxRand = (int)(this.cs[idxMaxSSE] * rand.nextDouble());
+
+                ///ASSIGN CLUSTER PROTOTYPE TO THAT POINT
+                for (int j=0; j<this.cp[0].length; j++){
+                    this.cp[i][j] = this.cp[idxMaxSSE][j];
+                }
+                empty = 1;
+            }
+        }
+
+
+        if (countUnmoved > .99*this.ci.length && empty == 0){
+            System.out.println("MORE THAN 95%");
+            return 1;
+
+        }
+        return 0;
+
+    }
+
+
+
+    /**
+    *	STEP 2 of kmeans iterative process. Calculates new mean of cluster after a reassignment and saves result in this.cp array (means are new cluster prototypes).
+    */
+    private void calcClusterMean(){
+        ///INIT ARRAYS WHERE DATA IS STORED
+        double[][] clusterSums = new double[this.k][this.m.getColumnSize()];
+
+
+        ///ENUMERATE THROUGHD DATA POINTS
+        ///SUM UP ALL DATA AND COUNT VALUES
+        for (int i = 0; i<this.m.getRowSize(); i++) {
+            for (int j = 0;j<this.m.getColumnSize();j++){
+                clusterSums[this.ci[i]][j] += this.m.getValueAtIndex(i,j);
+            }
+        }
+
+        ///CALCULATE AVERAGE OF EVERY DIMENSION
+        for (int i=0; i<this.k; i++) {
+            for (int j=0; j<this.m.getColumnSize(); j++) {
+
+                this.cp[i][j] = clusterSums[i][j]/this.cs[i];
+            }
         }
     }
 
-    return repeat;
-}
 
 
-
-/**
-*	STEP 2 of kmeans iterative process. Calculates new mean of cluster after a reassignment and saves result in this.cp array (means are new cluster prototypes).
-*/
-private void calcClusterMean(){
-    ///INIT ARRAYS WHERE DATA IS STORED
-    double[][] clusterSums = new double[this.k][this.m.getColumnSize()];
-
-
-    ///ENUMERATE THROUGHD DATA POINTS
-    ///SUM UP ALL DATA AND COUNT VALUES
-    for (int i = 0; i<this.m.getRowSize(); i++) {
-        for (int j = 0;j<this.m.getColumnSize();j++){
-            clusterSums[this.ci[i]][j] += this.m.getValueAtIndex(i,j);
+    private void print(){
+        for(int i = 0;i<this.cp.length;i++){
+            for(int j = 0;j<this.cp[0].length;j++){
+                System.out.printf("%.3f\t",this.cp[i][j]);
+            }
+            System.out.printf("\n");
         }
     }
 
-    ///CALCULATE AVERAGE OF EVERY DIMENSION
-    for (int i=0; i<this.k; i++) {
-        for (int j=0; j<this.m.getColumnSize(); j++) {
 
-            this.cp[i][j] = clusterSums[i][j]/this.cs[i];
-        }
+    /**
+    *
+    */
+    private void checkForEmptyCluster(){
+
     }
-}
-
-
-
-private void print(){
-    for(int i = 0;i<this.cp.length;i++){
-        for(int j = 0;j<this.cp[0].length;j++){
-            System.out.printf("%.3f\t",this.cp[i][j]);
-        }
-        System.out.printf("\n");
-    }
-}
-
-
-/**
-*
-*/
-private void checkForEmptyCluster(){
-
-}
 }

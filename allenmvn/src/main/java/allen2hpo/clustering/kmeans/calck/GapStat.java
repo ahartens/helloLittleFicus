@@ -52,8 +52,8 @@ public class GapStat implements GetKable{
 		int p = m.getColumnSize();
 
 
-		int k = 10;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
-		int b = 10;							///Number of uniform random distributions created for each k for which dispersion is calculated
+		int k = 20;							///NUMBER OF ITERATIONS, SO TESTING K 1 - 10
+		int b = 100;							///Number of uniform random distributions created for each k for which dispersion is calculated
 
 		double[] gap_k = stepOneTwo(k,b,m);
 		double[] s_k = stepThree(k,b);
@@ -186,7 +186,7 @@ public class GapStat implements GetKable{
 
 		this.kmeans.setK(k);
 		this.kmeans.setInitClustersBasic();
-		this.kmeans.beginClustering(5);
+		this.kmeans.beginClustering();
 
 		Matrix[] clusters = this.kmeans.getClusters();
 
@@ -212,7 +212,7 @@ public class GapStat implements GetKable{
 
 		kmo.setK(k);
 		kmo.setInitClustersBasic();
-		kmo.beginClustering(5);
+		kmo.beginClustering();
 
 		Matrix[] clusters = kmo.getClusters();
 

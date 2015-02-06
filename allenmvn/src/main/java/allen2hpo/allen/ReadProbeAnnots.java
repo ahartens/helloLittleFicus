@@ -5,7 +5,7 @@ import java.io.*;
 
 
 
-import allen2hpo.Allen.*;
+import allen2hpo.allen.*;
 /**
 *	Reads /Probes.csv file line by line, storing whatever info required in arrays
 *	remember to set the size of the matrix rows : must know size of data file before (marked by ***)
