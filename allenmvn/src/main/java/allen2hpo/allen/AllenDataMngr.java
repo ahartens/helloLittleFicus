@@ -23,8 +23,6 @@ public class AllenDataMngr{
 	/**	Matrix object containing all expression data. each row is a gene, each column a tissue sample */
 	private Matrix data = null;
 
-
-
 	/**
 	*	Constructor method parses data provided in allenbrain directory
 	*/
@@ -78,7 +76,7 @@ public class AllenDataMngr{
 		return this.geneNames;
 	}
 
-	/** @return int[] list of all sample/tissue ids. corresponds to columns of expression data matrix*/
+	/** @return int[] list of all sample/tissue ids. corresponds to columns of expression data matrix */
 	public int[] getTissueIds(){
 		return this.tissueIds;
 	}
