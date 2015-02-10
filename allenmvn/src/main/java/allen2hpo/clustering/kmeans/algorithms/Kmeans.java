@@ -5,168 +5,157 @@ import java.util.Random;
 
 
 /**
-*	KmeansObject can be used in any class which wishes to perform Kmeans clustering.
-*	To make a class that performs K means :
+*	Performs kmeans cluster analysis :
 *	1) Class must include a KmeansObject as a field
 *	2) Class must implement the Kmeansable interface
 *	3) In Kmeansable methods, calculate corresponding kmeans values (k value, seed clusters, distance equation)
 *	4) Set calculated value in KmeansObject
-*	5) Call beginClustering()
+*	@author Alex Hartenstein
 */
+
 public class Kmeans{
 
-
-
-    /**
-    *	The number of clusters
-    */
+    /** The number of clusters */
     private int k = 0;
 
-    /**
-    *	An m x n matrix of data to be clustered
-    */
+    /** An m x n matrix of data to be clustered */
     private Matrix m = null;
 
-    /**
-    *	cluster prototypes. The centroids of the clusters being calculated. A k x n two dimensional array
-    */
+    /** cluster prototypes. The centroids of the clusters being calculated. A k x n two dimensional array */
     private double[][] cp = null;
 
-    /**
-    *	cluster index. An m x 1 matrix. Stores the index of the cluster to which each data point in matrix belongs to
-    */
+    /**	cluster index. Stores the index of the cluster (0-(k-1)) to which each data point in matrix belongs to */
     private int[] ci = null;
 
-    /**
-    *	Stores size of clusters are they are created;
-    */
+    /** Stores size of clusters are they are created */
     private int[] cs = null;
 
-    /**
-    *	Contains sum of squared errors for each cluster. As assign data points add sum of squared error, after assignment divide by cluster size cs
-    */
+    /** Contains sum of squared errors for each cluster. As assign data points add sum of squared error, after assignment divide by cluster size cs */
     private double[] sses = null;
 
-    /**
-    *
-    */
+    /** Object implementing DistComputable interface which performs distance calculation. Default (Euclidean distance) is used if none provided in constructor method*/
     private DistComputable distCalc = null;
 
 
-
     ///CONSTRUCTOR METHODS
-    public Kmeans(Matrix mat, int kval, DistComputable d){
-        setData(mat,kval);
-        this.distCalc = d;
-    }
-
-
+    /**
+    *   Simplest constructor method. k,distance calculation,etc can be set using setter variables
+    *   @param Data matrix to be clustered
+    */
     public Kmeans(Matrix mat){
         setData(mat,1);
     }
 
     /**
     *	@param Takes a matrix object of the data that is to be clustered
+    *   @param int k is number of clusters data matrix should be partitioned into
     */
     public Kmeans(Matrix mat, int kval){
         setData(mat,kval);
     }
 
+    /**
+    *   @param matrix object is data to be clustered
+    *   @param int k is number of clusters data matrix should be partitioned into
+    *   @param distComputable implementing object to customize distance calculation
+    */
+    public Kmeans(Matrix mat, int kval, DistComputable d){
+        setData(mat,kval);
+        this.distCalc = d;
+    }
 
+    /**
+    *   Initializes data matrix, kval and cluster index array
+    *   Necessary because of various constructor methods
+    */
     private void setData(Matrix mat, int kval){
+
         ///SET MATRIX FIELD
         this.m = mat;
+
         ///Initialize cluster index array. While iterative clustering, the cluster to which a data point belongs to will be stored here.
         this.ci = new int[mat.getRowSize()];
 
         setK(kval);
     }
 
-    ///KMEANSABLE INTERFACE METHODS : HOW THESE VALUES ARE SET ALLOWS CUSTOMIZATION OF K MEANS ALGORITHM
-
+    /**
+    *   @param int k is number of clusters to data matrix should be partitioned into.
+    */
     public void setK(int kval){
         this.k = kval;
         this.cs = new int[kval];
 
     }
 
+    /**
+    *   @param double[][] init cluster prototypes with k rows and number of columns corresponding to datamatrix column size
+    */
     public void setInitClusters(double[][] clusterSeeds){
         this.cp = clusterSeeds;
     }
 
+    /**
+    *   @param distComputable object is able to calculate distance calculation between two points
+    */
     public void setDistCalc(DistComputable d){
         this.distCalc = d;
     }
 
     /**
-    *	Goes through each data point, assigning data points to nearest cluster. Then recalculates cluster means
-    *	@param takes an int for number of iterations to be run
+    *   Checks that all necessary components of kmeans algorithm are provided
+    *   If parts are not provided initializes missing components with default values
     */
-    public void beginClustering(){
-        if (this.m == null)
-        throw new IllegalArgumentException("Data not initialized");
-        if (this.k == 0)
-        throw new IllegalArgumentException("k not initialized");
-
-        ///Ensure that all components of kmeans algorithm have been set
-        preclusterCheck();
-
-        int maxRep = 100;
-        int finishClustering = 0;
-        int i = 0;
-
-        ///Iterate cluster assignments until less than 1% of points move during cluster assignment, or maximum repetition number is reached
-        while(finishClustering ==0 && i< maxRep){
-            finishClustering = assignPointsToCluster();
-            calcClusterMean();
-            i++;
-        }
-    }
-
     private void preclusterCheck(){
+        //Check that distance calcuation is specified. If not, use default of euclidean distance
         if (this.distCalc==null){
             setDistCalcBasic();
         }
+        //Check that cluster prototypes array exists. If not initialize using random initialization
         if (this.cp == null){
             setInitClustersBasic();
         }
     }
 
-
-
-    ///BASIC IMPLEMENTATIONS OF KMEANS AVAILABLE. CALL THROUGH INTERFACE METHODS
-
+    ///DEFAULT IMPLEMENTATION
     /**
-    *	Most basic implimentation of Kmeans cluster initialzation, just takes first 3 values of matrix.
+    *	Default implementation : Most basic implementation of Kmeans cluster initialzation, just takes first 3 values of matrix.
+    *   Called if no cluster prototypes are provided in constructor method (or set with setInitClusters)
     */
     public void setInitClustersBasic(){
-        ///INIT CLUSTER PROTOTYPES (AT THE MOMENT JUST TAKES FIRST 3 VALUES). CAN BE EXTENDED IN SUBLCASSES
         InitClustBasic init = new InitClustBasic();
         setInitClusters(init.initClusters(this.m,this.k));
     }
 
+    /**
+    *   Default implementation : most basic distance calculation (Euclidean distance) between two points.
+    *   Called if no custom distComputable object is provided in constructor method (or set with setDistCalc)
+    */
     public void setDistCalcBasic(){
         DistEuclidean dist = new DistEuclidean();
         setDistCalc(dist);
     }
 
-
-
-
     ///GETTER METHODS
 
-    /**
-    *	@return int k, number of clusters being formed
-    */
+    /** @return int k, number of clusters being formed */
     public int getK(){
         return this.k;
     }
 
-    /**
-    *	@return matrix object being clustered
-    */
+    /** @return matrix object being clustered */
     public Matrix getData(){
         return this.m;
+    }
+
+    /** @return double[][] with k rows and dimensionality of original data. The means of the clustered data */
+    public double[][] getClusterPrototypes(){
+        return this.cp;
+    }
+
+    /**	@return int [] containing the index of the cluster prototype (from 0-(k-1)) that each data point is assigned too (in order of original data matrix) */
+    public int[] getClusterAssignments(){
+        return this.ci;
     }
 
     /**
@@ -174,22 +163,23 @@ public class Kmeans{
     */
     public Matrix[] getClusters(){
 
-        ///INITIALIZE ARRAY OF MATRICES OF LENGTH K (ONE MATRIX PER CLUSTER)
+        //Initialize array of matrices of length k (one matrix per cluster)
         Matrix [] clusters = new Matrix[this.k];
 
-        ///INITALIZE MATRIX OBJECT FOR EACH CLUSTER AND PLACE IN ARRAY OF MATRICES
+        //Initialize matrix object for each cluster and place in array of matrices
+
         for (int i = 0;i<this.k;i++){
-            ///INITALIZE ARRAY OF PROPER SIZE FROM VALUE HELD IN THIS. CLUSTER SIZE
+            //Initialize array of proper size from value stored in this.clusterSize (cs)
             double[][] ca = new double[this.cs[i]][this.m.getColumnSize()];
             Matrix cm = new Matrix(ca);
             clusters[i] = cm;
         }
 
-        ///INITIALIZE ARRAY HOLDING COUNTER FOR EACH CLUSTER (INCREMENTED AS ADD ROW TO MATRIX)
+        //Initialize array holding counter for each cluster (incremented as add row to matrix)
         int [] inClustCount = new int[this.k];
 
 
-        ///FOR EACH VALUE IN ALL DATA MATRIX, CHECK WHAT CLUSTER IT BELONGS TO AND PLACE IN CORRESPONDING MATRIX
+        //For each value in data matrix, check what cluster it belongs to and place in corresponding matrix
         for (int i=0;i<this.m.getRowSize();i++){
             for(int j=0; j<this.m.getColumnSize(); j++){
                 clusters[this.ci[i]].setValueAtIndex(inClustCount[this.ci[i]],j,this.m.getValueAtIndex(i,j));
@@ -199,20 +189,6 @@ public class Kmeans{
 
         return clusters;
     }
-
-
-    public double[][] getClusterPrototypes(){
-        return this.cp;
-    }
-
-
-    /**
-    *	Returns array of ints containg the index of the cluster data point assigned too.
-    */
-    public int[] getClusterAssignments(){
-        return this.ci;
-    }
-
 
     /**
     *	Returns an array k long of arrays containing indices of data points
@@ -240,26 +216,57 @@ public class Kmeans{
     }
 
 
+    ///KMEANS CLUSTERING
+    /**
+    *	Goes through each data point, assigning data points to nearest cluster.
+    *   Then recalculates cluster means
+    *	@param takes an int for number of iterations to be run
+    */
+    public void beginClustering(){
+        if (this.m == null)
+        throw new IllegalArgumentException("Data not initialized");
+        if (this.k == 0)
+        throw new IllegalArgumentException("k not initialized");
 
-    ///PRIVATE METHODS
+        ///Ensure that all components of kmeans algorithm have been set
+        preclusterCheck();
+
+        int maxRep = 100;
+        int finishClustering = 0;
+        int i = 0;
+
+        //Iterate cluster assignments until less than 1% of points move during
+        //cluster assignment, or maximum repetition number is reached
+        while(finishClustering ==0 && i< maxRep){
+            finishClustering = assignPointsToCluster();
+            calcClusterMean();
+            i++;
+        }
+    }
 
     /**
-    *	STEP 1 of kmeans iterative process. Goes through each data point and assigns it to the nearest cluster.
+    *	STEP 1 of kmeans iterative process. Goes through each data point and
+    *   assigns it to the nearest cluster.
+    *   After all points are assigned, checks for empty clusters and if found,
+    *   reinitializes empty cluster prototype with with points from most dispersed
+    *   cluster.
+    *   If empty cluster found, returns 1 (empty = true) meaning that clustering
+    *   must continue (unless maxium iteration count has been reached)
     */
     private int assignPointsToCluster(){
-        int empty = 0;
-        ///INIT ARRAY WHERE ALL CALCULATED DISTANCES WILL BE STORED (REUSED FOR EACH DATA POINT)
+
+        //Init array where all the calculated distances will be stored
         double[] allDists = new double[this.k];
+
+        //Reinit arrays to store size of clusters (cs) sum of squared error(sse)
         this.cs = new int[this.k];
         this.sses = new double[this.k];
+
+        //Declare distance variable. Summation of distance between each dimension
         double dist;
 
+        //Init counter of points which do not change cluster assignment
         int countUnmoved = 0;
-        /*///CLEAR CLUSTER SIZE AND SSE ARRAY AS CLUSTERS ARE REASSIGNED
-        for (int i =0;i<this.cs.length;i++){
-        this.cs[i] = 0;
-        this.sses[i] = 0;
-        }*/
 
         ///GO THROUGH EACH DATA POINT, ASSIGNING THEM TO CLUSTERS
         for (int i=0; i<this.m.getRowSize(); i++) {
@@ -329,13 +336,12 @@ public class Kmeans{
                 for (int j=0; j<this.cp[0].length; j++){
                     this.cp[i][j] = this.cp[idxMaxSSE][j];
                 }
-                empty = 1;
+                return 0;
             }
         }
 
-
-        if (countUnmoved > .99*this.ci.length && empty == 0){
-            System.out.println("MORE THAN 95%");
+        ///Less than 1% of data points are reassigned to a new cluster
+        if (countUnmoved > .99*this.ci.length){
             return 1;
 
         }
@@ -343,10 +349,10 @@ public class Kmeans{
 
     }
 
-
-
     /**
-    *	STEP 2 of kmeans iterative process. Calculates new mean of cluster after a reassignment and saves result in this.cp array (means are new cluster prototypes).
+    *	STEP 2 of kmeans iterative process. Calculates new mean of cluster after
+    *   a reassignment and saves result in this.cp array (means are new cluster
+    *   prototypes).
     */
     private void calcClusterMean(){
         ///INIT ARRAYS WHERE DATA IS STORED
@@ -370,8 +376,6 @@ public class Kmeans{
         }
     }
 
-
-
     private void print(){
         for(int i = 0;i<this.cp.length;i++){
             for(int j = 0;j<this.cp[0].length;j++){
@@ -380,7 +384,6 @@ public class Kmeans{
             System.out.printf("\n");
         }
     }
-
 
     /**
     *

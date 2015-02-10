@@ -2,14 +2,14 @@ package allen2hpo.allen;
 
 import allen2hpo.matrix.*;
 
-
 /**
 *	This class is responsible for handling all data corresponding to one brain.
-*	It is able to parse all data corresponding to an allen brain directory (Expression, Gene/ Tissue Annotations)
+*	It is able to parse all data corresponding to an allen brain directory
+*	eg (Expression, Probe/Sample (ie gene/tissue) Annotations)
 *	@author Alex Hartenstein.
 */
 
-public class AllenData{
+public class AllenDataMngr{
 
 	/** Ordered list of all gene abbreviations derived from probes.csv file. Order == rows in microarrayexpression.csv */
 	private String[] geneNames = null;
@@ -20,54 +20,34 @@ public class AllenData{
 	/** Ordered array of all sample (ie tissue) names derived from SampleAnnot.csv. Order == columns in microarrayexpression.csv */
 	private String[] tissueNames = null;
 
-	/** OntologyData class responsible for all queries/handling of Ontology.csv */
-	private OntologyData ontology = null;
-
 	/**	Matrix object containing all expression data. each row is a gene, each column a tissue sample */
 	private Matrix data = null;
 
 
+
 	/**
-	*	Constructor method parses
+	*	Constructor method parses data provided in allenbrain directory
 	*/
-	public AllenData(String dir, int dim){
+	public AllenDataMngr(String dir, int dim){
 
 
-		///Parse gene + sample tissue names
-
+		//Parse gene + sample tissue names
 		readAnnotations(dir,dim);
 
-		///Parse ontology (all tissue names)
-		this.ontology = new OntologyData(dir,dim);
-
-		///Parse expression data
-		//ReadExpression expression = new ReadExpression(dir+"/MicroarrayExpression.csv",probes.getCount(),tissues.getCount(),true);
-
-
-
-
-		//this.data = expression.getData();
-		//this.data.meanNormalizeAcrossGenesAndSamples();
+		//Parse expression data
+		ReadExpression expression = new ReadExpression(dir+"/MicroarrayExpression.csv",this.geneNames.length,this.tissueIds.length,true);
+		this.data = expression.getData();
+		this.data.meanNormalizeAcrossGenesAndSamples();
 
 
 		//CovarMatrix cm = new CovarMatrix();
 		//cm.covarCalcMatrix(this.data,1);
 
+		//collapseExample(dir);
 
-		/*ReadExpression clusters = new ReadExpression("/Users/ahartens/Desktop/RCorrelation.csv",947,tissues.getCount(),false);
-		this.data = clusters.getData();
-		DataPrinterForGraphs printer = new DataPrinterForGraphs();
-		print2dMatrixAsJson(this.data);*/
-
-
-		ReadExpression clusters = new ReadExpression(dir + "/ClusterPrototypes.csv",10,this.tissueIds.length,true);
-		this.data = clusters.getData();
-		int[] brain = {4009,4268,4219,4084,4132, 4180};
-		collapseSamples(brain);
-
-		///frontal, insula, limbic lob, parietal,temporal, occipital
-		//int[] brain = {4007,4391,9001,4833,9512};
-		///Tel,di,mes,met,myl
+		//ReadExpression clusters = new ReadExpression(dir + "/row1.csv",1,this.tissueIds.length,false);
+	    //ReadExpression clusters = new ReadExpression(dir + "/ClusterPrototypes.csv",10,this.tissueIds.length,false);
+	    //this.data = clusters.getData();
 	}
 
 	/**
@@ -82,84 +62,25 @@ public class AllenData{
 		ReadTissueAnnots tissues = new ReadTissueAnnots(dir+"/SampleAnnot.csv",1840);
 
 		///Set variables
-		this.geneNames = probes.getData();
+		this.geneNames = probes.getNames();
 		this.tissueIds = tissues.getIds();
 		this.tissueNames = tissues.getNames();
 	}
 
-
-	/**
-	*	Compresses a wide data array by calculating mean expression of all children structures of given parent structures
-	*	@param an array of ontological parent structures
-	*/
-	public void collapseSamples(int[] samples){
-		double[][] collapsed = new double[this.data.getRowSize()][samples.length];
-		///Array of array. One array for each parent structure, containing indices of tissue samples that belong to it
-		int[][] allChildrenIndices = new int[samples.length][];
-		for(int i=0; i<samples.length; i++){
-			allChildrenIndices[i] = this.ontology.getIndicesOfChildrenOfStructureWithId(samples[i],this.tissueIds);
-		}
-
-		///Go through parent tissue and collapse corresponding data
-		for(int i=0; i<this.data.getRowSize(); i++){
-			for(int j=0; j<allChildrenIndices.length; j++){
-
-				double sum = 0;
-				for(int x=0; x<allChildrenIndices[j].length; x++){
-					sum += this.data.getValueAtIndex(i,allChildrenIndices[j][x]);
-
-				}
-				collapsed[i][j] = sum/allChildrenIndices[j].length;
-
-			}
-		}
-
-
-		Matrix clpsd = new Matrix(collapsed);
-		clpsd.printToFile("/Users/ahartens/Desktop/collapsed.csv");
-
-
-		/*for(int i=0; i<this.data.getRowSize(); i++){
-			System.out.printf("%f",collapsed[i][0]);
-
-			for(int j=1; j<samples.length; j++){
-				System.out.printf(",%f",collapsed[i][j]);
-			}
-			System.out.printf("\n");
-		}*/
-
-	}
-
-	private void collapseGeneData(){
-		String previousName = "";
-
-		for (int i=0; i<this.geneNames.length; i++){
-			if (this.geneNames[i].equals(previousName)){
-
-			}
-		}
-	}
-
-
-	/**
-	*	Prints an brain structure and all its children
-	*/
-	public void printStructureAtIndex(int i){
-		this.ontology.printStructureAtIndex(i);
-	}
-
-	/**
-	*	@return matrix object containing all expression data
-	*/
-	public Matrix getData(){
+	///GETTERS
+	/** @return matrix object containing all expression data */
+	public Matrix getExpression(){
 		return this.data;
 	}
 
-	/**
-	*	@return all gene names
-	*/
+	/** @return String[] all gene names(abbreviations) corresponds to columns of expression data matrix */
 	public String[] getAllGenes(){
 		return this.geneNames;
+	}
+
+	/** @return int[] list of all sample/tissue ids. corresponds to columns of expression data matrix*/
+	public int[] getTissueIds(){
+		return this.tissueIds;
 	}
 
 	/**

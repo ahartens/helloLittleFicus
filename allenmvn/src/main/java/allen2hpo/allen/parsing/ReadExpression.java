@@ -1,11 +1,9 @@
 package allen2hpo.allen;
 
-import java.util.*;
-import java.io.*;
-
 import allen2hpo.matrix.Matrix;
 
-
+import java.util.*;
+import java.io.*;
 
 
 /**
@@ -47,11 +45,7 @@ public class ReadExpression{
 		return this.matrix;
 	}
 
-
-
-
 	///PRIVATE METHODS
-
 	/**
 	*	private method. opens file with scanner or fails.
 	*/
@@ -65,44 +59,45 @@ public class ReadExpression{
 		}
 	}
 
-
-
 	/**
 	*	Reads file in line by line, passing handling of the line the private method handleRow.
 	*	Stores data in a matrix object
+	*	Stores ids (first column, if clip == yes)
 	*/
 	private void readFile(int r, int c, boolean clip){
+		///Initialize matrix and ids
 		double [][] array = new double[r][c];
 		this.matrix = new Matrix(array);
-		this.ids = new int[r];
-
-		/*///FIRST LINE IS READ TO DETERMINE NUMBER OF COLUMNS
-		handleFirstRow(scanner.nextLine(),matrix, dim);
-
-		///EACH FOLLOWING ROW IS READ
-		int ri = 1;*/
 		int ri = 0;
-	    while (scanner.hasNext()) {
-	    	handleRow(scanner.nextLine(), this.matrix, ri, clip);
-	    	ri++;
-	    }
+
+		///Two separate cases so that boolean clip checkonly only 1ce (rather than 63,000x)
+		if(clip == true){
+			this.ids = new int[r];
+		    while (scanner.hasNext()) {
+				handleRowStoreFirstColumn(scanner.nextLine(), this.matrix, ri);
+		    	ri++;
+		    }
+		}
+		else{
+			while (scanner.hasNext()) {
+				handleRowNoId(scanner.nextLine(), this.matrix, ri);
+				ri++;
+			}
+		}
 	}
 
-
-
 	/**
-	*	Stores data in a line to a matrix object andthe gene id to the ids array
+	*	Parses a line, storing first column as an id and all following in data matrix
 	*/
-	private void handleRow(String line, Matrix matrix, int ri, boolean clip){
-		///INIT SCANNER TO READ LINE
+	private void handleRowStoreFirstColumn(String line, Matrix matrix, int ri){
+		///Init scanner to read line
 		Scanner lineSc = new Scanner(line);
         lineSc.useDelimiter(",");
 
-		///ADD GENE NAME TO ARRAY OF GENE NAMES
-		if (clip){
-			this.ids[ri] = lineSc.nextInt();
-		}
-        ///SAVE ALL VALUES IN MATRIX
+		///Save Probe Id
+		this.ids[ri] = lineSc.nextInt();
+
+		//Save each cell to matrix
 		int i = 0;
 	    while (lineSc.hasNext()) {
 	    	matrix.setValueAtIndex(ri,i,lineSc.nextDouble());
@@ -110,10 +105,26 @@ public class ReadExpression{
         }
      }
 
+	/**
+	*	Parses a line, storing all values in a data matrix
+	*/
+	private void handleRowNoId(String line, Matrix matrix, int ri){
+		///Init scanner to read line
+		Scanner lineSc = new Scanner(line);
+		lineSc.useDelimiter(",");
 
+		//Save each cell to matrix
+		int i = 0;
+		while (lineSc.hasNext()) {
+			matrix.setValueAtIndex(ri,i,lineSc.nextDouble());
+			i++;
+		}
+	}
 
     /**
     *	Determines number of columns of array and sets data matrix to that value. Stores first line of data into matrix;
+	*	NOT USED ATM
+	*	Can be used if don't want to feed in number of columns/rows
     */
 	private void handleFirstRow(String line, Matrix matrix, int dim){
 

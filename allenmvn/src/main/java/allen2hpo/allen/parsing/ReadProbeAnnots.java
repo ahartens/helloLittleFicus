@@ -1,16 +1,17 @@
 package allen2hpo.allen;
 
+import allen2hpo.allen.*;
+
 import java.util.*;
 import java.io.*;
 
 
-
-import allen2hpo.allen.*;
 /**
 *	Reads /Probes.csv file line by line, storing whatever info required in arrays
 *	remember to set the size of the matrix rows : must know size of data file before (marked by ***)
 *	Probe ID number is stored in ids array
 */
+
 public class ReadProbeAnnots extends ReadAnnots{
 
 

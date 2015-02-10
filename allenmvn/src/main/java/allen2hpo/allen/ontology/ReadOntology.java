@@ -1,48 +1,62 @@
 package allen2hpo.allen;
 
+import allen2hpo.allen.*;
+
 import java.util.*;
 import java.io.*;
-
-
-import allen2hpo.allen.*;
 
 
 /**
 *	Reads /Probes.csv file line by line, storing whatever info required in arrays
 *	remember to set the size of the matrix rows : must know size of data file before (marked by ***)
 *	Probe ID number is stored in ids array
+*   max number of levels in ontology is 8
+*   @author Alex Hartenstein
 */
+
 public class ReadOntology{
+
+    /** scanner to read through line by line of ontology file */
     private Scanner scanner = null;
 
+    /** array of all structures, filled as line is read */
     Structure[] structures = null;
+
+    /** */
     Structure[] currentParents = null;
     int previousPathLength = 0;
     int count = 0;
-    ///max number of items in ontology is 8
-    public ReadOntology(String dir, int dim){
+
+    /**
+    *   Constructor method takes name of ontology file and
+    */
+    public ReadOntology(String dir){
         String file = dir+"/Ontology.csv";
-        this.structures = new Structure[dim];
+        this.structures = new Structure[5000];
         this.currentParents = new Structure[40];
-        StartReading(file,dim);
+        StartReading(file);
     }
 
+    ///GETTERS
+    /** get all structures */
     public Structure[] getData(){
         return this.structures;
     }
 
+    /** get number of structures */
     public int getDataLength(){
         return count;
     }
 
-
-    public void StartReading(String filename, int dim){
+    /**
+    *   Commences lifecycle of class :open,read,close
+    *   @param String path of ontology
+    */
+    public void StartReading(String filename){
         openFile(filename);
         readFile();
         scanner.close();
     }
-
-    ///PRIVATE METHODS
 
     /**
     *	private method. opens file with scanner or fails.
@@ -56,8 +70,6 @@ public class ReadOntology{
             System.out.println("File could not be opened");
         }
     }
-
-
 
     /**
     *	Reads file in line by line, passing handling of the line the private method handleRow.
@@ -73,7 +85,12 @@ public class ReadOntology{
         }
     }
 
-    public void handleRow(String line, int ri){
+    /**
+    *   Reads a row of data and stores data to a structure object
+    *   Due to strings in names of ontological structures, sometimes parsing using
+    *   "," as delimiter is not possible, thus must split on quotes
+    */
+    private void handleRow(String line, int ri){
 
         this.structures[this.count] = new Structure(this.count);
 
@@ -170,8 +187,6 @@ public class ReadOntology{
              }
          }
          this.previousPathLength = pathLength;
-
-
      }
 
      /**

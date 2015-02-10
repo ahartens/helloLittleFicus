@@ -1,7 +1,10 @@
 package allen2hpo;
 
-import java.util.Scanner;
+import allen2hpo.allen.*;
+import allen2hpo.clustering.*;
+import allen2hpo.matrix.*;
 
+import java.util.Scanner;
 
 /** Command line parser from apache */
 import org.apache.commons.cli.CommandLine;
@@ -11,11 +14,13 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
 
-import allen2hpo.allen.*;
-import allen2hpo.clustering.*;
-import allen2hpo.matrix.*;
 
-
+/**
+*   Parse expression data from multiple brains into data matrices
+*   Cluster data matrices
+*   S
+*   @author Alex Harenstein
+*/
 public class Allen2HPO {
 
     /** Required input parsed from command line. Directory that contains Probes.csv, MicroarrayExpression.csv, SampleAnnot.csv*/
@@ -39,16 +44,30 @@ public class Allen2HPO {
         ///Must be set in order to perfrom analysis. Should correspond to number of rows in microarray analysis file
         int numberOfProbes = 63000;
 
-        ///Read all data
-        AllenData mngr = new AllenData(this.dataPath,numberOfProbes);
+        //Open brain expression directory
+        AllenDataMngr brain1 = new AllenDataMngr(this.dataPath,numberOfProbes);
 
-    //    interactive(argv,mngr);
-        //Cluster clust = new Cluster(mngr);
+        //Open Ontology file
+        //OntologyDataMngr ontology = new OntologyDataMngr(this.dataPath);
+        //ontology.printAllStructuresHierarchy();
+        //ontology.printAllStructuresHierarchyClusterExpressionValues(brain1.getTissueIds(),brain1.getExpression());
 
+
+        //Print parent/children of ontology
+        //interactive(argv,ontology);
+
+        //Cluster data
+        Cluster clust = new Cluster(brain1);
+
+        //CollapseColumns collapse = new CollapseColumns(brain1.getExpression(), brain1.getTissueIds(),ontology);
 
     }
 
-    private void interactive(String argv[], AllenData mngr){
+
+    /**
+    *   Prints ontological structure and all its children at given int
+    */
+    private void interactive(String argv[], OntologyDataMngr mngr){
 
        Scanner in = new Scanner(System.in);
        int val = 0;
@@ -70,10 +89,10 @@ public class Allen2HPO {
         *   Constructor method performs cluster method and prints
         *   @param AllenData object (contains fully parsed brain microarray expression/annotations)
         */
-        public Cluster(AllenData mngr){
+        public Cluster(AllenDataMngr mngr){
             ///Initialize kmeans object and cluster data
-            GapStat gap = new GapStat(mngr.getData());
-            Kmeans kmeans = new Kmeans(mngr.getData(),gap.getK());
+            GapStat gap = new GapStat(mngr.getExpression());
+            Kmeans kmeans = new Kmeans(mngr.getExpression(),gap.getK());
 
             kmeans.beginClustering();
             ///Print clusters
@@ -84,7 +103,7 @@ public class Allen2HPO {
         /**
         *   Prints names of genes in a cluster into a csv file
         */
-        private void writeOutputToFile(AllenData mngr, Kmeans kmeans){
+        private void writeOutputToFile(AllenDataMngr mngr, Kmeans kmeans){
 
             ///Get gene names corresponding to indices in the clustering
             String[][] clusters = mngr.getGeneClusters(kmeans.getClusterIndices());

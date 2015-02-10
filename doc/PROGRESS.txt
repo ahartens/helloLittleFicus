@@ -1,24 +1,62 @@
-28. January 2015
-    To do:
-    When to stop clustering? when <1% clusters change cluster assignment
+30. January 2015
+	DONE TODAY :
+	uploaded everything to svn, as well as cleaned up svn directory
+	2) checked that my pearsons correlation coefficeint is correct with r : get same minimum value (0.7773679), first line looks the same! (is further checkign necessary?)
 
-    2) cluster initialization :
-    pick sample
+
+
+29. January 2015
+	
+	TO DO :
+	upload to svn
+	still figure out when to stop clustering
+	cluster initilization still weird
+	empty clustering sitll not happy =/
+
+	DONE TODAY :
+    Disaster struck when trying to move stuff between text editors as well as remove kmeans object
+    1) kmeansboject no longer exists, is replaced by kmeans (kmeans was transiently named kmeansprototype - led to problems 
+      as well - beware)
+    - kmeansable no longer exists, instead feed variable components (dist cal, get k, cluster init)
+      in constructor methods of kmeans
+    - remeber that when running allendata have to feed in maximum/ actually accurate size of MicroarrayExpression 
+      (so at end 63,000, currently only 100! led to major problems in printing out cluster)
+    - printed out cluster assignments from allen
+    2) handling of empty clusters! still not perfect... after each point assigned to cluster, checks to see if empty clusters exist
+    - if empty cluster exists, assigns new cluster prototype (cp) from cluster with largest sse (scatter)
+
+
+
+28. January 2015
+    
+    TO DO:
+    When to stop clustering? when <1% clusters change cluster assignment?
+
+    DONE TODAY : 
+    - cluster basic now picks random rows as initial cluster prototypes (dumb randomizaiton: previous took just first 3)
+    - started handling of empty clusters
+
+
+
 25. January 2015
 	making uniform random matrix generator object for gapstat
-	- in order to do so requires max/min of each tissue (column). therfore added calcSummary method to matrix. calculates max/min of each row and column, storing in private field of matrix class
+	- in order to do so requires max/min of each tissue (column). therfore added calcSummary method 
+	  to matrix. calculates max/min of each row and column, storing in private field of matrix class
 	- ALSO calculates mean of each row/min
 
-	to do : getAllMeans ( i think that was for biclustering?) calculates all means as well, is superfluous if have dataSummary method
+	to do : getAllMeans ( i think that was for biclustering?) calculates all means as well, is superfluous 
+	if have dataSummary method
 
 
-	- unsure as where/when to call 'dataSummary': only when wish to create uniform random distributions?. could theoretically also be calculated while reading in data.
+	- unsure as where/when to call 'dataSummary': only when wish to create uniform random distributions?.
+	  could theoretically also be calculated while reading in data.
 
 
-	THOUGHTS : 
-	1) Do 3 vesicles of brain development leave footprints ... Mean across across structure and compare means.. is that at all reasonable?
+	THOUGHTS :
+	1) Do 3 vesicles of brain development leave footprints ... Mean across across structure and compare 
+	 means.. is that at all reasonable?
 
-	2) Compare neighboring structure and distant structure.. should probably use r for that.  
+	2) Compare neighboring structure and distant structure.. should probably use r for that.
 
 
 24. January 2015
@@ -32,22 +70,23 @@
 	however.. what i thought was gap stat is not quite gap stat. going back to reading but am confused..
 
 21. January 2015
-	split 'clustering' package into multiple directories. kmeans now a subdirectory split into : 
-	1) algorithm : contains 
-		- kmeanobjects : algorithmic implmentation of kmeans 
-		- variations of kmeans : provide components to kmeanobjects   
+	split 'clustering' package into multiple directories. kmeans now a subdirectory split into :
+	1) algorithm : contains
+		- kmeanobjects : algorithmic implmentation of kmeans
+		- variations of kmeans : provide components to kmeanobjects
 	2) interface : contains all methods that must be implemented by a kmeans algorithm
-	3) components directory 
+	3) components directory
 		- initclusters
 		- calck
 		- distanceCalc
 
-	- created kmeansbasic test class. tests basic implementation of kmeans with sample file. compared to r file, works. how to test?
+	- created kmeansbasic test class. tests basic implementation of kmeans with sample file. compared 
+	  to r file, works. how to test?
 	- did euclidean distance test class
-	- 
+	-
 
 16. January 2015
-	Thinking about big picture. 
+	Thinking about big picture.
 	At end of whatever clustering is done, will get a cluster vector
 	from an mxn data matrix, receive an m cluster vector
 	each row of matrix has a corresponding value in vector which corresponds to index of cluster it is assigned to
@@ -63,7 +102,7 @@
 	1) I don't think my similarity matrix is a similarity matrix at all. it's a distance matrix..
 	want to either take :
 	- the inner product (dot product)
-	- Pearson Correlation Coefficient : dot product of standardized (ie. centered on their means + scaled by stdev) 
+	- Pearson Correlation Coefficient : dot product of standardized (ie. centered on their means + scaled by stdev)
 
 	2) about confusion of yesterday : in book says about kmeans clustering that a proximity matrix isn't needed... so i just feed it the raw (ie. normalized) data?
 
@@ -76,13 +115,13 @@
 		- added clustering directory parallel to matrix (as well as tests)
 		- added kmeans class. as it stands, kmeans can be relatively subclassed easily
 		- major question :
-				do i want each part of kmeans to be a different class? for example, should 
+				do i want each part of kmeans to be a different class? for example, should
 				1) calculating k (later gapstat)
 				2) cluster initialization
 				3) calculating distance from cluster center
 				4) recalculating mean
 				all be a separate classes, so that a very basic kmeans calls modular parts
-		as it is now, the entire kmeans class can be subclassed and the parts that one wishes to change can be simply overridden.. but doesn't seem too elegant. hm...  
+		as it is now, the entire kmeans class can be subclassed and the parts that one wishes to change can be simply overridden.. but doesn't seem too elegant. hm...
 
 13. January 2015
 
@@ -96,7 +135,7 @@
 		- calls 'super.setMatrix' in constructor method
 
 		Now :
-		- mean normalization? 
+		- mean normalization?
 
 		Still to do:
 		- hard coded test of dotproduct
@@ -116,20 +155,20 @@
 
 
 		OR : have Matrix interface , then Matrixcalculations class that implements them
-		- further matrix objects such as 'Datatable' and 'Similaritymatrix' have an object Matrixcalculations that can implement methods.. 
+		- further matrix objects such as 'Datatable' and 'Similaritymatrix' have an object Matrixcalculations that can implement methods..
 
 
 		--> downloaded human brain ontology used by allen brain project.
 		1) should keep data in a dictionary, with 'id' as key and 'structure object' as value? each structure object has a 'parent_id' field and an array of children?
-		or 2) have each structure have an array of parents and 
+		or 2) have each structure have an array of parents and
 
 
 9. January 2015
 		1) Added matrix matrix multiplication and some unit testing : same as transposition, how thoroughly shoudl results be tested? with matrix of known answer? pos/neg/zero values?
 		2) Added matrix scalar multiplication and some unit testing :
-		Questions : 
-		- how thoroughly is unit testing reasonable? With pre-defined answers, or perform parallel operation and check results? 
-		- should i check for null argument at every step ? 
+		Questions :
+		- how thoroughly is unit testing reasonable? With pre-defined answers, or perform parallel operation and check results?
+		- should i check for null argument at every step ?
 
 
 
@@ -144,11 +183,11 @@
 7. January 2015
 		1) Download Allen Brain Atlas
 		http://human.brain-map.org/static/download
-		 
+
 		.Complete normalized microarray datasets
 
 		Complete microarray datasets for the full complement of six brains are available for download. The datasets contain gene expression values normalized across all brains using an improved normalization process implemented in March 2013.
 
 		Downloadable files containing all normalized microarray expression values as well as probe and sample metadata necessary for analysis: H0351.2001, H0351.2002, H0351.1009, H0351.1012, H0351.1015, H0351.1016.
 
-		An XML or CSV link to meta-information and URL to download each of the raw microarray files. 
+		An XML or CSV link to meta-information and URL to download each of the raw microarray files.

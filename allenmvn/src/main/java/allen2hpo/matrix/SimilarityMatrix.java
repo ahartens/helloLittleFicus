@@ -1,26 +1,26 @@
 package allen2hpo.matrix;
 
+
 public class SimilarityMatrix extends Matrix{
-	
+
 	/**
 	*	Sum of pairwise distances
 	*/
 	private int spw = 0;
 
 	/**
-	*	@param Takes an mxn matrix and creates an mxm similarity matrix, comparing 
+	*	@param Takes an mxn matrix and creates an mxm similarity matrix, comparing
 	*/
 	public SimilarityMatrix(Matrix m){
 		computeSimilarityMatrix(m);
 	}
 
 	public SimilarityMatrix(double[][] a){
-		
+
 		///INITIALIZE SIMILARITY MATRIX WITH SIZE CORRESPONDING TO DATA MATRIX
 		Matrix m = new Matrix(a);
 		computeSimilarityMatrix(m);
 	}
-
 
 	/**
 	*	Called by Constructor methods to make a similarity matrix
@@ -30,8 +30,6 @@ public class SimilarityMatrix extends Matrix{
 
 		super.setMatrix(new double[m.getRowSize()][m.getRowSize()]);
 		computeSimilarity(m);
-		//print();
-
 	}
 
 	private void computeSimilarity(Matrix m){

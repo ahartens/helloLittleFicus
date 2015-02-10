@@ -1,7 +1,5 @@
 package allen2hpo.matrix;
 
-
-
 /**
 *   Shell for 2d array
 *   @author Alex Hartenstein
@@ -27,7 +25,8 @@ public class Matrix{
     }
 
     /**
-    *@param requires initialized 2d data array of non zero column and row size
+    *   Constructor method takes 2d array
+    *   @param requires initialized 2d data array of non zero column and row size
     */
     public Matrix(double[][] data) {
 	   setMatrix(data);
@@ -43,7 +42,7 @@ public class Matrix{
         if (this.dat==null)
            throw new IllegalArgumentException("Data not initialized");
         if (this.dat.length == 0){
-           System.out.println("data matrix is empty");
+           //System.out.println("data matrix is empty");
             this.dat = new double[1][1];
         }
         if (this.dat[0].length == 0){
@@ -53,29 +52,34 @@ public class Matrix{
     }
 
     /**
-     *
-     */
+    *   initialize empty matrix with given dimensions
+    *   @param int number of rows
+    *   @param int number of columns
+    */
     public void setMatrixSize(int row, int col){
         this.dat = new double[row][col];
     }
 
     /**
-    *   Set value
+    *   Set value at index
+    *   @param int row index
+    *   @param int column index
+    *   @param double value to be set
     */
     public void setValueAtIndex(int r, int c, double val){
         this.dat[r][c] = val;
     }
 
     /**
-     *  @return int number of rows of the data matrix
-     */
+    *   @return int number of rows of the data matrix
+    */
     public int getRowSize() {
 	   return this.dat.length;
     }
 
     /**
-     *  @return int number of columns of the data matrix
-     */
+    *   @return int number of columns of the data matrix
+    */
     public int getColumnSize() {
        return this.dat[0].length;
     }
@@ -165,8 +169,6 @@ public class Matrix{
         return allMeanInfo;
     }
 
-
-
     /**
     *   Adds a 2d array to matrix.
     *   @param requires initialized 2d array with same dimensions as matrix object
@@ -185,8 +187,6 @@ public class Matrix{
             }
         }
     }
-
-
 
     /**
     *   Matrix matrix multiplication. Performs dotproduct of rows and columns
@@ -222,12 +222,9 @@ public class Matrix{
         this.dat = c;
     }
 
-
-
     /**
-    *   Matrix Scalar multiplication
-    *   @param double
-    *   @return scalar multiplication of matrix by given value
+    *   Matrix multiply by a scalar value
+    *   @param double, value with which matrix should be multiplied
     */
     public void multiply(double b){
         for(int i=0;i<getRowSize();i++){
@@ -236,8 +233,6 @@ public class Matrix{
             }
         }
     }
-
-
 
     /**
     *   Transpose matrix
@@ -249,13 +244,11 @@ public class Matrix{
                 t[j][i] = this.dat[i][j];
             }
         }
-
         this.dat = t;
     }
 
-
     /**
-    *   Finds max, mind and mean of every column and row
+    *   Finds max, min and mean of every column and row
     */
     public void calcSummary(){
 
@@ -366,7 +359,6 @@ public class Matrix{
     public double getColumnMean(int idx){
         return this.colMeans[idx];
     }
-
 
     public void meanNormalize(){
 

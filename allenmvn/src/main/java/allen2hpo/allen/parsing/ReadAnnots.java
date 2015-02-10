@@ -4,13 +4,16 @@ import java.util.*;
 import java.io.*;
 
 
-
-
 /**
-*	Reads /Probes.csv file line by line, storing whatever info required in arrays
-*	remember to set the size of the matrix rows : must know size of data file before (marked by ***)
-*	Probe ID number is stored in ids array
+*	Abstract class to read an annotation file (probe/sample).
+*	Skips first line (header) and continues to parse file line by line
+*	Subclasses can specify which cells should be stored in id/name array
+*	by overriding handleRow method (called for each line)
+*	@param string filename of file to be provided
+*	@param general number of rows that are expected (arrays later clipped to proper size)
+*	@author Alex Hartenstein
 */
+
 abstract class ReadAnnots{
 
 	private Scanner scanner = null;
@@ -21,53 +24,55 @@ abstract class ReadAnnots{
 	public abstract void handleRow(String line, int ri);
 
 
+	/**
+	*	Constructor method performs all necessary actions
+	*	handleRow() must be overridding
+	*	@param string filename of file to be provided
+	*	@param general number of rows that are expected (arrays later clipped to proper size)
+	*/
 	public void StartReading(String filename, int dim){
+		//Init arrays to store cell info with PREDEFINED dimension size
 		this.ids = new int[dim];
 		this.names = new String[dim];
-		System.out.println("started reading");
+
+		//Lifecycle
 		openFile(filename);
 		readFile();
+		scanner.close();
 
+		//Ensure that arrays are exactly the correct size of data they contain
 		if (this.count != dim){
 
 			int[] tempIds = new int[this.count];
 			String [] tempNames = new String[this.count];
-
 			for (int i=0; i<this.count; i++){
 				tempIds[i] = this.ids[i];
 				tempNames[i] = this.names[i];
-
 			}
 			this.ids = tempIds;
 			this.names = tempNames;
-
 		}
-		scanner.close();
 	}
 
 
-	/**
-	*	@return Returns matrix object filled with data
-	*/
-	public String[] getData(){
-		return this.names;
-	}
+	///GETTERS
+	/** @return String[] name or abbreviation */
 	public String[] getNames(){
 		return this.names;
 	}
+
+	/** @return int[] id number */
 	public int[] getIds(){
 		return this.ids;
 	}
 
+	/** @return int number of rows in parsed file */
 	public int getCount(){
 		return this.count;
 	}
 
 
-
-
 	///PRIVATE METHODS
-
 	/**
 	*	private method. opens file with scanner or fails.
 	*/
@@ -80,8 +85,6 @@ abstract class ReadAnnots{
 			System.out.println("File could not be opened");
 		}
 	}
-
-
 
 	/**
 	*	Reads file in line by line, passing handling of the line the private method handleRow.
@@ -99,13 +102,10 @@ abstract class ReadAnnots{
 
 
 	public void setNameAtIndex(String name, int i){
-		System.out.println(name);
 		this.names[i] = name;
 	}
 
 	public void setIdAtIndex(int id, int i){
 		this.ids[i] = id;
 	}
-
-
 }

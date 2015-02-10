@@ -28,6 +28,10 @@ public class FileWriter{
 		writer.printf("%.8f",d);
 	}
 
+	public void writeInt(int d){
+		writer.printf("%d",d);
+	}
+
 	public void writeDelimit(){
 		writer.printf(",");
 	}

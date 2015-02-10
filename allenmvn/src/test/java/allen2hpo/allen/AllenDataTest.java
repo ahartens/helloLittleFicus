@@ -14,7 +14,7 @@ public class AllenDataTest{
 
 	@Test
 	public void getGeneNamesTest(){
-	
+
 
 	}
 
