@@ -45,7 +45,7 @@ public class GapStat implements GetKable{
 	public GapStat(Matrix m){
 
 		int k = 20;							///Number of iterations, thus testing K values 1-20
-		int b = 100;						///Number of uniform random distributions created for each k for which dispersion is calculated
+		int b = 10;						///Number of uniform random distributions created for each k for which dispersion is calculated
 
 		double[] gap_k = stepOneTwo(k,b,m);
 		double[] s_k = stepThree(k,b);
@@ -151,7 +151,7 @@ public class GapStat implements GetKable{
 	*/
 	private double calcMeanDispersion(int k, Matrix m, int realOrRandom){
 
-		this.repeat = 10;
+		this.repeat = 1;
 		double sumW = 0;
 
 		for (int j=0; j<this.repeat ; j++){
@@ -184,14 +184,12 @@ public class GapStat implements GetKable{
 
 		double wk = 0;
 
-		for(int i=0;i<k;i++){
+		for(int i=0; i<k; i++){
 			SimilarityMatrix sim = new SimilarityMatrix(clusters[i]);
 			wk += (1.0/(clusters[i].getRowSize()))*sim.getSumOfPairwiseDistances();
 		}
 		return Math.log(wk);
 	}
-
-
 
 	/**
 	* 	@param takes random uniform matrix should be found and current iteration of k

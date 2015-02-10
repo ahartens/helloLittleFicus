@@ -31,7 +31,7 @@ public class ReadProbeAnnots extends ReadAnnots{
 		int i = 0;
 	    while (lineSc.hasNext()) {
 	    	///ADD PROBE ID TO ID LIST
-	    	if(i==0){
+	    	if(i==2){
 	    		super.setIdAtIndex(lineSc.nextInt(),ri);
 	    	}
 	    	///ADD GENE SYMBOL TO ARRAY

@@ -31,7 +31,6 @@ public class ReadTissueAnnots extends ReadAnnots{
 		while(quoteSc.hasNext()){
 			lineSplitByQuotes[quoteCount] = quoteSc.next();
 			quoteCount ++;
-			System.out.println(quoteCount);
 		}
 
 

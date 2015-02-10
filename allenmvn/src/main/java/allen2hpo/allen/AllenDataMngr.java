@@ -14,6 +14,9 @@ public class AllenDataMngr{
 	/** Ordered list of all gene abbreviations derived from probes.csv file. Order == rows in microarrayexpression.csv */
 	private String[] geneNames = null;
 
+	/** Ordered list of all gene ids from probes.csv file.*/
+	private int[] geneIds = null;
+
 	/** Ordered array of all sample (ie tissue) ids derived from SampleAnnot.csv. Order == columns in microarrayexpression.csv */
 	private int[] tissueIds = null;
 
@@ -35,6 +38,12 @@ public class AllenDataMngr{
 		//Parse expression data
 		ReadExpression expression = new ReadExpression(dir+"/MicroarrayExpression.csv",this.geneNames.length,this.tissueIds.length,true);
 		this.data = expression.getData();
+
+		///Mean across rows that refer to single gene
+		CollapseRows collapser = new CollapseRows(this.data,this.geneIds);
+		this.data = collapser.getData();
+		System.out.println("THIS IS THE NEW SIZE OF GENES : "+ this.data.getRowSize());
+
 		this.data.meanNormalizeAcrossGenesAndSamples();
 
 
@@ -60,7 +69,9 @@ public class AllenDataMngr{
 		ReadTissueAnnots tissues = new ReadTissueAnnots(dir+"/SampleAnnot.csv",1840);
 
 		///Set variables
+		this.geneIds = probes.getIds();
 		this.geneNames = probes.getNames();
+
 		this.tissueIds = tissues.getIds();
 		this.tissueNames = tissues.getNames();
 	}

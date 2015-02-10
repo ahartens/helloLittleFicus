@@ -10,6 +10,9 @@ import java.util.Random;
 *	2) Class must implement the Kmeansable interface
 *	3) In Kmeansable methods, calculate corresponding kmeans values (k value, seed clusters, distance equation)
 *	4) Set calculated value in KmeansObject
+*
+*   Variables that affect speed of clustering :
+*   cap_B, this.repeat
 *	@author Alex Hartenstein
 */
 
