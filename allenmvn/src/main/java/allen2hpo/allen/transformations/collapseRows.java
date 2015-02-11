@@ -15,15 +15,20 @@ public class CollapseRows{
         /**	Matrix object containing all expression data meaned over condensed indices*/
         private Matrix condData = null;
 
-        private List<String> = null;
+        private List<String> condNames = null;
 
         /** Get averageddata*/
         public Matrix getData(){
             return this.condData;
         }
 
-        public String getGeneNames(){
-            return this.geneNames;
+        public String[] getGeneNames(){
+            String[] names = new String[condNames.size()];
+            for(int i=0; i<this.condNames.size(); i++){
+                names[i] = this.condNames.get(i);
+                System.out.println("name : "+names[i]);
+            }
+            return names;
         }
 
         /**
@@ -68,11 +73,11 @@ public class CollapseRows{
         *   Creates 2d array. each row is a unique gene, each column is the index of expressionvalue that corresponds to gene
         *   @param int[] array of gene names with repeated gene ids
         */
-        private List<List<Number>> createCollapsedIndicesArray(int[] geneIds){
+        private List<List<Number>> createCollapsedIndicesArray(int[] geneIds, String[] geneNames){
 
             //Init 2d array that will contain indices of unique genes
             List<List<Number>> condensedIndices = new ArrayList<List<Number>>();
-
+            this.condNames = new ArrayList<String>();
             int previousGeneId = 0;
             int currentCount = 0;
 
@@ -84,6 +89,7 @@ public class CollapseRows{
                 }
                 //If the gene id is unique/the first of repeats, create a new numberlist to hold values of unique gene
                 else{
+                    this.condNames.add(geneNames[i]);
                     List<Number> newGene = new ArrayList<Number>();
                     newGene.add(i);
                     condensedIndices.add(newGene);
@@ -120,5 +126,4 @@ public class CollapseRows{
 
             this.condData = new Matrix(condensedData);
         }
-
 }

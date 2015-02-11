@@ -23,7 +23,6 @@ public class CollapseRowsTest{
         Matrix condensed = collapse.getData();
         condensed.print();
 
-        System.out.printf("Condensed is this big : %d %d\n\n",condensed.getRowSize(),condensed.getColumnSize());
     }
 
     @Test
@@ -32,11 +31,25 @@ public class CollapseRowsTest{
         Matrix m = new Matrix(data);
 
         int[] indices = {12,12,12,12,11,11,33};
+        String[] names = {"one","one","one","one","two","two","three"};
 
-        CollapseRows collapse = new CollapseRows(m,indices);
+        CollapseRows collapse = new CollapseRows(m,indices,names);
+
+
         Matrix condensed = collapse.getData();
-        condensed.print();
+        double[][] correct = {{1,2,3,4,5,6},{7,8,9,10,11,12},{13,14,15,16,17,18}};
+        for(int i=0; i<condensed.getRowSize(); i++){
+            for(int j=0; j<condensed.getColumnSize(); j++){
+                Assert.assertEqual(correct[i][j],condensed.getValueAtIndex(i,j),.001);
+            }
+        }
 
-        System.out.printf("Condensed two is this big : %d %d\n\n",condensed.getRowSize(),condensed.getColumnSize());
+
+        String[] namesCondensed = condensed.getNames()
+        String correctNames = {"one","two","three"};
+
+        for(int i=0; i<namesCondensed.length; i++){
+            Assert.assertEqual(namesCondensed[i], correctNames[i]);
+        }
     }
 }

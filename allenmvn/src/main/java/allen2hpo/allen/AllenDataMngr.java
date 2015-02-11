@@ -40,9 +40,10 @@ public class AllenDataMngr{
 		this.data = expression.getData();
 
 		///Mean across rows that refer to single gene
-		CollapseRows collapser = new CollapseRows(this.data,this.geneIds);
+		CollapseRows collapser = new CollapseRows(this.data,this.geneIds, this.geneNames);
 		this.data = collapser.getData();
-		System.out.println("THIS IS THE NEW SIZE OF GENES : "+ this.data.getRowSize());
+		this.geneNames = collapser.getGeneNames();
+		System.out.println("THIS IS THE NEW SIZE OF GENE NAMES : "+ this.data.getRowSize());
 
 		this.data.meanNormalizeAcrossGenesAndSamples();
 
