@@ -392,6 +392,7 @@ public class Matrix{
                 double val = getValueAtIndex(i,j);
 
                 double norm = val - this.colMeans[j] - this.rowMeans[i] + this.meanAll;
+                setValueAtIndex(i,j,norm);
             }
         }
     }

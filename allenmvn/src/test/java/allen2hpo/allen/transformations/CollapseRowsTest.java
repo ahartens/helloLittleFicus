@@ -40,16 +40,16 @@ public class CollapseRowsTest{
         double[][] correct = {{1,2,3,4,5,6},{7,8,9,10,11,12},{13,14,15,16,17,18}};
         for(int i=0; i<condensed.getRowSize(); i++){
             for(int j=0; j<condensed.getColumnSize(); j++){
-                Assert.assertEqual(correct[i][j],condensed.getValueAtIndex(i,j),.001);
+                Assert.assertEquals(correct[i][j],condensed.getValueAtIndex(i,j),.001);
             }
         }
 
 
-        String[] namesCondensed = condensed.getNames()
-        String correctNames = {"one","two","three"};
+        String[] namesCondensed = collapse.getGeneNames();
+        String[] correctNames = {"one","two","three"};
 
         for(int i=0; i<namesCondensed.length; i++){
-            Assert.assertEqual(namesCondensed[i], correctNames[i]);
+            Assert.assertEquals(namesCondensed[i], correctNames[i]);
         }
     }
 }

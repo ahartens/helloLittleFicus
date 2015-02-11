@@ -15,18 +15,21 @@ public class CollapseRows{
         /**	Matrix object containing all expression data meaned over condensed indices*/
         private Matrix condData = null;
 
+        /** Array list of unique gene names*/
         private List<String> condNames = null;
 
-        /** Get averageddata*/
+        /** Get data for unique gene names (averaged over probes) */
         public Matrix getData(){
             return this.condData;
         }
 
+        /**
+        *   @return String[] of unique gene names
+        */
         public String[] getGeneNames(){
             String[] names = new String[condNames.size()];
             for(int i=0; i<this.condNames.size(); i++){
                 names[i] = this.condNames.get(i);
-                System.out.println("name : "+names[i]);
             }
             return names;
         }

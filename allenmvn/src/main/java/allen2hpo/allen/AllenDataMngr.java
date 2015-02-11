@@ -37,10 +37,10 @@ public class AllenDataMngr{
 
 		//Parse expression data
 		ReadExpression expression = new ReadExpression(dir+"/MicroarrayExpression.csv",this.geneNames.length,this.tissueIds.length,true);
-		this.data = expression.getData();
+		//this.data = expression.getData();
 
 		///Mean across rows that refer to single gene
-		CollapseRows collapser = new CollapseRows(this.data,this.geneIds, this.geneNames);
+		CollapseRows collapser = new CollapseRows(expression.getData(),this.geneIds, this.geneNames);
 		this.data = collapser.getData();
 		this.geneNames = collapser.getGeneNames();
 		System.out.println("THIS IS THE NEW SIZE OF GENE NAMES : "+ this.data.getRowSize());

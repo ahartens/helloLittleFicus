@@ -44,13 +44,16 @@ public class GapStat implements GetKable{
 	*/
 	public GapStat(Matrix m){
 
-		int k = 20;							///Number of iterations, thus testing K values 1-20
+		int k = 20;						///Number of iterations, thus testing K values 1-20
 		int b = 10;						///Number of uniform random distributions created for each k for which dispersion is calculated
 
-		double[] gap_k = stepOneTwo(k,b,m);
-		double[] s_k = stepThree(k,b);
 
-		this.kfinal = stepFour(gap_k,s_k,b);
+		while(this.kfinal == 0){
+			double[] gap_k = stepOneTwo(k,b,m);
+			double[] s_k = stepThree(k,b);
+			this.kfinal = stepFour(gap_k,s_k,b);
+		}
+
 	}
 
 	/**
