@@ -226,7 +226,7 @@ public class Kmeans{
     *   Then recalculates cluster means
     *	@param takes an int for number of iterations to be run
     */
-    public void beginClustering(){
+    public void performClustering(){
         if (this.m == null)
         throw new IllegalArgumentException("Data not initialized");
         if (this.k == 0)

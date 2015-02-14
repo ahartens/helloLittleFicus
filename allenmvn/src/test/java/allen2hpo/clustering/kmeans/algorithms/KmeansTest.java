@@ -42,7 +42,7 @@ public class KmeansTest{
 
     @Test public void testSimpleClustering() {
 	Kmeans km = new Kmeans(m,2);
-	km.beginClustering();
+	km.performClustering();
 	int[] idx = km.getClusterAssignments();
 	int cluster1 = idx[0];
 	int cluster2 = idx[1];
@@ -59,7 +59,7 @@ public class KmeansTest{
         GapStat gap = new GapStat(m);
 
         Kmeans km = new Kmeans(m,gap.getK());
-        km.beginClustering();
+        km.performClustering();
         double [][] protos = km.getClusterPrototypes();
 
         for(int i=0; i<protos.length; i++){

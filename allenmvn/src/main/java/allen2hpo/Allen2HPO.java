@@ -92,7 +92,7 @@ public class Allen2HPO {
             GapStat gap = new GapStat(mngr.getExpression());
             Kmeans kmeans = new Kmeans(mngr.getExpression(),gap.getK());
 
-            kmeans.beginClustering();
+            kmeans.performClustering();
             ///Print clusters
             writeOutputToFile(mngr, kmeans);
 
