@@ -254,15 +254,8 @@ public class Allen2HPO {
     	System.err.println("[INFO] Usage: java -jar Allen2HPO.jar -D ????");
     	System.err.println("[INFO] where ARGS comprises:");
     	System.err.println("[INFO]");
-    	System.err.println("[INFO] -V: the original VCF file");
-    	System.err.println("[INFO] -W: the downsampled VCF file");
-    	System.err.println("[INFO] -D: the Jannovar transcript definition file");
-    	System.err.println("[INFO] -B: the HPO bed file");
-    	System.err.println("[INFO] -F: name of output file (optional, default: varcompare.txt)");
-    	System.err.println("[INFO] --cov: avg coverage of the original VCF file");
-    	System.err.println("[INFO] --covdown: avg coverage of the downsampled VCF file");
-    	System.err.println("[INFO] --bam: the bed file of the target HPO region");
-    	System.exit(1);
+    	System.err.println("[INFO] -D: data directory with Allen Brain microarray files");
+	System.exit(1);
     }
 
 }

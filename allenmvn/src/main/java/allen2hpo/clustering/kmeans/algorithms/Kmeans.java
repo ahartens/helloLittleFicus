@@ -5,12 +5,13 @@ import java.util.Random;
 
 
 /**
-*	Performs kmeans cluster analysis :
-*	1) Class must include a KmeansObject as a field
-*	2) Class must implement the Kmeansable interface
-*	3) In Kmeansable methods, calculate corresponding kmeans values (k value, seed clusters, distance equation)
-*	4) Set calculated value in KmeansObject
-*
+* <p>Performs kmeans cluster analysis:</p>
+* <ol>
+* <li>Class must include a {@link allen2hpo.clustering.Kmeans Kmeans} as a field
+* <li>Class must implement the Kmeansable interface
+* <li>In Kmeansable methods, calculate corresponding kmeans values (k value, seed clusters, distance equation)
+* <li>Set calculated value in KmeansObject
+* </ol>
 *   Variables that affect speed of clustering :
 *   cap_B, this.repeat
 *	@author Alex Hartenstein
@@ -27,7 +28,7 @@ public class Kmeans{
     /** cluster prototypes. The centroids of the clusters being calculated. A k x n two dimensional array */
     private double[][] cp = null;
 
-    /**	cluster index. Stores the index of the cluster (0-(k-1)) to which each data point in matrix belongs to */
+    /**	cluster index. Stores the index of the cluster (0-(k-1)) to which each data point in matrix belongs */
     private int[] ci = null;
 
     /** Stores size of clusters are they are created */
@@ -46,7 +47,7 @@ public class Kmeans{
     *   @param Data matrix to be clustered
     */
     public Kmeans(Matrix mat){
-        setData(mat,1);
+        this(mat,1);
     }
 
     /**
@@ -54,7 +55,7 @@ public class Kmeans{
     *   @param int k is number of clusters data matrix should be partitioned into
     */
     public Kmeans(Matrix mat, int kval){
-        setData(mat,kval);
+        this(mat,kval,new DistEuclidean());
     }
 
     /**
