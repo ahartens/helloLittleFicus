@@ -1,6 +1,8 @@
-package allen2hpo.clustering;
+package allen2hpo.clustering.kmeans.calck;
 
 import allen2hpo.matrix.*;
+import allen2hpo.clustering.kmeans.Kmeans;
+
 
 /**
 *	GapStat is a method to find the optimal number of clusters in a data set

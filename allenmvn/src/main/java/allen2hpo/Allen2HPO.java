@@ -3,7 +3,9 @@ package allen2hpo;
 import allen2hpo.allen.*;
 import allen2hpo.allen.ontology.*;
 
-import allen2hpo.clustering.*;
+import allen2hpo.clustering.kmeans.Kmeans;
+import allen2hpo.clustering.kmeans.calck.GapStat;
+
 import allen2hpo.matrix.*;
 
 import java.util.Scanner;
@@ -20,9 +22,9 @@ import org.apache.commons.cli.Parser;
 /**
 *   Parse expression data from multiple brains into data matrices
 *   Cluster data matrices
-*   S
 *   @author Alex Harenstein
 */
+
 public class Allen2HPO {
 
     /** Required input parsed from command line. Directory that contains Probes.csv, MicroarrayExpression.csv, SampleAnnot.csv*/

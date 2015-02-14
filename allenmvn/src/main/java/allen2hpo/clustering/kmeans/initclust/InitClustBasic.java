@@ -1,7 +1,15 @@
-package allen2hpo.clustering;
+package allen2hpo.clustering.kmeans.initclust;
 
 import allen2hpo.matrix.Matrix;
 import java.util.Random;
+
+
+/**
+*	Given a data set, randomly selects k data points as cluster seeds
+*	Most basic implementation for initializaing cluster prototypes
+*	Implements InitClusterable interface to return clusters
+*	@author Alex Hartenstein
+*/
 
 public class InitClustBasic implements InitClusterable{
 

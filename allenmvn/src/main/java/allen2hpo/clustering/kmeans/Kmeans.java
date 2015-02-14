@@ -1,7 +1,11 @@
-package allen2hpo.clustering;
+package allen2hpo.clustering.kmeans;
 
 import allen2hpo.matrix.Matrix;
 import java.util.Random;
+
+import allen2hpo.clustering.kmeans.calck.*;
+import allen2hpo.clustering.kmeans.distance.*;
+import allen2hpo.clustering.kmeans.initclust.*;
 
 
 /**

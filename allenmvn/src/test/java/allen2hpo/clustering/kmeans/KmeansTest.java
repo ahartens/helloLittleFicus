@@ -1,4 +1,4 @@
-package allen2hpo.clustering;
+package allen2hpo.clustering.kmeans;
 
 import org.junit.Test;
 import org.junit.AfterClass;
@@ -6,7 +6,6 @@ import org.junit.BeforeClass;
 import org.junit.Assert;
 
 import allen2hpo.matrix.Matrix;
-import allen2hpo.clustering.Kmeans;
 
 
 public class KmeansTest{
@@ -14,7 +13,7 @@ public class KmeansTest{
 
 
 
-    static Matrix m = null; 
+    static Matrix m = null;
 
     static Matrix bigMatrix=null;
 
@@ -49,12 +48,12 @@ public class KmeansTest{
 	int cluster3 = idx[2];
 	Assert.assertEquals(cluster2,cluster3);
 	Assert.assertNotEquals(cluster1,cluster3);
-	
-	
+
+
     }
 
-      /* 
-       
+      /*
+
 
         GapStat gap = new GapStat(m);
 
@@ -73,7 +72,7 @@ public class KmeansTest{
 
 */
 
-   
+
 
 
 }
