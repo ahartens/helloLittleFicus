@@ -43,7 +43,7 @@ public class AllenDataMngr{
 		CollapseRows collapser = new CollapseRows(expression.getData(),this.geneIds, this.geneNames);
 		this.data = collapser.getData();
 		this.geneNames = collapser.getGeneNames();
-		System.out.println("THIS IS THE NEW SIZE OF GENE NAMES : "+ this.data.getRowSize());
+		System.out.println("Number of unique genes : "+ this.data.getRowSize());
 
 		this.data.meanNormalizeAcrossGenesAndSamples();
 
@@ -51,11 +51,6 @@ public class AllenDataMngr{
 		//CovarMatrix cm = new CovarMatrix();
 		//cm.covarCalcMatrix(this.data,1);
 
-		//collapseExample(dir);
-
-		//ReadExpression clusters = new ReadExpression(dir + "/row1.csv",1,this.tissueIds.length,false);
-	    //ReadExpression clusters = new ReadExpression(dir + "/ClusterPrototypes.csv",10,this.tissueIds.length,false);
-	    //this.data = clusters.getData();
 	}
 
 	/**

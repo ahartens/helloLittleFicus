@@ -36,7 +36,6 @@ public class OntologyDataMngr{
             if(this.structures[i].getId() == id){
 
                 parent = structures[i];
-                System.out.printf("Parent : %d is named : %s\n",id,parent.getName());
                 break;
             }
         }
@@ -83,12 +82,9 @@ public class OntologyDataMngr{
         int level = 0;
         for(int i=0; i<this.length; i++){
             level = this.structures[i].getLevel();
-            System.out.println(this.structures[i].getName()+" is at level : "+level);
             while(level < previousLevel){
-                System.out.println("this is level : "+level+ "this is previous"+previousLevel);
                 for(int j=0; j<previousLevel-1; j++){
                     writer.writeString("  ");
-                    System.out.println("whatup");
                 }
                 writer.writeString("},\n");
                 previousLevel --;
@@ -112,8 +108,6 @@ public class OntologyDataMngr{
                 writer.writeString("23 ,\n");
             }
 
-            System.out.printf("\nprevious Level : %d current Level : %d\n",previousLevel,level);
-
             previousLevel = level;
         }
 
@@ -122,7 +116,6 @@ public class OntologyDataMngr{
             for(int j=0; j<previousLevel-1; j++){
                 writer.writeString("  ");
             }
-            System.out.println("this is level : "+level+ "this is previous"+previousLevel);
             writer.writeString("},\n");
             previousLevel --;
         }
@@ -132,7 +125,7 @@ public class OntologyDataMngr{
     }
 
     public void printAllStructuresHierarchyClusterExpressionValues(int[] sampleIds, Matrix m){
-        FileWriter writer = new FileWriter("/Users/ahartens/Desktop/ProtovisTutorial/indentedTree/values.js");
+        FileWriter writer = new FileWriter("/Users/ahartens/Desktop/PrototypeValues.js");
         writer.writeString("var values = [\n");
 
         CollapseColumns collapser = new CollapseColumns(m, sampleIds, this);
@@ -143,12 +136,22 @@ public class OntologyDataMngr{
             }
             else{
                 values = new double[m.getRowSize()];
+
+                ///check if samples contains structure
+                for(int j=0; j<sampleIds.length; j++){
+                    //if it does, copy prototype expression values (all rows of structure's column)
+                    if(sampleIds[j] == this.structures[i].getId()){
+                        for(int x=0; x<m.getRowSize(); x++){
+                            values[x] = m.getValueAtIndex(x,j);
+                        }
+                    }
+                }
                 //for(int j=0; j<this)
             }
             writer.writeString("[");
 
             for(int j=0; j<values.length; j++){
-                writer.writeDouble(values[j]*100);
+                writer.writeDouble(values[j]);
                 writer.writeDelimit();
             }
             writer.writeString("],\n");

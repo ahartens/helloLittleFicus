@@ -48,19 +48,15 @@ public class Allen2HPO {
         AllenDataMngr brain1 = new AllenDataMngr(this.dataPath,numberOfProbes);
 
         //Open Ontology file
-        //OntologyDataMngr ontology = new OntologyDataMngr(this.dataPath);
         //ontology.printAllStructuresHierarchy();
         //ontology.printAllStructuresHierarchyClusterExpressionValues(brain1.getTissueIds(),brain1.getExpression());
 
 
-        //Print parent/children of ontology
-        //interactive(argv,ontology);
-
         //Cluster data
         Cluster clust = new Cluster(brain1);
 
-        //CollapseColumns collapse = new CollapseColumns(brain1.getExpression(), brain1.getTissueIds(),ontology);
-
+        OntologyDataMngr ontology = new OntologyDataMngr(this.dataPath);
+        ontology.printAllStructuresHierarchyClusterExpressionValues(brain1.getTissueIds(),clust.getPrototypes());
     }
 
 
@@ -84,7 +80,7 @@ public class Allen2HPO {
     *   2) printing output to cl/file
     */
     class Cluster{
-
+        private Matrix prototypes;
         /**
         *   Constructor method performs cluster method and prints
         *   @param AllenData object (contains fully parsed brain microarray expression/annotations)
@@ -97,6 +93,12 @@ public class Allen2HPO {
             kmeans.beginClustering();
             ///Print clusters
             writeOutputToFile(mngr, kmeans);
+
+            this.prototypes = new Matrix (kmeans.getClusterPrototypes());
+        }
+
+        public Matrix getPrototypes(){
+            return this.prototypes;
         }
 
 
@@ -179,7 +181,7 @@ public class Allen2HPO {
         }
 
         private void writeAllClustersGenesToOneFile(FileWriter writer, String[][] clusters){
-            for(int i =0;i<clusters.length;i++){
+            for(int i =0; i<clusters.length; i++){
                 for(int j=0; j<clusters[i].length-1; j++){
                     writer.writeString(clusters[i][j]);
                     writer.writeDelimit();

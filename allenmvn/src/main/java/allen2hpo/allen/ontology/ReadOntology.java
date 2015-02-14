@@ -93,7 +93,7 @@ public class ReadOntology{
     private void handleRow(String line, int ri){
 
         this.structures[this.count] = new Structure(this.count);
-
+        this.structures[this.count].setIndex(ri);
         ///Input is a csv and some cells may contain further commas. These cells have quotes
         ///Thus first split line into components separated by commas. Handle results separately
         Scanner quoteSc = new Scanner(line);

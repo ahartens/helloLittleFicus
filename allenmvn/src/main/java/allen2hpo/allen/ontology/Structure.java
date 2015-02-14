@@ -39,6 +39,10 @@ public class Structure{
         this.index = i;
     }
 
+    public int getIndex(){
+        return this.index;
+    }
+
     public void setID(int i){
         this.id = i;
     }
@@ -59,8 +63,6 @@ public class Structure{
         this.children[childCount] = child;
         childCount++;
     }
-
-
 
     public int getPathLength(){
         return this.path.length;
