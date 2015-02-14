@@ -1,6 +1,8 @@
 package allen2hpo;
 
 import allen2hpo.allen.*;
+import allen2hpo.allen.ontology.*;
+
 import allen2hpo.clustering.*;
 import allen2hpo.matrix.*;
 

@@ -1,4 +1,4 @@
-package allen2hpo.allen;
+package allen2hpo.allen.ontology;
 
 
 /**

@@ -1,7 +1,7 @@
-package allen2hpo.allen;
+package allen2hpo.allen.transformations;
 
 import allen2hpo.matrix.*;
-
+import allen2hpo.allen.ontology.*;
 
 /**
 *	This class decreases the number of columns in data

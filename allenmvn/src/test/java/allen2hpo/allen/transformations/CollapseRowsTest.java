@@ -9,6 +9,8 @@ import org.junit.Assert;
 import allen2hpo.matrix.*;
 import allen2hpo.clustering.*;
 import allen2hpo.allen.*;
+import allen2hpo.allen.transformations.*;
+
 
 public class CollapseRowsTest{
 

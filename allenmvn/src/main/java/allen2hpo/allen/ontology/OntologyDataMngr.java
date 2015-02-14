@@ -1,7 +1,9 @@
-package allen2hpo.allen;
+package allen2hpo.allen.ontology;
 
 import java.util.*;
 import allen2hpo.matrix.*;
+import allen2hpo.allen.transformations.*;
+
 /**
 *   Responsible for parsing/handling queries to Brain Ontology
 *   @author Alex Hartenstein

@@ -1,6 +1,9 @@
 package allen2hpo.allen;
 
 import allen2hpo.matrix.*;
+import allen2hpo.allen.parsing.*;
+import allen2hpo.allen.transformations.*;
+
 
 /**
 *	This class is responsible for handling all data corresponding to one brain.
