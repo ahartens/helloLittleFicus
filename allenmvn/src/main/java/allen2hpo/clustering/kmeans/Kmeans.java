@@ -12,12 +12,10 @@ import allen2hpo.clustering.kmeans.initclust.*;
 * <p>Performs kmeans cluster analysis:</p>
 * <ol>
 * <li>Class must include a {@link allen2hpo.clustering.Kmeans Kmeans} as a field
-* <li>Class must implement the Kmeansable interface
 * <li>In Kmeansable methods, calculate corresponding kmeans values (k value, seed clusters, distance equation)
 * <li>Set calculated value in KmeansObject
 * </ol>
 *   Variables that affect speed of clustering :
-*   cap_B, this.repeat
 *	@author Alex Hartenstein
 */
 

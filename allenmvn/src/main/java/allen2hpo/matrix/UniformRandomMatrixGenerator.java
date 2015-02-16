@@ -7,6 +7,7 @@ import java.util.Random;
 *	Generates a uniform random matrix of gene expression values that reflects
 *	gene expression values of a given matrix m with (g x e) dimensions
 *	gr[e1] = unifr(min(e1),max(e1))
+*	@author Alex Hartenstein
 */
 
 public class UniformRandomMatrixGenerator{
@@ -14,7 +15,7 @@ public class UniformRandomMatrixGenerator{
 	/** random number generator */
 	private Random rand = null;
 
-	/** matrix  */
+	/** original data set which should be used to generate uniform random matrix  */
 	private Matrix m;
 
 	public UniformRandomMatrixGenerator(Matrix m){

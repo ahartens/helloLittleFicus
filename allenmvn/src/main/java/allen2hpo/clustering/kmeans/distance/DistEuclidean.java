@@ -11,13 +11,15 @@ package allen2hpo.clustering.kmeans.distance;
 public class DistEuclidean implements DistComputable{
 
 	public double calculateProximity(double[] p1, double[] p2){
+
 		double dist = 0;
 
+		//Distance for each dimension calculated
 		for(int i=0;i<p1.length;i++){
-	                ///DISTANCE OF EACH DIMENSION TO CORRESPONDING DIMENSION OF CLUSTER MEAN.
-	               dist +=  Math.pow(p1[i] - p2[i],2.0);
+	    	dist +=  Math.pow(p1[i] - p2[i],2.0);
         }
-        ///CALCULATE SSE AND SAVE IN ARRAY
+		
+        //Calculate final distance
         return Math.sqrt(dist);
 	}
 
