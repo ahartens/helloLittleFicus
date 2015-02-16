@@ -190,7 +190,7 @@ public class GapStat implements GetKable{
 		double wk = 0;
 
 		for(int i=0; i<k; i++){
-			SimilarityMatrix sim = new SimilarityMatrix(clusters[i]);
+			DistanceMatrix sim = new DistanceMatrix(clusters[i]);
 			wk += (1.0/(clusters[i].getRowSize()))*sim.getSumOfPairwiseDistances();
 		}
 		return Math.log(wk);
@@ -214,7 +214,7 @@ public class GapStat implements GetKable{
 		double wk = 0;
 
 		for(int i=0;i<k;i++){
-			SimilarityMatrix sim = new SimilarityMatrix(clusters[i]);
+			DistanceMatrix sim = new DistanceMatrix(clusters[i]);
 			wk += (1.0/(clusters[i].getRowSize()))*sim.getSumOfPairwiseDistances();
 		}
 		return Math.log(wk);

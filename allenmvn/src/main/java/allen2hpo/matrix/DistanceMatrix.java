@@ -11,7 +11,7 @@ import allen2hpo.clustering.kmeans.distance.*;
 *	@author Alex Hartenstein
 */
 
-public class SimilarityMatrix extends Matrix{
+public class DistanceMatrix extends Matrix{
 
 	/** Sum of pairwise distances */
 	private int spw = 0;
@@ -24,7 +24,7 @@ public class SimilarityMatrix extends Matrix{
 	*	@param Matrix object of data to be used
 	*	@param distComputable object from kmeans clustering that is able to compute distance between two points
 	*/
-	public SimilarityMatrix (Matrix m, DistComputable d){
+	public DistanceMatrix (Matrix m, DistComputable d){
 		computeSimilarityMatrix(m);
 		this.distCalc = d;
 	}
@@ -33,7 +33,7 @@ public class SimilarityMatrix extends Matrix{
 	*	Alternate constructor method taking only a Matrix object and using euclidean distance as default.
 	*	@param Matrix object m of original data
 	*/
-	public SimilarityMatrix(Matrix m){
+	public DistanceMatrix(Matrix m){
 		this(m,new DistEuclidean());
 	}
 
@@ -41,7 +41,7 @@ public class SimilarityMatrix extends Matrix{
 	*	Alternate constructor method taking 2d array as parameter.
 	*	@param double[][] of original data
 	*/
-	public SimilarityMatrix(double[][] a){
+	public DistanceMatrix(double[][] a){
 		//Initialize similarity matrix with size corresponding to data matrix
 		this(new Matrix(a));
 	}
