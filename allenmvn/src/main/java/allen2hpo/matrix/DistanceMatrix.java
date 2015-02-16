@@ -4,7 +4,7 @@ import allen2hpo.clustering.kmeans.distance.*;
 
 
 /**
-*	<p>Given an mxn matrix, computes a similarity matrix that is an mxm matrix</p>
+*	<p>Given an mxn matrix, computes a distance matrix that is an mxm matrix</p>
 * 	<ol>
 * 	<li>Can customize distance measure to be used in calculation by passing a distComputable object in constructor method</li>
 *	<li>Default behavior is to use euclidean distance as distance between any two points.</li>
@@ -14,7 +14,7 @@ import allen2hpo.clustering.kmeans.distance.*;
 public class DistanceMatrix extends Matrix{
 
 	/** Sum of pairwise distances */
-	private int spw = 0;
+	private double spw = 0;
 
 	/** Distance calculation object */
 	private DistComputable distCalc;
@@ -25,8 +25,14 @@ public class DistanceMatrix extends Matrix{
 	*	@param distComputable object from kmeans clustering that is able to compute distance between two points
 	*/
 	public DistanceMatrix (Matrix m, DistComputable d){
-		computeSimilarityMatrix(m);
+		//Set distance calculation object (default is set as euclidean)
 		this.distCalc = d;
+
+		//Init mxm matrix (from mxn data matrix) for distance matrix
+		super.setMatrix(new double[m.getRowSize()][m.getRowSize()]);
+
+		//Compute distance matrix
+		computeDistance(m);
 	}
 
 	/**
@@ -47,59 +53,39 @@ public class DistanceMatrix extends Matrix{
 	}
 
 	/**
-	*	Called by Constructor methods to make a similarity matrix
+	*	@return sum of pairwise distance, which is calculated as distance matrix is computed
 	*/
-	private void computeSimilarityMatrix(Matrix m){
-		///INITIALIZE SIMILARITY MATRIX WITH SIZE CORRESPONDING TO DATA MATRIX
-
-		super.setMatrix(new double[m.getRowSize()][m.getRowSize()]);
-		computeSimilarity(m);
-	}
-
-	private void computeSimilarity(Matrix m){
-	///FOR EACH ROW OF SIMILARITY MATRIX
-			for (int i=0;i<m.getRowSize();i++){
-				///FOR EACH COLUMN OF SIMILARITY MATRIX
-				//for(int j=0;j<=m.getColumnSize();j++){
-				for(int j=0;j<=i;j++){
-
-
-				/*	double sum = 0;
-
-
-					///FOR EACH COLUMN OF DATA COLUMN (CORRESPONDING TO DIMENSION OF VECTOR)
-					for (int z =0;z<m.getColumnSize();z++){
-						///CALCULATE DISTANCE OF DIMENSION
-						sum += Math.pow(m.getValueAtIndex(i,z) - m.getValueAtIndex(j,z),2);
-					}
-					///CALCULATE EUCLIDEAN DISTANCE
-					double dist = Math.sqrt(sum);*/
-
-					double[] p1 = m.getRowAtIndex(i);
-					double[] p2 = m.getRowAtIndex(j);
-
-					double dist = this.distCalc.calculateProximity(p1,p2);
-
-
-					///SET VALUE IN SIMILARITY MATRIX
-					setValueAtIndex(i,j,dist);
-					this.spw += dist;
-				}
-			}
-	}
-
 	public double getSumOfPairwiseDistances(){
 		return this.spw;
 	}
 
-	public void print(){
-        for(int i = 0;i<getRowSize();i++){
-            for(int j = 0;j<=i;j++){
-                System.out.printf("%.5f\t",super.getValueAtIndex(i,j));
-            }
-            System.out.printf("\n");
-        }
-        System.out.printf("\n\n\n");
+	/**
+	*	Goes through each row and calculates distance to every other row
+	*	@param Matrix object m of original data
+	*/
+	private void computeDistance(Matrix m){
+	//For each row of similarity matrix
+		for (int i=0;i<m.getRowSize();i++){
 
-    }
+			//for(int j=0;j<=m.getColumnSize();j++){
+
+			//For each column of similarity matrix below the diagonal
+			for(int j=0;j<=i;j++){
+
+				//Get two rows to be compared
+				double[] p1 = m.getRowAtIndex(i);
+				double[] p2 = m.getRowAtIndex(j);
+
+				//Get distance between two points
+				double dist = this.distCalc.calculateProximity(p1,p2);
+
+
+				//Set value in similarity matrix
+				setValueAtIndex(i,j,dist);
+
+				//Add to sum of pairwise distance
+				this.spw += dist;
+			}
+		}
+	}
 }
