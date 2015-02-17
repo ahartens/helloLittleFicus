@@ -9,6 +9,7 @@ import allen2hpo.clustering.kmeans.calck.GapStat;
 import allen2hpo.matrix.*;
 
 import java.util.Scanner;
+import java.util.ArrayList;
 
 /** Command line parser from apache */
 import org.apache.commons.cli.CommandLine;
@@ -22,6 +23,7 @@ import org.apache.commons.cli.Parser;
 /**
 *   Parse expression data from multiple brains into data matrices
 *   Cluster data matrices
+*   Print one cluster per file with single gene name per line
 *   @author Alex Harenstein
 */
 
@@ -35,47 +37,54 @@ public class Allen2HPO {
 
 
     public static void main(String[] args) {
-    	Allen2HPO allen=new Allen2HPO(args);
+        
+        Allen2HPO allen2hpo = new Allen2HPO();
+
+        /**
+        *   Parse the command line for directory path
+        */
+        allen2hpo.parseCommandLine(args);
+
+        /**
+        *   Read in all expression data and annotations
+        *   All data for one brain is packaged in a single AllenDataMngr object
+        *   Array of multiple brains
+        */
+        ArrayList<AllenDataMngr> allData = allen2hpo.readData();
+
+
+        /**
+        *   Read in the ontology file
+        *   In future can be used by cluster analysis to modify proximity measure calculation
+        */
+        OntologyDataMngr ontology = new OntologyDataMngr(allen2hpo.getDataPath());
+
+
+        /**
+        *   Perform cluster analysis on each brain one at a time
+        */
+        //Cluster clust = new Cluster(brain1);
+
     }
 
     /**
-    *   Performs kmeans on MicroarrayExpression.csv contained in directory passed in -D option of command line. Outputs clusters into a file
+    *   Private method that reads in expression data and annotations for all brain objects
+    *   At the moment only reads a single brain
     */
-    public Allen2HPO(String[] argv) {
-
-    	parseCommandLine(argv);
-
+    private ArrayList<AllenDataMngr> readData(){
         ///Must be set in order to perfrom analysis. Should correspond to number of rows in microarray analysis file
         int numberOfProbes = 63000;
 
+        ArrayList<AllenDataMngr> allData = new ArrayList<AllenDataMngr>();
         //Open brain expression directory
         AllenDataMngr brain1 = new AllenDataMngr(this.dataPath,numberOfProbes);
 
-        //Open Ontology file
-        //ontology.printAllStructuresHierarchy();
-        //ontology.printAllStructuresHierarchyClusterExpressionValues(brain1.getTissueIds(),brain1.getExpression());
-
-
-        //Cluster data
-        Cluster clust = new Cluster(brain1);
-
-        OntologyDataMngr ontology = new OntologyDataMngr(this.dataPath);
-        ontology.printAllStructuresHierarchyClusterExpressionValues(brain1.getTissueIds(),clust.getPrototypes());
+        allData.add(brain1);
+        return allData;
     }
 
-
-    /**
-    *   Prints ontological structure and all its children at given int
-    */
-    private void interactive(String argv[], OntologyDataMngr mngr){
-
-       Scanner in = new Scanner(System.in);
-       int val = 0;
-       while(val != -1){
-           val = in.nextInt();
-           System.out.println("YOU PRINTED : "+val);
-           mngr.printStructureAtIndex(val);
-       }
+    public String getDataPath(){
+        return this.dataPath;
     }
 
     /**
