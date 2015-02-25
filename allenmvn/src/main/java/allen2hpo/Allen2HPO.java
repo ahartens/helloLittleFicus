@@ -37,7 +37,7 @@ public class Allen2HPO {
 
 
     public static void main(String[] args) {
-        
+
         Allen2HPO allen2hpo = new Allen2HPO();
 
         /**
@@ -222,53 +222,53 @@ public class Allen2HPO {
     /**
      * Parse the command line using apache's CLI.
      */
-	private void parseCommandLine (String[] args){
-		try{
-		    Options options = new Options();
+    private void parseCommandLine (String[] args){
+        try{
+            Options options = new Options();
 
-		    options.addOption(new Option("D","data",true,"Path to data"));
+            options.addOption(new Option("D","data",true,"Path to data"));
             options.addOption(new Option("S","size",true,"NumberOf"));
 
             //options.addOption(new Option("O","output",false,"Path to write clusters to"));
         //    options.addOption(new Option("A","allOutput",false,"Print cluster prototypes to output file"));
 
-		    /* options.addOption(new Option("W","vcf2",true,"Path to downsampled VCF file"));
-		    options.addOption(new Option("D","ucsc",true,"Path to serialized UCSC file"));
-		    options.addOption(new Option("B","bed",true,"Path to bed file"));
-		    options.addOption(new Option("F","fname",true,"Output file name"));
-		    options.addOption(new Option(null,"cov",true,"coverage of original BAM"));
-		    options.addOption(new Option(null,"covdown",true,"coverage of downsampled BAM"));
-		    options.addOption(new Option(null,"bam",true,"name of original BAM"));*/
+            /* options.addOption(new Option("W","vcf2",true,"Path to downsampled VCF file"));
+            options.addOption(new Option("D","ucsc",true,"Path to serialized UCSC file"));
+            options.addOption(new Option("B","bed",true,"Path to bed file"));
+            options.addOption(new Option("F","fname",true,"Output file name"));
+            options.addOption(new Option(null,"cov",true,"coverage of original BAM"));
+            options.addOption(new Option(null,"covdown",true,"coverage of downsampled BAM"));
+            options.addOption(new Option(null,"bam",true,"name of original BAM"));*/
 
-		    Parser parser = new GnuParser();
-		    CommandLine cmd = parser.parse(options, args);
+            Parser parser = new GnuParser();
+            CommandLine cmd = parser.parse(options, args);
 
-		    if (cmd.hasOption("D")) {
-		    	this.dataPath = cmd.getOptionValue("D");
+            if (cmd.hasOption("D")) {
+                this.dataPath = cmd.getOptionValue("D");
                 this.outputPath = this.dataPath+"/Clusters_OUTPUT.csv";
 
-		    } else {
-			    usage();
-		    }
+            } else {
+                usage();
+            }
 
 
-		}
-		catch (ParseException pe) {
-		    System.err.println("Error parsing command line options");
-		    System.err.println(pe.getMessage());
-		    System.exit(1);
-		}
+        }
+        catch (ParseException pe) {
+            System.err.println("Error parsing command line options");
+            System.err.println(pe.getMessage());
+            System.exit(1);
+        }
 
-	}
+    }
 
 
 
     public static void usage() {
-    	System.err.println("[INFO] Usage: java -jar Allen2HPO.jar -D ????");
-    	System.err.println("[INFO] where ARGS comprises:");
-    	System.err.println("[INFO]");
-    	System.err.println("[INFO] -D: data directory with Allen Brain microarray files");
-	System.exit(1);
+        System.err.println("[INFO] Usage: java -jar Allen2HPO.jar -D ????");
+        System.err.println("[INFO] where ARGS comprises:");
+        System.err.println("[INFO]");
+        System.err.println("[INFO] -D: data directory with Allen Brain microarray files");
+    System.exit(1);
     }
 
 }

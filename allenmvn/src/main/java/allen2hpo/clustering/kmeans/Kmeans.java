@@ -66,38 +66,47 @@ public class Kmeans{
     *   @param distComputable implementing object to customize distance calculation
     */
     public Kmeans(Matrix mat, int kval, DistComputable d){
-        setData(mat,kval);
-        this.distCalc = d;
-    }
 
-    /**
-    *   Initializes data matrix, kval and cluster index array
-    *   Necessary because of various constructor methods
-    */
-    private void setData(Matrix mat, int kval){
+        if (mat == null)
+            throw new IllegalArgumentException("Data not initialized");
+        if (kval == 0)
+            throw new IllegalArgumentException("k not initialized");
+        if (d == null)
+            throw new IllegalArgumentException("d not initialized");
 
-        ///SET MATRIX FIELD
+
+        /** Set data matrix private variable */
         this.m = mat;
 
-        ///Initialize cluster index array. While iterative clustering, the cluster to which a data point belongs to will be stored here.
+        /** Initialize cluster index array. While iterative clustering, the cluster to which a data point belongs to will be stored here. */
         this.ci = new int[mat.getRowSize()];
 
+        /** Set K value */
         setK(kval);
+
+        /** Set distance calculation object */
+        this.distCalc = d;
     }
 
     /**
     *   @param int k is number of clusters to data matrix should be partitioned into.
     */
     public void setK(int kval){
+        /** Set K value */
         this.k = kval;
+        /** Init cluster size array. Stores number of points assigned to each cluster in step 1. */
         this.cs = new int[kval];
-
     }
 
     /**
     *   @param double[][] init cluster prototypes with k rows and number of columns corresponding to datamatrix column size
     */
     public void setInitClusters(double[][] clusterSeeds){
+        if (clusterSeeds == null)
+            throw new IllegalArgumentException("Cluster Seeds not initialized");
+        if (clusterSeeds.length != this.k)
+            throw new IllegalArgumentException("Invalid initialization of cluster seeds");
+
         this.cp = clusterSeeds;
     }
 
@@ -229,10 +238,7 @@ public class Kmeans{
     *	@param takes an int for number of iterations to be run
     */
     public void performClustering(){
-        if (this.m == null)
-        throw new IllegalArgumentException("Data not initialized");
-        if (this.k == 0)
-        throw new IllegalArgumentException("k not initialized");
+
 
         ///Ensure that all components of kmeans algorithm have been set
         preclusterCheck();
