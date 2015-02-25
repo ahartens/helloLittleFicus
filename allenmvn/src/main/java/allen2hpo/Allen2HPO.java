@@ -10,6 +10,7 @@ import allen2hpo.matrix.*;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.io.File;
 
 /** Command line parser from apache */
 import org.apache.commons.cli.CommandLine;
@@ -35,56 +36,112 @@ public class Allen2HPO {
     /** Optional input parsed from command line. If not specified will print into dataPath given in Clusters_OUTPUT.csv*/
     private String outputPath = null;
 
+    /** Getter for dataPath */
+    public String getDataPath(){
+        return this.dataPath;
+    }
+
 
     public static void main(String[] args) {
 
         Allen2HPO allen2hpo = new Allen2HPO();
+
+
 
         /**
         *   Parse the command line for directory path
         */
         allen2hpo.parseCommandLine(args);
 
+
+
         /**
-        *   Read in all expression data and annotations
-        *   All data for one brain is packaged in a single AllenDataMngr object
-        *   Array of multiple brains
+        *   Go through each brain donor. For Each brain :
+        *   1) Extract microarray expression and corresponding annotations (probe,sample)
+        *   2) Perform cluster analysis
+        *   3) Export cluster files
         */
-        ArrayList<AllenDataMngr> allData = allen2hpo.readData();
+        File parentDir = new File(allen2hpo.getDataPath());
+        int donorCount = 0;
+        /** Data path provided points to a single brain donor */
+        if (allen2hpo.checkIfDirAllenDataMngrCompatible(parentDir)) {
+            allen2hpo.performSingleDonorAnalysis(parentDir);
+            donorCount ++;
+        }
+        /** Check if data path provided points to a directory of brain donors */
+        else
+        {
+            /** Get name of all files in parent directory */
+            String[] files = parentDir.list();
+            /** Check if file is a directory and if it is allenbrain compatible */
+            for(String fileName : files)
+            {
+                File child = new File(allen2hpo.getDataPath() + parentDir.separator + fileName);
+                if (child.isDirectory())
+                {
+                    if (allen2hpo.checkIfDirAllenDataMngrCompatible(child)) {
+                        allen2hpo.performSingleDonorAnalysis(child);
+                        donorCount++;
+                    }
+                }
+            }
+        }
+        if (donorCount == 0)
+        {
+            System.out.println("No compatible Allen Brain directories were found");
+            break;
+        }
+
+
+
 
 
         /**
         *   Read in the ontology file
         *   In future can be used by cluster analysis to modify proximity measure calculation
         */
-        OntologyDataMngr ontology = new OntologyDataMngr(allen2hpo.getDataPath());
-
-
-        /**
-        *   Perform cluster analysis on each brain one at a time
-        */
-        //Cluster clust = new Cluster(brain1);
+    //    OntologyDataMngr ontology = new OntologyDataMngr(allen2hpo.getDataPath());
 
     }
 
     /**
-    *   Private method that reads in expression data and annotations for all brain objects
-    *   At the moment only reads a single brain
+    *   Checks for presence of all necessary files for AllenDataMngr
+    *   @param File object representing a directory to be checked
     */
-    private ArrayList<AllenDataMngr> readData(){
+    private boolean checkIfDirAllenDataMngrCompatible(File dir){
+        boolean expression = false;
+        boolean probes = false;
+        boolean samples = false;
+
+        /** Check for presence of all necessary files */
+        for(String fileName : dir.list())
+        {
+            if (fileName.equals("MicroarrayExpression.csv") )
+                expression = true;
+            if (fileName.equals("Probes.csv") )
+                probes = true;
+            if (fileName.equals("SampleAnnot.csv") )
+                samples = true;
+        }
+
+        /** If all necessary files present, return true */
+        if (expression == true && probes == true && samples == true)
+            return true;
+
+        return false;
+    }
+
+    /**
+    *
+    */
+    private void performSingleDonorAnalysis(File dir){
         ///Must be set in order to perfrom analysis. Should correspond to number of rows in microarray analysis file
         int numberOfProbes = 63000;
 
-        ArrayList<AllenDataMngr> allData = new ArrayList<AllenDataMngr>();
-        //Open brain expression directory
-        AllenDataMngr brain1 = new AllenDataMngr(this.dataPath,numberOfProbes);
+        AllenDataMngr brainData = new AllenDataMngr(this.dataPath,numberOfProbes);
 
-        allData.add(brain1);
-        return allData;
-    }
+        Cluster clust = new Cluster(brainData);
 
-    public String getDataPath(){
-        return this.dataPath;
     }
 
     /**
