@@ -32,11 +32,11 @@ public class AllenDataMngr{
 	/**
 	*	Constructor method parses data provided in allenbrain directory
 	*/
-	public AllenDataMngr(String dir, int dim){
+	public AllenDataMngr(String dir){
 
 
 		//Parse gene + sample tissue names
-		readAnnotations(dir,dim);
+		readAnnotations(dir);
 
 		//Parse expression data
 		ReadExpression expression = new ReadExpression(dir+"/MicroarrayExpression.csv",this.geneNames.length,this.tissueIds.length,true);
@@ -61,11 +61,11 @@ public class AllenDataMngr{
 	*	@param string of directory where files are to be found
 	*	@param int number of expected rows
 	*/
-	private void readAnnotations(String dir, int dim){
+	private void readAnnotations(String dir){
 
 		///Parse gene names
-		ReadProbeAnnots probes = new ReadProbeAnnots(dir,dim);
-		ReadTissueAnnots tissues = new ReadTissueAnnots(dir+"/SampleAnnot.csv",1840);
+		ReadProbeAnnots probes = new ReadProbeAnnots(dir+"/Probes.csv");
+		ReadTissueAnnots tissues = new ReadTissueAnnots(dir+"/SampleAnnot.csv");
 
 		///Set variables
 		this.geneIds = probes.getIds();

@@ -15,9 +15,9 @@ import java.io.*;
 public class ReadProbeAnnots extends ReadAnnots{
 
 
-	public ReadProbeAnnots(String dir, int dim){
-		String file = dir+"/Probes.csv";
-		super.StartReading(file,dim);
+	public ReadProbeAnnots(String dir){
+		String file = dir;
+		super.StartReading(file);
 	}
 
 

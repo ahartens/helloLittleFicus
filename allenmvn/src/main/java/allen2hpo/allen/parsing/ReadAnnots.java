@@ -5,10 +5,9 @@ import java.io.*;
 
 
 /**
-*	Abstract class to read an annotation file (probe/sample).
+*	<p>Abstract class to read an annotation file (probe/sample).
 *	Skips first line (header) and continues to parse file line by line
-*	Subclasses can specify which cells should be stored in id/name array
-*	by overriding handleRow method (called for each line)
+*	Subclasses must override handleRow method (called for each line of file)</p>
 *	@param string filename of file to be provided
 *	@param general number of rows that are expected (arrays later clipped to proper size)
 *	@author Alex Hartenstein
@@ -25,33 +24,25 @@ abstract class ReadAnnots{
 
 
 	/**
-	*	Constructor method performs all necessary actions
-	*	handleRow() must be overridding
+	*	Constructor method implements lifecycle
+	*	handleRow() Subclasses must overridden by subclasses
 	*	@param string filename of file to be provided
-	*	@param general number of rows that are expected (arrays later clipped to proper size)
 	*/
-	public void StartReading(String filename, int dim){
-		//Init arrays to store cell info with PREDEFINED dimension size
-		this.ids = new int[dim];
-		this.names = new String[dim];
+	public void StartReading(String filename){
 
-		//Lifecycle
+		/** Count number of lines in file, excluding the first line (header) */
+		openFile(filename);
+		countLines();
+		scanner.close();
+
+		/** Initialize name/id arrays with dimension size found previously */
+		this.ids = new int[this.count];
+		this.names = new String[this.count];
+
+		/** Parse each line of the file */
 		openFile(filename);
 		readFile();
 		scanner.close();
-
-		//Ensure that arrays are exactly the correct size of data they contain
-		if (this.count != dim){
-
-			int[] tempIds = new int[this.count];
-			String [] tempNames = new String[this.count];
-			for (int i=0; i<this.count; i++){
-				tempIds[i] = this.ids[i];
-				tempNames[i] = this.names[i];
-			}
-			this.ids = tempIds;
-			this.names = tempNames;
-		}
 	}
 
 
@@ -87,12 +78,27 @@ abstract class ReadAnnots{
 	}
 
 	/**
+	*	Count number of lines in file
+	*/
+	private void countLines(){
+		scanner.nextLine();
+		while (scanner.hasNext()){
+			scanner.nextLine();
+			this.count++;
+		}
+	}
+
+	/**
 	*	Reads file in line by line, passing handling of the line the private method handleRow.
 	*/
 	private void readFile(){
-		///FIRST LINE IS A HEADER : REMOVE IT
+		/** First line is a header : remove it */
 		scanner.nextLine();
-		///EACH FOLLOWING ROW IS READ
+
+		/** 
+		*	Parse each following line
+		*	Handling of line is specified by subclasses of readAnnots
+		*/
 		this.count = 0;
 	    while (scanner.hasNext()) {
 	    	handleRow(scanner.nextLine(),this.count);

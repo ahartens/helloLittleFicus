@@ -15,9 +15,9 @@ import allen2hpo.allen.*;
 public class ReadTissueAnnots extends ReadAnnots{
 
 
-	public ReadTissueAnnots(String dir, int dim){
+	public ReadTissueAnnots(String dir){
 		String file = dir;
-		super.StartReading(file,dim);
+		super.StartReading(file);
 	}
 
 
