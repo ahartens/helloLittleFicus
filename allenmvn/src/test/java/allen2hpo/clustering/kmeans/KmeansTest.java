@@ -40,7 +40,7 @@ public class KmeansTest{
 
     @Test public void testSimpleClustering() {
 	Kmeans km = new Kmeans(m,2);
-	km.performClustering();
+	km.doClustering();
 	int[] idx = km.getClusterAssignments();
 	int cluster1 = idx[0];
 	int cluster2 = idx[1];

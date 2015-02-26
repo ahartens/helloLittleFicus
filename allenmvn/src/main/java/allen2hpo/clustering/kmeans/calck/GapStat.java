@@ -183,7 +183,7 @@ public class GapStat implements GetKable{
 
 		this.kmeans.setK(k);
 		this.kmeans.setInitClustersBasic();
-		this.kmeans.performClustering();
+		this.kmeans.doClustering();
 
 		Matrix[] clusters = this.kmeans.getClusters();
 
@@ -207,7 +207,7 @@ public class GapStat implements GetKable{
 
 		kmo.setK(k);
 		kmo.setInitClustersBasic();
-		kmo.performClustering();
+		kmo.doClustering();
 
 		Matrix[] clusters = kmo.getClusters();
 

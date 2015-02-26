@@ -3,8 +3,7 @@ package allen2hpo;
 import allen2hpo.allen.*;
 import allen2hpo.allen.ontology.*;
 
-import allen2hpo.clustering.kmeans.Kmeans;
-import allen2hpo.clustering.kmeans.calck.GapStat;
+import allen2hpo.clustering.ClusteringMngr;
 
 import allen2hpo.matrix.*;
 
@@ -25,7 +24,7 @@ import org.apache.commons.cli.Parser;
 *   <b>Clusters genes with similar expression patterns across multiple tissues</b><br>
 *   <dl>
 *       <dt>Receives single (or directory of) Allen Brain microarray analysis directories<dt>
-*       <dd>Each Allen Brain directory must contain a MicroarrayExpression.csv, SampleAnnot.csv and Probes.csv file)</dd>
+*       <dd>Each Allen Brain directory must contain a MicroarrayExpression.csv, SampleAnnot.csv and Probes.csv file</dd>
 *   </dl>
 *   </p>
 *   <p>
@@ -42,7 +41,13 @@ import org.apache.commons.cli.Parser;
 
 public class Allen2HPO {
 
-    /** Required input parsed from command line. Directory that contains Probes.csv, MicroarrayExpression.csv, SampleAnnot.csv*/
+    /** 
+    *   Required input parsed from command line.<br>
+    *   Directory containing following OR  subdirectories containing following :
+    *   <ol>
+    *   <li> Probes.csv</li>, <li>MicroarrayExpression.csv</li>, <li>SampleAnnot.csv</li>
+    *   </ol>
+    */
     private String dataPath = null;
 
     /** Optional input parsed from command line. If not specified will print into dataPath given in Clusters_OUTPUT.csv*/
@@ -58,8 +63,6 @@ public class Allen2HPO {
 
         Allen2HPO allen2hpo = new Allen2HPO();
 
-
-
         /**
         *   Parse the command line for directory path
         */
@@ -68,19 +71,34 @@ public class Allen2HPO {
 
 
         /**
-        *   Go through each brain donor. For Each brain :
+        *   Read in the ontology file
+        *   Can be used by cluster analysis to modify proximity measure calculation
+        *   Currently not being used
+        */
+        //OntologyDataMngr ontology = new OntologyDataMngr(allen2hpo.getDataPath());
+
+
+
+        /**
+        *   Go through each brain donor directory. For each directory :
         *   1) Extract microarray expression and corresponding annotations (probe,sample)
         *   2) Perform cluster analysis
-        *   3) Export cluster files
+        *   3) Print cluster files
         */
+        
         File parentDir = new File(allen2hpo.getDataPath());
         int donorCount = 0;
+
         /** Data path provided points to a single brain donor */
-        if (allen2hpo.checkAllAllenBrainFilesPresent(parentDir)) {
+
+        if (allen2hpo.checkAllAllenBrainFilesPresent(parentDir)) 
+        {
             /** Do the cluster analysis on single brain donor */
             allen2hpo.performSingleDonorAnalysis(parentDir);
             donorCount ++;
         }
+
+
         /** Data path provided points to a directory of brain donors */
         else
         {
@@ -100,7 +118,8 @@ public class Allen2HPO {
                 }
             }
         }
-        /** Data path doesn't point compatible file */
+
+        /** Data path doesn't point to a compatible file */
         if (donorCount == 0)
         {
             System.out.println("No compatible Allen Brain directories were found");
@@ -108,15 +127,11 @@ public class Allen2HPO {
 
 
 
-
-
-        /**
-        *   Read in the ontology file
-        *   In future can be used by cluster analysis to modify proximity measure calculation
-        */
-    //    OntologyDataMngr ontology = new OntologyDataMngr(allen2hpo.getDataPath());
-
     }
+
+
+
+
 
     /**
     *   <p>Checks for presence of all necessary files for AllenDataMngr</p>
@@ -129,6 +144,7 @@ public class Allen2HPO {
     *   @param File directory to be checked
     *   @return boolean true if all present, false if any missing
     */
+
     private boolean checkAllAllenBrainFilesPresent(File dir){
         boolean expression = false;
         boolean probes = false;
@@ -156,141 +172,38 @@ public class Allen2HPO {
     *
     */
     private void performSingleDonorAnalysis(File dir){
-        AllenDataMngr brainData = new AllenDataMngr(this.dataPath);
+        
 
-        Cluster clust = new Cluster(brainData);
-
-    }
-
-    /**
-    *   Cluster nested class is responsible for
-    *   1) performing cluster analysis on a single brain
-    *   2) printing output to cl/file
-    */
-    class Cluster{
-        private Matrix prototypes;
         /**
-        *   Constructor method performs cluster method and prints
-        *   @param AllenData object (contains fully parsed brain microarray expression/annotations)
+        *   Init AllenDataMngr object to serve as wrapper of directory corresponding to a single Allen Brain donor
         */
-        public Cluster(AllenDataMngr mngr){
-            ///Initialize kmeans object and cluster data
-            GapStat gap = new GapStat(mngr.getExpression());
-            Kmeans kmeans = new Kmeans(mngr.getExpression(),gap.getK());
+        AllenDataMngr brainDataMngr = new AllenDataMngr(dir.getPath());
 
-            kmeans.performClustering();
-            ///Print clusters
-            writeOutputToFile(mngr, kmeans);
+        /**
+        *   Parse directory 
+        */
+        brainDataMngr.parseExpressionAndAnnotations();
 
-            this.prototypes = new Matrix (kmeans.getClusterPrototypes());
-        }
+        /**
+        *   Average expression of probes with same gene name to create unique gene-expression pairs
+        */
+        brainDataMngr.collapseRepeatProbesToUniqueGenes();
 
-        public Matrix getPrototypes(){
-            return this.prototypes;
-        }
+        /**
+        *   Normalize the data
+        */
+        brainDataMngr.meanNormalizeData();
+
+
 
 
         /**
-        *   Prints names of genes in a cluster into a csv file
+        *   Cluster Data
         */
-        private void writeOutputToFile(AllenDataMngr mngr, Kmeans kmeans){
+        ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
 
-            ///Get gene names corresponding to indices in the clustering
-            String[][] clusters = mngr.getGeneClusters(kmeans.getClusterIndices());
-
-            ///Init 2d array k elements long containing cluster prototypes
-            double [][] protos = kmeans.getClusterPrototypes();
-
-
-            ///Write gene names to file
-            FileWriter writer = new FileWriter();
-            writer.createFileWithName(outputPath);
-            writeAllClustersGenesToOneFile(writer,clusters);
-            writeClusterPrototypesToFile(writer,protos);
-            writer.closeFile();
-
-
-            writeClusterGenesToFile(dataPath,clusters);
-            writePopulationGenesToFile(dataPath,mngr.getAllGenes());
-
-            ///Print clusters in terminal
-            printClusterPrototypesInTerminal(protos);
-            printClusterGenesInTerminal(clusters);
-
-        }
-
-        private void printClusterGenesInTerminal(String[][] clusters){
-            for(int i =0;i<clusters.length;i++){
-                System.out.printf("Cluster %d",i);
-                for(int j=0; j<clusters[i].length-1; j++){
-                    System.out.printf(" %s,",clusters[i][j]);
-                }
-                System.out.printf(" %s,",clusters[i][clusters[i].length-1]);
-                System.out.printf("\ncount of : %d\n\n",clusters[i].length);
-            }
-        }
-
-        private void writeClusterPrototypesToFile(FileWriter writer, double[][] protos){
-
-            ///Write cluster prototypes to file
-            for(int i =0;i<protos.length;i++){
-                for(int j=0; j<protos[i].length-1; j++){
-                    writer.writeDouble(protos[i][j]);
-                    writer.writeDelimit();
-                }
-                writer.writeDouble(protos[i][protos[i].length-1]);
-                writer.writeNextLine();
-            }
-        }
-
-        private void writeClusterGenesToFile(String dir, String[][] clusters){
-            for(int i =0;i<clusters.length;i++){
-                FileWriter newFile = new FileWriter();
-                newFile.createFileWithName(dir+"/cluster_"+String.valueOf(i)+".txt");
-
-                for(int j=0; j<clusters[i].length; j++){
-                    newFile.writeString(clusters[i][j]);
-                    newFile.writeNextLine();
-                }
-                newFile.closeFile();
-            }
-        }
-
-        private void writePopulationGenesToFile(String dir, String[] array){
-
-            FileWriter newFile = new FileWriter();
-            newFile.createFileWithName(dir+"/population.txt");
-
-            for(int i=0; i<array.length; i++){
-                newFile.writeString(array[i]);
-                newFile.writeNextLine();
-            }
-            newFile.closeFile();
-        }
-
-        private void writeAllClustersGenesToOneFile(FileWriter writer, String[][] clusters){
-            for(int i =0; i<clusters.length; i++){
-                for(int j=0; j<clusters[i].length-1; j++){
-                    writer.writeString(clusters[i][j]);
-                    writer.writeDelimit();
-                }
-                writer.writeString(clusters[i][clusters[i].length-1]);
-                writer.writeNextLine();
-            }
-        }
-
-        private void printClusterPrototypesInTerminal(double [][]protos){
-            ///Print cluster prototypes in command line
-            System.out.println("CLUSTER PROTOTYPES:");
-            for(int i=0; i<protos.length; i++){
-                System.out.printf("%d HAS THE PROTOTYPE : \n",i);
-                for(int j=0; j<protos[0].length; j++){
-                    System.out.printf("(%d) : %.3f\t",j,protos[i][j]);
-                }
-                System.out.printf("\n\n\n\n\n");
-            }
-        }
-
+        clusteringMngr.doKmeansClusteringWithGapStat();
+        clusteringMngr.writeOutputToFile(this.dataPath);
     }
 
 

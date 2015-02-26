@@ -29,31 +29,68 @@ public class AllenDataMngr{
 	/**	Matrix object containing all expression data. each row is a gene, each column a tissue sample */
 	private Matrix data = null;
 
+	/** String path to directory which should be parsed */
+	private String dataPath = null;
+
 	/**
 	*	Constructor method parses data provided in allenbrain directory
 	*/
 	public AllenDataMngr(String dir){
 
+		this.dataPath = dir;
+	}
 
-		//Parse gene + sample tissue names
-		readAnnotations(dir);
+	/** 
+    *   Parse data contained in an Allen Brain donor directory<br>
+    *   <ol>
+    *   <li>Probes.csv is parsed and gene IDs and gene names are stored in memory</li> 
+    *	<li>SampleAnnot.csv is parsed and tissue IDs and tissue names are stored in memory</li>
+    *	<li>MicroarrayExpression.csv is parsed keeping all expression values in a Matrix object</li>
+    *   </ol>
+    */
+	public void parseExpressionAndAnnotations(){
+		
+		/**
+		*	Parse Probes.csv and set gene Ids and names
+		*/
+		ReadProbeAnnots probes = new ReadProbeAnnots(this.dataPath+"/Probes.csv");
+		this.geneIds = probes.getIds();
+		this.geneNames = probes.getNames();
 
-		//Parse expression data
-		ReadExpression expression = new ReadExpression(dir+"/MicroarrayExpression.csv",this.geneNames.length,this.tissueIds.length,true);
-		//this.data = expression.getData();
 
+		/**
+		*	Parse SampleAnnot.csv and set tissue ids and names
+		*/
+		ReadTissueAnnots tissues = new ReadTissueAnnots(this.dataPath+"/SampleAnnot.csv");
+		this.tissueIds = tissues.getIds();
+		this.tissueNames = tissues.getNames();
+
+
+		/**
+		*	Parse MicroarrayExpression.csv
+		*	Uses length of probes.csv and sampleannot.csv to specify dimensions of Matrix array storing data
+		*	True because first column is a header specifying probe id (should be parsed and stored separately frome expression data)
+		*/
+		ReadExpression expression = new ReadExpression(this.dataPath+"/MicroarrayExpression.csv",this.geneNames.length,this.tissueIds.length,true);
+		this.data = expression.getData();
+
+	}
+
+
+
+	/**
+	*	Gene
+	*/
+	public void collapseRepeatProbesToUniqueGenes(){
 		///Mean across rows that refer to single gene
-		CollapseRows collapser = new CollapseRows(expression.getData(),this.geneIds, this.geneNames);
+		CollapseRows collapser = new CollapseRows(this.data,this.geneIds, this.geneNames);
 		this.data = collapser.getData();
 		this.geneNames = collapser.getGeneNames();
 		System.out.println("Number of unique genes : "+ this.data.getRowSize());
+	}
 
+	public void meanNormalizeData(){
 		this.data.meanNormalizeAcrossGenesAndSamples();
-
-
-		//CovarMatrix cm = new CovarMatrix();
-		//cm.covarCalcMatrix(this.data,1);
-
 	}
 
 	/**
@@ -63,16 +100,7 @@ public class AllenDataMngr{
 	*/
 	private void readAnnotations(String dir){
 
-		///Parse gene names
-		ReadProbeAnnots probes = new ReadProbeAnnots(dir+"/Probes.csv");
-		ReadTissueAnnots tissues = new ReadTissueAnnots(dir+"/SampleAnnot.csv");
-
-		///Set variables
-		this.geneIds = probes.getIds();
-		this.geneNames = probes.getNames();
-
-		this.tissueIds = tissues.getIds();
-		this.tissueNames = tissues.getNames();
+		
 	}
 
 	///GETTERS

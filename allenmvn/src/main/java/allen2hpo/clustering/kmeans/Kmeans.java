@@ -3,6 +3,7 @@ package allen2hpo.clustering.kmeans;
 import allen2hpo.matrix.Matrix;
 import java.util.Random;
 
+import allen2hpo.clustering.Clusterable;
 import allen2hpo.clustering.kmeans.calck.*;
 import allen2hpo.clustering.kmeans.distance.*;
 import allen2hpo.clustering.kmeans.initclust.*;
@@ -19,7 +20,7 @@ import allen2hpo.clustering.kmeans.initclust.*;
 *	@author Alex Hartenstein
 */
 
-public class Kmeans{
+public class Kmeans implements Clusterable{
 
     /** The number of clusters */
     private int k = 0;
@@ -237,7 +238,7 @@ public class Kmeans{
     *   Then recalculates cluster means
     *	@param takes an int for number of iterations to be run
     */
-    public void performClustering(){
+    public void doClustering(){
 
 
         ///Ensure that all components of kmeans algorithm have been set
