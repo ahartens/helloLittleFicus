@@ -6,18 +6,24 @@ import allen2hpo.allen.transformations.*;
 
 
 /**
+*	<p>
 *	This class is responsible for handling all data corresponding to one brain.
-*	It is able to parse all data corresponding to an allen brain directory
-*	eg (Expression, Probe/Sample (ie gene/tissue) Annotations)
+*	<ol>
+*	<li>It is able to parse and store all data corresponding to an allen brain directory
+*	(Expression, Probe/Sample (ie gene/tissue) Annotations)</li>
+*	<li>Mean across all rows that refer to the same gene</li>
+*	<li>Mean normalize all expression data</li>
+*	</ol>
+*	</p>
 *	@author Alex Hartenstein.
 */
 
 public class AllenDataMngr{
 
-	/** Ordered list of all gene abbreviations derived from probes.csv file. Order == rows in microarrayexpression.csv */
+	/** Ordered array of all gene abbreviations derived from probes.csv file. Order == rows in microarrayexpression.csv */
 	private String[] geneNames = null;
 
-	/** Ordered list of all gene ids from probes.csv file.*/
+	/** Ordered array of all gene ids from probes.csv file.*/
 	private int[] geneIds = null;
 
 	/** Ordered array of all sample (ie tissue) ids derived from SampleAnnot.csv. Order == columns in microarrayexpression.csv */
@@ -33,20 +39,14 @@ public class AllenDataMngr{
 	private String dataPath = null;
 
 	/**
-	*	Constructor method parses data provided in allenbrain directory
+	*	Constructor method sets data path of directory to be parsed
 	*/
 	public AllenDataMngr(String dir){
-
 		this.dataPath = dir;
 	}
 
 	/** 
-    *   Parse data contained in an Allen Brain donor directory<br>
-    *   <ol>
-    *   <li>Probes.csv is parsed and gene IDs and gene names are stored in memory</li> 
-    *	<li>SampleAnnot.csv is parsed and tissue IDs and tissue names are stored in memory</li>
-    *	<li>MicroarrayExpression.csv is parsed keeping all expression values in a Matrix object</li>
-    *   </ol>
+    *   Parse 3 major files in Allen Brain directory : Probes.csv, SampleAnnot.csv, MicroarrayExpression.csv
     */
 	public void parseExpressionAndAnnotations(){
 		
@@ -76,35 +76,40 @@ public class AllenDataMngr{
 
 	}
 
-
-
 	/**
-	*	Gene
+	*	Mean across rows (probes) that refer to single gene.
+	*	Result is one gene one expression value.
 	*/
 	public void collapseRepeatProbesToUniqueGenes(){
-		///Mean across rows that refer to single gene
-		CollapseRows collapser = new CollapseRows(this.data,this.geneIds, this.geneNames);
+		
+		CollapseRows collapser = new CollapseRows();
+
+		/** 
+		*	Perform collapsing of rows of expression data using given row annotations (gene ids + names) 
+		*/
+		collapser.doCollapseRowsGivenGeneIds(this.data, this.geneIds, this.geneNames);
+
+		/**
+		*	Set this data to collapsed data
+		*/
 		this.data = collapser.getData();
 		this.geneNames = collapser.getGeneNames();
+
+
 		System.out.println("Number of unique genes : "+ this.data.getRowSize());
 	}
 
+	/**
+	*	Matrix object mean normalizes itself using.<br> 
+	*	normVal = val(x,y) - mean(x) - mean(y) + mean(all)
+	*/
 	public void meanNormalizeData(){
 		this.data.meanNormalizeAcrossGenesAndSamples();
 	}
 
-	/**
-	*	Parses annotations corresponding to given microarray experiment (probes + samples)
-	*	@param string of directory where files are to be found
-	*	@param int number of expected rows
-	*/
-	private void readAnnotations(String dir){
-
-		
-	}
 
 	///GETTERS
-	/** @return matrix object containing all expression data */
+	/** @return Matrix object containing all expression data */
 	public Matrix getExpression(){
 		return this.data;
 	}
@@ -120,8 +125,8 @@ public class AllenDataMngr{
 	}
 
 	/**
-	*	@return array of arrays of gene ids corresponding to index assignments.
-	*	@param array of arrays of indices of clustered genes
+	*	@return String[][] of arrays of gene ids corresponding to index assignments.
+	*	@param int[][] of arrays of indices of clustered genes
 	*/
 	public String[][] getGeneClusters(int[][] ci){
 		///ci = cluster indicies
@@ -138,9 +143,9 @@ public class AllenDataMngr{
 	}
 
 	/**
-	*	Creates a datamatrix of selected columns (all rows) from original expression matrix
+	*	Creates a data matrix of selected columns (all rows) from original expression matrix
 	*	@return Matrix object
-	*	@param array of int (desired column indices)
+	*	@param int[] of int (desired column indices)
 	*/
 	public Matrix getExpressionDataForTissues(int[] tissueIndices){
 		double[][] e = new double[this.data.getRowSize()][tissueIndices.length];
@@ -154,16 +159,16 @@ public class AllenDataMngr{
 	}
 
 	/**
-	*	@return 1d array of strings
-	*	@param 1d array of ints, corresponding to rows indices
+	*	@return String[] array of strings
+	*	@param int[] array of ints, corresponding to rows indices
 	*/
 	public String[] getGenesAtIndexes(int[] indexes){
 		return getNamesAtIndexes(indexes,this.geneNames);
 	}
 
 	/**
-	*	@return 1d array of strings
-	*	@param 1d array of ints, corresponding to rows indices
+	*	@return String[] 1d array of strings
+	*	@param int[] 1d array of ints, corresponding to rows indices
 	*/
 	public String[] getTissuesAtIndexes(int[] indexes){
 		return getNamesAtIndexes(indexes,this.tissueNames);
@@ -171,9 +176,9 @@ public class AllenDataMngr{
 
 	/**
 	*	Called getGenes/getTissues methods
-	*	@return array of strings of
-	*	@param array of ints, indices of desired name
-	*	@param array of strings, the list from which names are selected from
+	*	@return String[] of strings of
+	*	@param int[] of ints, indices of desired name
+	*	@param String[] of strings, the list from which names are selected from
 	*/
 	private String[] getNamesAtIndexes(int[] indexes, String[] allNames){
 		String[] names = new String[indexes.length];

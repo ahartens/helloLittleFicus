@@ -21,7 +21,8 @@ public class CollapseRowsTest{
 
         int[][] indices = {{0,1,2,3},{4,5},{6}};
 
-        CollapseRows collapse = new CollapseRows(m,indices);
+        CollapseRows collapse = new CollapseRows();
+        collapse.doCollapseRowsGivenIndices(m,indices);
         Matrix condensed = collapse.getData();
         condensed.print();
 
@@ -29,14 +30,20 @@ public class CollapseRowsTest{
 
     @Test
     public void CollapseRowsTestTwo(){
+        /**
+         *  7x6 matrix of data
+         */
         double[][] data = {{1,2,3,4,5,6},{1,2,3,4,5,6,},{1,2,3,4,5,6},{1,2,3,4,5,6},{7,8,9,10,11,12},{7,8,9,10,11,12},{13,14,15,16,17,18}};
         Matrix m = new Matrix(data);
 
+        /**
+         *  
+         */
         int[] indices = {12,12,12,12,11,11,33};
         String[] names = {"one","one","one","one","two","two","three"};
 
-        CollapseRows collapse = new CollapseRows(m,indices,names);
-
+        CollapseRows collapse = new CollapseRows();
+        collapse.doCollapseRowsGivenGeneIds(m,indices,names);
 
         Matrix condensed = collapse.getData();
         double[][] correct = {{1,2,3,4,5,6},{7,8,9,10,11,12},{13,14,15,16,17,18}};

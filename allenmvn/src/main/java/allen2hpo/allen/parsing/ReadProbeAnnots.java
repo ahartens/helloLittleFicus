@@ -17,6 +17,7 @@ public class ReadProbeAnnots extends ReadAnnots{
 
 	public ReadProbeAnnots(String dir){
 		String file = dir;
+		
 		super.StartReading(file);
 	}
 

@@ -2,9 +2,7 @@ package allen2hpo;
 
 import allen2hpo.allen.*;
 import allen2hpo.allen.ontology.*;
-
 import allen2hpo.clustering.ClusteringMngr;
-
 import allen2hpo.matrix.*;
 
 import java.util.Scanner;
@@ -21,18 +19,12 @@ import org.apache.commons.cli.Parser;
 
 /**
 *   <p>
-*   <b>Clusters genes with similar expression patterns across multiple tissues</b><br>
-*   <dl>
-*       <dt>Receives single (or directory of) Allen Brain microarray analysis directories<dt>
-*       <dd>Each Allen Brain directory must contain a MicroarrayExpression.csv, SampleAnnot.csv and Probes.csv file</dd>
-*   </dl>
-*   </p>
-*   <p>
-*   Each Allen Brain Directory is consecutively analyzed.
+*   Responsible for managing lifecycle of program.
+*   <br>Given a single (or directory of) Allen Brain microarray analysis directories, finds clusters of genes with similar expression patterns across multiple tissues.
+*   <br>Each Allen Brain Directory is consecutively analyzed :
 *   <ol>
-*   <li>Expression data + annotations are parsed and packaged in an AllenDataMngr object</li>
+*   <li>Expression data an annotations are parsed and packaged in an AllenDataMngr object</li>
 *   <li>Expression data is clustered</li>
-*   <li>Resulting clusters are sent to AllenDataMngr, which returns gene names corresponding to expression data</li>
 *   <li>Each cluster is printed to a separate file, one gene per line</li>
 *   </ol>
 *   </p>
@@ -41,13 +33,7 @@ import org.apache.commons.cli.Parser;
 
 public class Allen2HPO {
 
-    /** 
-    *   Required input parsed from command line.<br>
-    *   Directory containing following OR  subdirectories containing following :
-    *   <ol>
-    *   <li> Probes.csv</li>, <li>MicroarrayExpression.csv</li>, <li>SampleAnnot.csv</li>
-    *   </ol>
-    */
+    /** Required input parsed from command line. Directory containing following OR subdirectories containing expression data and annotations */
     private String dataPath = null;
 
     /** Optional input parsed from command line. If not specified will print into dataPath given in Clusters_OUTPUT.csv*/
@@ -59,6 +45,14 @@ public class Allen2HPO {
     }
 
 
+    /**
+    *   <p>Lifecycle of program.
+    *   <ol>
+    *   <li>Parse the command line, getting path to directory of data to be analyzed.</li>
+    *   <li>Analyze each directory found that contains the necessary files for analysis</li>
+    *   </ol>
+    *   </p>
+    */
     public static void main(String[] args) {
 
         Allen2HPO allen2hpo = new Allen2HPO();
@@ -94,7 +88,7 @@ public class Allen2HPO {
         if (allen2hpo.checkAllAllenBrainFilesPresent(parentDir)) 
         {
             /** Do the cluster analysis on single brain donor */
-            allen2hpo.performSingleDonorAnalysis(parentDir);
+            allen2hpo.doSingleDonorAnalysis(parentDir);
             donorCount ++;
         }
 
@@ -102,45 +96,49 @@ public class Allen2HPO {
         /** Data path provided points to a directory of brain donors */
         else
         {
-            /** Get name of all files in parent directory */
+            /** 
+            *   Get name of all files in parent directory 
+            */
             String[] files = parentDir.list();
-            /** Check if file is a directory and if it is allenbrain compatible */
+            /** 
+            *   Check if file is a directory and if it is allenbrain compatible 
+            */
             for(String fileName : files)
             {
                 File child = new File(allen2hpo.getDataPath() + parentDir.separator + fileName);
                 if (child.isDirectory())
                 {
-                    if (allen2hpo.checkAllAllenBrainFilesPresent(child)) {
-                        /** Do the cluster analysis on single brain donor */
-                        allen2hpo.performSingleDonorAnalysis(child);
+                    if (allen2hpo.checkAllAllenBrainFilesPresent(child)) 
+                    {
+                        /** 
+                        *   Do the cluster analysis on single brain donor 
+                        */
+                        allen2hpo.doSingleDonorAnalysis(child);
                         donorCount++;
                     }
                 }
             }
         }
 
-        /** Data path doesn't point to a compatible file */
+        /** 
+        *   Data path doesn't point to a compatible file 
+        */
         if (donorCount == 0)
         {
             System.out.println("No compatible Allen Brain directories were found");
         }
 
-
-
     }
 
-
-
-
-
     /**
-    *   <p>Checks for presence of all necessary files for AllenDataMngr</p>
-    *   <p>Returns true if following are present in directory :</p>
+    *   <p>Checks for presence of all necessary files for AllenDataMngr.<br>
+    *   Returns true if following are present in directory :
     *   <ol>
     *   <li>MicroarrayExpression.csv</li>
     *   <li>Probes.csv</li>
     *   <li>SampleAnnot.csv</li>
     *   </ol>
+    *   </p>
     *   @param File directory to be checked
     *   @return boolean true if all present, false if any missing
     */
@@ -169,9 +167,17 @@ public class Allen2HPO {
     }
 
     /**
-    *
+    *   <p>Do cluster analysis on one brain directory and print out the results
+    *   <ol>
+    *   <li>Parse all data contained in directory</li>
+    *   <li>Collapse multiple probes to unique gene-expression value pairs</li>
+    *   <li>Mean normalize the data</li>
+    *   <li>Cluster the data using kmeans with gap statistic</li>
+    *   <li>Print cluster files</li>
+    *   </ol>
+    *   </p>
     */
-    private void performSingleDonorAnalysis(File dir){
+    private void doSingleDonorAnalysis(File dir){
         
 
         /**
