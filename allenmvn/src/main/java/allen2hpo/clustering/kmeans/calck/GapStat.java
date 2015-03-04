@@ -182,7 +182,6 @@ public class GapStat implements GetKable{
 		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
 
 		this.kmeans.setK(k);
-		this.kmeans.setInitClustersBasic();
 		this.kmeans.doClustering();
 
 		Matrix[] clusters = this.kmeans.getClusters();
@@ -206,7 +205,6 @@ public class GapStat implements GetKable{
 		Kmeans kmo = new Kmeans(m);
 
 		kmo.setK(k);
-		kmo.setInitClustersBasic();
 		kmo.doClustering();
 
 		Matrix[] clusters = kmo.getClusters();

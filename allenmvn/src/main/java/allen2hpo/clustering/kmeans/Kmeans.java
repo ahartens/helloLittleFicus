@@ -45,11 +45,14 @@ public class Kmeans implements Clusterable{
     *   calculation. Default (Euclidean distance) is used if none provided in constructor method.*/
     private DistComputable distCalc = null;
 
+    /** Object implementing DistComputable interface which performs distance 
+    *   calculation. Default (Euclidean distance) is used if none provided in constructor method.*/
+    private InitClusterable cpIniter = null;
+
 
     ///CONSTRUCTOR METHODS
     /**
-    *   Simplest constructor method initializes only data to be clusters. k, distance 
-    *   calculation, etc can be set using setter variables.
+    *   Simplest constructor method initializes only data to be clustered.
     *   @param Matrix expression data to be clustered.
     */
     public Kmeans(Matrix mat){
@@ -57,8 +60,7 @@ public class Kmeans implements Clusterable{
     }
 
     /**
-    *   Constructor method initializing expression data to be clustered and K value. As no
-    *    proximity calculation specified, default proximity calculation is used.
+    *   Constructor method initializing expression data to be clustered and K value.
     *	@param Matrix expression data to be clustered.
     *   @param int number of clusters data matrix should be partitioned into.
     */
@@ -67,14 +69,26 @@ public class Kmeans implements Clusterable{
     }
 
     /**
-    *   Exhaustive constructor method that, in addition to setting expression data 
-    *   and k value, allows for customization of distance calculation used in clustering.
-    *   @param Matrix object is data to be clustered.
-    *   @param int k is number of clusters data matrix should be partitioned into
-    *   @param DistComputable distance calculation implementing DistComputable interface to 
-    *   customize distance calculation.
+    *   Constructor method initializing expression data to be clustered, K value and distance calculation.
+    *   @param Matrix expression data to be clustered.
+    *   @param int number of clusters data matrix should be partitioned into.
+    *   @param DistComputable distance calculation implementing DistComputable interface to customize distance calculation.
     */
     public Kmeans(Matrix mat, int kval, DistComputable d){
+        this(mat,kval,d,new InitClustBasic());
+    }
+
+
+    /**
+    *   Exhaustive constructor method that, in addition to setting expression data 
+    *   and k value, allows for customization of distance calculation used in clustering and 
+    *   method with which cluster prototypes are initialized.
+    *   @param Matrix object is data to be clustered.
+    *   @param int k is number of clusters data matrix should be partitioned into
+    *   @param DistComputable distance calculation implementing DistComputable interface to customize distance calculation.
+    *   @param InitClusterable object specifying method used to initialize cluster prototypes 
+    */
+    public Kmeans(Matrix mat, int kval, DistComputable d, InitClusterable cpInit){
 
         if (mat == null)
             throw new IllegalArgumentException("Data not initialized");
@@ -82,22 +96,41 @@ public class Kmeans implements Clusterable{
             throw new IllegalArgumentException("k not initialized");
         if (d == null)
             throw new IllegalArgumentException("d not initialized");
+        if (cpInit == null)
+            throw new IllegalArgumentException("d not initialized");
 
 
-        /** Set data matrix private variable */
+        /** 
+        *   Set data matrix private variable 
+        */
         this.m = mat;
 
-        /** Initialize cluster index array. While iterative clustering, the cluster to which a data point belongs to will be stored here. */
-        this.ci = new int[mat.getRowSize()];
-
-        /** Set K value */
+        /** 
+        *   Set K value 
+        */
         setK(kval);
 
-        /** Set distance calculation object */
+        /** 
+        *   Set distance calculation object 
+        */
         this.distCalc = d;
+
+        /** 
+        *   Initialize cluster prototype start values using InitClusterable object
+        */
+        this.cpIniter = cpInit;
+
+        /** 
+        *   Initialize cluster index array. While iterative clustering, the cluster to
+        *   which a data point belongs to will be stored here. 
+        */
+        this.ci = new int[mat.getRowSize()];
+
     }
 
     /**
+    *   Called by constructor method or can be called externally if wish to change k.
+    *   <br> Sets k value to be used as well as initializes arrays necessary for k of that size
     *   @param int k is number of clusters to data matrix should be partitioned into.
     */
     public void setK(int kval){
@@ -107,58 +140,6 @@ public class Kmeans implements Clusterable{
         this.cs = new int[kval];
     }
 
-    /**
-    *   @param double[][] init cluster prototypes with k rows and number of columns corresponding to datamatrix column size
-    */
-    public void setInitClusters(double[][] clusterSeeds){
-        if (clusterSeeds == null)
-            throw new IllegalArgumentException("Cluster Seeds not initialized");
-        if (clusterSeeds.length != this.k)
-            throw new IllegalArgumentException("Invalid initialization of cluster seeds");
-
-        this.cp = clusterSeeds;
-    }
-
-    /**
-    *   @param distComputable object is able to calculate distance calculation between two points
-    */
-    public void setDistCalc(DistComputable d){
-        this.distCalc = d;
-    }
-
-    /**
-    *   Checks that all necessary components of kmeans algorithm are provided
-    *   If parts are not provided initializes missing components with default values
-    */
-    private void preclusterCheck(){
-        //Check that distance calcuation is specified. If not, use default of euclidean distance
-        if (this.distCalc==null){
-            setDistCalcBasic();
-        }
-        //Check that cluster prototypes array exists. If not initialize using random initialization
-        if (this.cp == null){
-            setInitClustersBasic();
-        }
-    }
-
-    ///DEFAULT IMPLEMENTATION
-    /**
-    *	Default implementation : Most basic implementation of Kmeans cluster initialzation, just takes first 3 values of matrix.
-    *   Called if no cluster prototypes are provided in constructor method (or set with setInitClusters)
-    */
-    public void setInitClustersBasic(){
-        InitClustBasic init = new InitClustBasic();
-        setInitClusters(init.initClusters(this.m,this.k));
-    }
-
-    /**
-    *   Default implementation : most basic distance calculation (Euclidean distance) between two points.
-    *   Called if no custom distComputable object is provided in constructor method (or set with setDistCalc)
-    */
-    public void setDistCalcBasic(){
-        DistEuclidean dist = new DistEuclidean();
-        setDistCalc(dist);
-    }
 
     ///GETTER METHODS
 
@@ -242,11 +223,17 @@ public class Kmeans implements Clusterable{
 
     ///KMEANS CLUSTERING
     /**
+    *   Initializes k cluster prototypes using specified initialiation method.
     *	Goes through each data point, assigning data points to nearest cluster.
     *   Then recalculates cluster means
     *	@param takes an int for number of iterations to be run
     */
     public void doClustering(){
+
+        /**
+        *   Initialize the cluster prototypes using specified or default intialization method.
+        */
+        this.cp = this.cpIniter.initClusters(this.m,this.k);
 
 
         ///Ensure that all components of kmeans algorithm have been set
