@@ -23,17 +23,17 @@ import org.apache.commons.cli.Parser;
 *   <br>Given a single (or directory of) Allen Brain microarray analysis directories, finds clusters of genes with similar expression patterns across multiple tissues.
 *   <br>Each Allen Brain Directory is consecutively analyzed :
 *   <ol>
-*   <li>Expression data an annotations are parsed and packaged in an AllenDataMngr object</li>
-*   <li>Expression data is clustered</li>
-*   <li>Each cluster is printed to a separate file, one gene per line</li>
+*   <li>Expression data and annotations are parsed and packaged in an {@link allen2hpo.allen AllenDataMngr} object</li>
+*   <li>Expression data is clustered using selected clustering method.</li>
+*   <li>{@link allen2hpo.clustering ClusteringMngr} prints clusters, one cluster per file, one gene per line using {@link allen2hpo.allen AllenDataMngr} to retrieve gene names.</li>
 *   </ol>
 *   </p>
-*   @author Alex Harenstein
+*   @author Alex Hartenstein
 */
 
 public class Allen2HPO {
 
-    /** Required input parsed from command line. Directory containing following OR subdirectories containing expression data and annotations */
+    /** Required input parsed from command line. Directory containing expression data and sample/probe annotations (OR subdirectories containing said) */
     private String dataPath = null;
 
     /** Optional input parsed from command line. If not specified will print into dataPath given in Clusters_OUTPUT.csv*/
@@ -49,7 +49,7 @@ public class Allen2HPO {
     *   <p>Lifecycle of program.
     *   <ol>
     *   <li>Parse the command line, getting path to directory of data to be analyzed.</li>
-    *   <li>Analyze each directory found that contains the necessary files for analysis</li>
+    *   <li>For each directory found containing necessary files for analysis, perform analysis by calling 'doSingleDonorAnalysis'</li>
     *   </ol>
     *   </p>
     */
@@ -93,7 +93,7 @@ public class Allen2HPO {
         }
 
 
-        /** Data path provided points to a directory of brain donors */
+        /** Data path provided points to a directory of brain donors (ie contains subdirectories) */
         else
         {
             /** 
@@ -169,7 +169,7 @@ public class Allen2HPO {
     /**
     *   <p>Do cluster analysis on one brain directory and print out the results
     *   <ol>
-    *   <li>Parse all data contained in directory</li>
+    *   <li>Parse all data contained in directory using {@link allen2hpo.allen AllenDataMngr}</li>
     *   <li>Collapse multiple probes to unique gene-expression value pairs</li>
     *   <li>Mean normalize the data</li>
     *   <li>Cluster the data using kmeans with gap statistic</li>
@@ -224,16 +224,7 @@ public class Allen2HPO {
             options.addOption(new Option("S","size",true,"NumberOf"));
 
             //options.addOption(new Option("O","output",false,"Path to write clusters to"));
-        //    options.addOption(new Option("A","allOutput",false,"Print cluster prototypes to output file"));
-
-            /* options.addOption(new Option("W","vcf2",true,"Path to downsampled VCF file"));
-            options.addOption(new Option("D","ucsc",true,"Path to serialized UCSC file"));
-            options.addOption(new Option("B","bed",true,"Path to bed file"));
-            options.addOption(new Option("F","fname",true,"Output file name"));
-            options.addOption(new Option(null,"cov",true,"coverage of original BAM"));
-            options.addOption(new Option(null,"covdown",true,"coverage of downsampled BAM"));
-            options.addOption(new Option(null,"bam",true,"name of original BAM"));*/
-
+     
             Parser parser = new GnuParser();
             CommandLine cmd = parser.parse(options, args);
 
@@ -258,7 +249,7 @@ public class Allen2HPO {
 
 
     public static void usage() {
-        System.err.println("[INFO] Usage: java -jar Allen2HPO.jar -D ????");
+        System.err.println("[INFO] Usage: java -jar Allen2HPO.jar -D ???");
         System.err.println("[INFO] where ARGS comprises:");
         System.err.println("[INFO]");
         System.err.println("[INFO] -D: data directory with Allen Brain microarray files");

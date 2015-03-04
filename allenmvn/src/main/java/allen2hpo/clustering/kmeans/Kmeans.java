@@ -10,13 +10,11 @@ import allen2hpo.clustering.kmeans.initclust.*;
 
 
 /**
-* <p>Performs kmeans cluster analysis:</p>
+* <p>Performs kmeans cluster analysis:
 * <ol>
-* <li>Class must include a {@link allen2hpo.clustering.Kmeans Kmeans} as a field
-* <li>In Kmeansable methods, calculate corresponding kmeans values (k value, seed clusters, distance equation)
-* <li>Set calculated value in KmeansObject
+* <li>
 * </ol>
-*   Variables that affect speed of clustering :
+*   Variables that affect speed of clustering :</p>
 *	@author Alex Hartenstein
 */
 
@@ -28,43 +26,53 @@ public class Kmeans implements Clusterable{
     /** An m x n matrix of data to be clustered */
     private Matrix m = null;
 
-    /** cluster prototypes. The centroids of the clusters being calculated. A k x n two dimensional array */
+    /** cluster prototypes. The centroids of the clusters being calculated.
+    *    A k x n two dimensional array */
     private double[][] cp = null;
 
-    /**	cluster index. Stores the index of the cluster (0-(k-1)) to which each data point in matrix belongs */
+    /**	cluster index. Stores the index of the cluster (0-(k-1)) to which 
+    *   each data point in matrix belongs */
     private int[] ci = null;
 
     /** Stores size of clusters are they are created */
     private int[] cs = null;
 
-    /** Contains sum of squared errors for each cluster. As assign data points add sum of squared error, after assignment divide by cluster size cs */
+    /** Contains sum of squared errors for each cluster. As assign data points 
+    *   add sum of squared error, after assignment divide by cluster size cs */
     private double[] sses = null;
 
-    /** Object implementing DistComputable interface which performs distance calculation. Default (Euclidean distance) is used if none provided in constructor method*/
+    /** Object implementing DistComputable interface which performs distance 
+    *   calculation. Default (Euclidean distance) is used if none provided in constructor method.*/
     private DistComputable distCalc = null;
 
 
     ///CONSTRUCTOR METHODS
     /**
-    *   Simplest constructor method. k,distance calculation,etc can be set using setter variables
-    *   @param Data matrix to be clustered
+    *   Simplest constructor method initializes only data to be clusters. k, distance 
+    *   calculation, etc can be set using setter variables.
+    *   @param Matrix expression data to be clustered.
     */
     public Kmeans(Matrix mat){
         this(mat,1);
     }
 
     /**
-    *	@param Takes a matrix object of the data that is to be clustered
-    *   @param int k is number of clusters data matrix should be partitioned into
+    *   Constructor method initializing expression data to be clustered and K value. As no
+    *    proximity calculation specified, default proximity calculation is used.
+    *	@param Matrix expression data to be clustered.
+    *   @param int number of clusters data matrix should be partitioned into.
     */
     public Kmeans(Matrix mat, int kval){
         this(mat,kval,new DistEuclidean());
     }
 
     /**
-    *   @param matrix object is data to be clustered
+    *   Exhaustive constructor method that, in addition to setting expression data 
+    *   and k value, allows for customization of distance calculation used in clustering.
+    *   @param Matrix object is data to be clustered.
     *   @param int k is number of clusters data matrix should be partitioned into
-    *   @param distComputable implementing object to customize distance calculation
+    *   @param DistComputable distance calculation implementing DistComputable interface to 
+    *   customize distance calculation.
     */
     public Kmeans(Matrix mat, int kval, DistComputable d){
 

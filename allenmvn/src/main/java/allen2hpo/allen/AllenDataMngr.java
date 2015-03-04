@@ -8,11 +8,17 @@ import allen2hpo.allen.transformations.*;
 /**
 *	<p>
 *	This class is responsible for handling all data corresponding to one brain.
+*	<br>It is able to :
 *	<ol>
-*	<li>It is able to parse and store all data corresponding to an allen brain directory
-*	(Expression, Probe/Sample (ie gene/tissue) Annotations)</li>
-*	<li>Mean across all rows that refer to the same gene</li>
-*	<li>Mean normalize all expression data</li>
+*	<li>parse and store all data corresponding to an allen brain directory
+*	(expression, probe/sample (ie gene/tissue) annotations).</li>
+*	<li>Mean across all rows that refer to the same gene.</li>
+*	<li>Mean normalize all expression data.</li>
+*	</ol>
+*	In addition, is responsible for relating expression data to annotations.
+*	<ol>
+*	<li>Retrieve gene/tissue names given row/column indices. Used to get gene names when printing clusters</li>
+*	<li>Retrieve expression data for given row/column indices.</li>
 *	</ol>
 *	</p>
 *	@author Alex Hartenstein.
