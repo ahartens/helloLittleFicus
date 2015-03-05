@@ -10,7 +10,7 @@ import allen2hpo.matrix.Matrix;
 *	@author Alex Hartenstein
 */
 
-interface InitClusterable {
+public interface InitClusterable {
 
 	double[][] initClusters(Matrix m, int k);
 

@@ -44,7 +44,6 @@ public class Allen2HPO {
         return this.dataPath;
     }
 
-
     /**
     *   <p>Lifecycle of program.
     *   <ol>
@@ -131,6 +130,56 @@ public class Allen2HPO {
     }
 
     /**
+    *   <p>Do cluster analysis on one brain directory and print out the results
+    *   <ol>
+    *   <li>Parse all data contained in directory using {@link allen2hpo.allen AllenDataMngr}</li>
+    *   <li>Collapse multiple probes to unique gene-expression value pairs</li>
+    *   <li>Mean normalize the data</li>
+    *   <li>Cluster the data using kmeans with gap statistic</li>
+    *   <li>Print cluster files</li>
+    *   </ol>
+    *   </p>
+    */
+    private void doSingleDonorAnalysis(File dir){
+        
+
+        /**
+        *   Init AllenDataMngr object to serve as wrapper of directory corresponding to a single Allen Brain donor
+        */
+        AllenDataMngr brainDataMngr = new AllenDataMngr(dir.getPath());
+
+        /**
+        *   Parse directory 
+        */
+        brainDataMngr.parseExpressionAndAnnotations();
+
+        /**
+        *   Average expression of probes with same gene name to create unique gene-expression pairs
+        */
+        brainDataMngr.collapseRepeatProbesToUniqueGenes();
+
+        /**
+        *   Normalize the data
+        */
+        brainDataMngr.meanNormalizeData();
+
+        /**
+        *   Cluster Data
+        */
+        ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
+
+        /**
+        *   Perform Kmeans clustering using the gap statistic to calculate k
+        */
+        clusteringMngr.doKmeansClusteringWithGapStat();
+
+        /**
+        *   Write individual clusters to files, one gene per line
+        */
+        clusteringMngr.writeOutputToFile(this.dataPath);
+    }
+
+    /**
     *   <p>Checks for presence of all necessary files for AllenDataMngr.<br>
     *   Returns true if following are present in directory :
     *   <ol>
@@ -166,51 +215,6 @@ public class Allen2HPO {
         return false;
     }
 
-    /**
-    *   <p>Do cluster analysis on one brain directory and print out the results
-    *   <ol>
-    *   <li>Parse all data contained in directory using {@link allen2hpo.allen AllenDataMngr}</li>
-    *   <li>Collapse multiple probes to unique gene-expression value pairs</li>
-    *   <li>Mean normalize the data</li>
-    *   <li>Cluster the data using kmeans with gap statistic</li>
-    *   <li>Print cluster files</li>
-    *   </ol>
-    *   </p>
-    */
-    private void doSingleDonorAnalysis(File dir){
-        
-
-        /**
-        *   Init AllenDataMngr object to serve as wrapper of directory corresponding to a single Allen Brain donor
-        */
-        AllenDataMngr brainDataMngr = new AllenDataMngr(dir.getPath());
-
-        /**
-        *   Parse directory 
-        */
-        brainDataMngr.parseExpressionAndAnnotations();
-
-        /**
-        *   Average expression of probes with same gene name to create unique gene-expression pairs
-        */
-        brainDataMngr.collapseRepeatProbesToUniqueGenes();
-
-        /**
-        *   Normalize the data
-        */
-        brainDataMngr.meanNormalizeData();
-
-
-
-
-        /**
-        *   Cluster Data
-        */
-        ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
-
-        clusteringMngr.doKmeansClusteringWithGapStat();
-        clusteringMngr.writeOutputToFile(this.dataPath);
-    }
 
 
     /**
