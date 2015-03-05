@@ -282,11 +282,14 @@ public class Kmeans implements Clusterable{
     }
 
     /**
-    *   Two dimensional array is returned containing (row) indices of data points organized by cluster assignment.
+    *   Two dimensional array is returned containing (row) indices of data 
+    *   points organized by cluster assignment.
     *   <br>Imagined as a table :
     *   <ol>
-    *   <li>There are as many rows as there are clusters. Each row of table is an array. (eg. in kmeans there are k rows)</li>
-    *   <li>Each column of table is a (row) index that points to the location of a data point in microarray expression data.</li>
+    *   <li>There are as many rows as there are clusters. Each row of table is 
+    *   an array. (eg. in kmeans there are k rows)</li>
+    *   <li>Each column of table is a (row) index that points to the location of
+    *    a data point in microarray expression data.</li>
     *   </ol>
     *   @return int[][]
     */

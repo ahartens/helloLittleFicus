@@ -71,6 +71,9 @@ public class KmeansTest{
 
 */
 
+    @Test public void testCheckForEmptyClusterAndReassign(){
+        Kmeans km = new Kmeans()
+    }
 
 
 
