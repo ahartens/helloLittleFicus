@@ -2,52 +2,94 @@ package allen2hpo.clustering.kmeans.calck;
 
 import allen2hpo.matrix.*;
 import allen2hpo.clustering.kmeans.Kmeans;
-
+import allen2hpo.clustering.kmeans.distance.*;
 
 /**
-*	GapStat is a method to find the optimal number of clusters in a data set
-*	It is therefore called by a kmeansable setk() method.
-*	Confusingly, GapStat itself performs Kmeans, in an iterative fashion.
-*	For each k value for which it performs kmeans, it calculates
-*		1) the expected dispersion given a random distribution with n samples each with p dimensions
-*		2) the actual dispersion W by a given k and data set, Matrix m
-*
+*	<p>Finds optimal number of clusters using kmeans.
+*	<br>GapStat itself performs Kmeans, in an iterative fashion.
+*	For each k value for which it performs kmeans, it calculates:
+*	<ol>
+*	<li>The expected dispersion given a random distribution with n samples 
+*	each with p dimensions</li>
+*	<li>The actual dispersion W by a given k and data set, Matrix m</li>
+*	</ol>
 *	TO USE :
-*	1) Call constructor method using the data set for which k should be found argument.
-*	2) call getK(); getter method
+*	<ol>
+*	<li>Create instance setting data to be clustered and optional distance 
+*	calculation object (if none specified defaults to Euclidean distance).</li>
+*	<li>Call getK() to get optimal k value value.</li>
+*	</ol>
 *	@author Alex Hartenstein
 */
 
 public class GapStat implements GetKable{
 
-	/**	K value with lowest Gap between log of expected dispersion and log of actual dispersion */
+
+	//__________________________________________________________________________
+    //
+    //  Class Variables                                   
+    //__________________________________________________________________________
+
+
+	/**	K value with lowest Gap between log of expected dispersion and log of 
+	*	actual dispersion */
 	int kfinal;
 
-	/**	object performing kmeans or actual data. random distributions init their own kmeans object */
+	/**	object performing kmeans or actual data. random distributions init their
+	*	own kmeans object */
 	Kmeans kmeans;
 
-	/**	Array number of tested K long, containing calculated dispersion for given matrix for index i clusters. */
+	/**	Array number of tested K long, containing calculated dispersion for 
+	*	given matrix for index i clusters. */
 	double [] wk = null;
 
-	/** contains calculated dispersion of a uniform random matrix B. Array #tested K long by B (# of uniform random matrices created) */
+	/** contains calculated dispersion of a uniform random matrix B. Array 
+	*	#tested K long by B (# of uniform random matrices created) */
 	double [][] wkb_star = null;
 
 	/** number of times that kmeans should be performed at each iteration */
 	int repeat = 1;
 
-	/**	Returns k value for which the gap statistic is the greatest */
-	public int getK(){
-		return this.kfinal;
+	/** Object implementing DistComputable interface which performs distance 
+    *   calculation. Default (Euclidean distance) is used if none provided in 
+    *   constructor method.*/
+    private DistComputable distCalc = null;
+
+
+
+    //__________________________________________________________________________
+    //
+    //  Constructors                                   
+    //__________________________________________________________________________    
+
+	/**
+	*	Simple Constructor method using default distance measurement (euclidean)
+	*	@param Matrix m of data for which number of clusters k should be 
+	*	optimized
+	*/
+	public GapStat(Matrix m){
+		this(m,new DistEuclidean());
 	}
 
 	/**
-	*	Constructor method that begins gap stat calculation
-	*	@param Matrix m of data for which number of clusters k should be optimized
+	*	Constructor method implementing lifecycle of gap stat. 
+	*	@param Matrix data for which optimal k value should be found
+	*	@param DistComputable distance calculation
 	*/
-	public GapStat(Matrix m){
+	public GapStat(Matrix m, DistComputable dc){
 
-		int k = 20;						///Number of iterations, thus testing K values 1-20
-		int b = 10;						///Number of uniform random distributions created for each k for which dispersion is calculated
+		/*
+		*	Set distance calculation object
+		*/
+		this.distCalc = dc;
+
+
+		/*	Number of iterations, thus testing K values 1-20 */
+		int k = 20;
+		
+		/*	Number of uniform random distributions created for each k for 
+		*	which dispersion is calculated */
+		int b = 10;
 
 
 		while(this.kfinal == 0){
@@ -55,13 +97,34 @@ public class GapStat implements GetKable{
 			double[] s_k = stepThree(k,b);
 			this.kfinal = stepFour(gap_k,s_k,b);
 		}
-
 	}
 
+
+
+	//__________________________________________________________________________
+    //
+    //  Getters                                   
+    //__________________________________________________________________________
+
+	/**	Returns k value for which the gap statistic is the greatest */
+	public int getK(){
+		return this.kfinal;
+	}
+
+
+
+	//__________________________________________________________________________
+    //
+    //  GapStat Implementation                                 
+    //__________________________________________________________________________
+
+
 	/**
-	*	Step one of gap stat, returns an array capital K, with a gap value corresponding index + 1
+	*	Step one of gap stat, returns an array capital K, with a gap value 
+	*	corresponding index + 1
 	*	@param first int is capital K, the number of k values to be tested
-	*	@param second int is capital B, the number of random uniform distributions to be created
+	*	@param second int is capital B, the number of random uniform 
+	*	distributions to be created
 	*/
 	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m){
 
@@ -106,6 +169,8 @@ public class GapStat implements GetKable{
 
 		return gap;
 	}
+
+
 
 	/**
 	*
@@ -152,7 +217,8 @@ public class GapStat implements GetKable{
 
 	/**
 	*	@param k value, data matrix xto be clustered
-	*	@param realOrRandom, third arguement : if 0 cluster real data, else cluster random uniform data
+	*	@param realOrRandom, third arguement : if 0 cluster real data, else 
+	*	cluster random uniform data
 	*/
 	private double calcMeanDispersion(int k, Matrix m, int realOrRandom){
 
@@ -188,9 +254,23 @@ public class GapStat implements GetKable{
 
 		double wk = 0;
 
-		for(int i=0; i<k; i++){
-			DistanceMatrix sim = new DistanceMatrix(clusters[i]);
-			wk += (1.0/(clusters[i].getRowSize()))*sim.getSumOfPairwiseDistances();
+		/*
+		*	For each cluster calculate the sum of pairwise distance of expression values
+		*/
+		for(int x=0; x<k; x++){
+			
+			float sumOfPairwiseDistanceForCluster = 0;
+
+
+			for(int i=0; i<clusters[x].getRowSize(); i++)
+			{
+				for(int j=0; j<clusters[x].getRowSize(); j++)
+				{
+					sumOfPairwiseDistanceForCluster += distCalc.calculateProximity(clusters[x].getRowAtIndex(i),clusters[x].getRowAtIndex(j));
+				}
+			}
+
+			wk += (1.0/(clusters[x].getRowSize()))*sumOfPairwiseDistanceForCluster;
 		}
 		return Math.log(wk);
 	}
