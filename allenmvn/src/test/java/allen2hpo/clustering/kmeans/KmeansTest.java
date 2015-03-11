@@ -8,7 +8,7 @@ import org.junit.Assert;
 import allen2hpo.matrix.Matrix;
 import allen2hpo.clustering.kmeans.initclust.*;
 import allen2hpo.clustering.kmeans.distance.*;
-
+import allen2hpo.clustering.kmeans.calck.GapStat;
 public class KmeansTest{
 
 
@@ -29,6 +29,29 @@ public class KmeansTest{
 
 
     @Test
+
+    public void testClustering(){
+
+        DistComputable dc = new DistEuclidean();
+        InitClusterable ic = new InitClustMostDistant();
+
+        GapStat gap = new GapStat(bigMatrix,dc,ic);
+        System.out.println("gap is finally : "+gap.getK());
+
+        Kmeans km = new Kmeans(bigMatrix,3,dc,ic);
+        km.doClustering();
+        System.out.println("finished clustering");
+        double[][] clusterPrototypes = km.getClusterPrototypes();
+        for(int i = 0;i<clusterPrototypes.length; i++){
+            for(int j =0; j<clusterPrototypes[0].length;j++){
+                System.out.printf("%f    ",clusterPrototypes[i][j]);
+            }
+             System.out.printf("\n");
+
+        }
+        
+
+    }
     public void testInitClusters(){
     	Kmeans km = new Kmeans(m,1,new DistEuclidean(),new InitClustBasic());
     	int k = km.getK();

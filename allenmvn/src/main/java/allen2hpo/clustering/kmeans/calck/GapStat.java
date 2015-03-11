@@ -25,7 +25,6 @@ import allen2hpo.clustering.kmeans.initclust.*;
 
 public class GapStat implements GetKable{
 
-
 	//__________________________________________________________________________
     //
     //  Class Variables                                   
@@ -61,6 +60,9 @@ public class GapStat implements GetKable{
     *   is used if none provided in constructor method.*/
     private InitClusterable cpInit = null;
 
+    /**	Enum used by calcDispersion to specify if received matrix is real or 
+    *	randomly generated */
+    private enum Data {REAL,RANDOM};
 
 
 
@@ -112,7 +114,10 @@ public class GapStat implements GetKable{
     //  Getters                                   
     //__________________________________________________________________________
 
-	/**	Returns k value for which the gap statistic is the greatest */
+	/**	
+	*	Returns k value for which the gap statistic is the greatest. Required
+	*	for GetK interface implementation.
+	*/
 	public int getK(){
 		return this.kfinal;
 	}
@@ -121,7 +126,7 @@ public class GapStat implements GetKable{
 
 	//__________________________________________________________________________
     //
-    //  GapStat Implementation                                 
+    //  GapStat Lifecycle Implementation                                 
     //__________________________________________________________________________
 
 
@@ -132,72 +137,93 @@ public class GapStat implements GetKable{
 	*	@param second int is capital B, the number of random uniform 
 	*	distributions to be created
 	*/
-	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m){
+	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m)
+	{
 
-		//Init random expression data generator with actual data
-		UniformRandomMatrixGenerator generator = new UniformRandomMatrixGenerator(m);
+		/* Init random expression data generator with actual data */
+		UniformRandomMatrixGenerator generator = 
+			new UniformRandomMatrixGenerator(m);
 
-		//Init array that will hold calculated gap value for given k value (capital K long)
+		/*	Init array that will hold calculated gap value for given k value 
+		*	(capital K long) */
 		double[] gap = new double[cap_k];
 
-		//Calculated dispersion for actual data
+		/*	Calculated dispersion for actual Data */
 		this.wk = new double[cap_k];
 
-		//Calculated dispersion for randomly generated data
+		/*	Calculated dispersion for randomly generated data */
 		this.wkb_star = new double[cap_k][cap_b];
 
 
-		//For each k value perform kmeans and calculate gap
-		for (int k = 0; k<cap_k; k++){
+		/*	For each k value perform kmeans and calculate gap */
+		for (int k = 0; k<cap_k; k++)
+		{
 
-			///Calculate actual log(Wk) for given k value
-			wk[k] = calcMeanDispersion(k+1, m,0);
+			/*	Calculate actual log(Wk) for given k value */
+			wk[k] = calcMeanDispersion(k+1, m,Data.REAL);
 
-			///Reset sum of gaps
+			/*	Reset sum of gaps */
 			double gapSum_k = 0;
 
-			///Calculate log(Wkb_star) for given k for B uniform random matrices.
-			for (int b = 0; b<cap_b; b++){
-				///Create random uniform matrix
-				wkb_star[k][b] = calcMeanDispersion(k+1,generator.generateUniformRand(),1);
+			/*	
+			*	Calculate log(Wkb_star) for given k for B uniform random 
+			*	matrices. 
+			*/
+			for (int b = 0; b<cap_b; b++)
+			{
+				/*	Create random uniform matrix */
+				wkb_star[k][b] = 
+					calcMeanDispersion(k+1,generator.generateUniformRand(),
+						Data.RANDOM);
 
-				///Calculate gap and add to sum
+				/*	Calculate gap and add to sum */
 				gapSum_k += wkb_star[k][b] - wk[k];
-				//System.out.printf("k = %d, b + %d : %f - %f =  %f \n",k, b,wkb_star[k][b], wk[k],gapSum_k);
 			}
-
-			///Calculate actual gap by dividing by capital B (number of random distributions created)
+			
+			/*	
+			*	Calculate actual gap by dividing by capital B (number of random 
+			*	distributions created) 
+			*/
 			gap[k] = gapSum_k/cap_b;
 		}
 
 		return gap;
 	}
 
-
-
 	/**
 	*
 	*/
-	private double[] stepThree( int cap_k, int cap_b){
-
-		///PART ONE : Calculate l_bar for each value k
+	private double[] stepThree( int cap_k, int cap_b)
+	{
+		/*
+		*	PART ONE
+		*	Calculate l_bar for each value k
+		*/
 		double[] lbar_k = new double[cap_k];
 
-		for (int k = 0; k<cap_k; k++){
-			for (int b = 0; b<cap_b; b++){
+		for (int k = 0; k<cap_k; k++)
+		{
+			for (int b = 0; b<cap_b; b++)
+			{
 				lbar_k[k] += this.wkb_star[k][b];
 			}
 			lbar_k[k] /= cap_b;
 		}
 
-		///PART TWO : Calculate standard deviation for each value k, using l_bar
+		/*
+		*	PART TWO
+		*	Calculate standard deviation for each value k, using l_bar
+		*/
 		double[] sd_k = new double[cap_k];
 		double[] s_k = new double[cap_k];
 
-		for (int k = 0; k<cap_k; k++){
-			for (int b = 0; b<cap_b; b++){
+		for (int k = 0; k<cap_k; k++)
+		{
+			for (int b = 0; b<cap_b; b++)
+			{
 				sd_k[k] += Math.pow(this.wkb_star[k][b] - lbar_k[k],2);
 			}
+			
 			sd_k[k] = Math.sqrt(sd_k[k]/cap_b);
 			s_k[k] = Math.sqrt(1+(1/cap_b))*sd_k[k];
 		}
@@ -205,31 +231,45 @@ public class GapStat implements GetKable{
 	}
 
 	/**
-	*
+	*	11.3.2015 changed this to not look at k = 1 (first element in gap array)
+	*	because was often greater. is this reasonable???
 	*/
 	private int stepFour(double[] gap, double[] s, int cap_k){
+		System.out.println("step four");
+		for(int k = 1; k< cap_k - 1; k++){
+			//System.out.printf("gk: %f  >=  %f   gk+1: %f    s:%f\n",
+			//gap[k],gap[k+1] - s[k+1],gap[k+1],s[k+1]);
 
-		for(int k = 0; k< cap_k - 1; k++){
+			if ( gap[k] >= gap[k+1] - s[k+1] ){
 
-			if (gap[k] > 0 && gap[k] >= gap[k+1] - s[k+1] ){
 				return k+1;
 			}
 		}
 		return 0;
 	}
 
-	/**
-	*	@param k value, data matrix xto be clustered
-	*	@param realOrRandom, third arguement : if 0 cluster real data, else 
-	*	cluster random uniform data
-	*/
-	private double calcMeanDispersion(int k, Matrix m, int realOrRandom){
 
-		this.repeat = 1;
+
+	//__________________________________________________________________________
+    //
+    //	Calculate Dispersion                                   
+    //__________________________________________________________________________
+
+	/**
+	*	Calculates dispersion of given data m separated into k clusters r times
+	*	(runs k means r times) and returns average dispersion. 
+	*	<br>Called by Step One.
+	*	@param int k value for which dispersion should be calculated
+	*	@param Matrix m data matrix (either real or randomly generated)
+	*	@param Data enum specifying if data is real or randomly generated
+	*/
+	private double calcMeanDispersion(int k, Matrix m, Data realOrRandom){
+
+		this.repeat = 10;
 		double sumW = 0;
 
 		for (int j=0; j<this.repeat ; j++){
-			if (realOrRandom == 0){
+			if (realOrRandom == Data.REAL){
 				sumW += calcDispersion(k,m);
 			}
 			else{
@@ -240,62 +280,92 @@ public class GapStat implements GetKable{
 	}
 
 	/**
-	* 	@param takes data matrix for which optimal number of clusters should be found and current iteration of k
-	*	Performs kmeans clustering
-	*	Calculates D, the sum of pairwise distances between points in one cluster, for each cluster
-	*	Calculates W, the pooled within-cluster sum of squares around the cluster means (sum from 1 to k of ((1/2n)*D))
-	*	Returns log of W.
+	*	Calculates dispersion of real expression data for given number of 
+	*	clusters k. 
+	*	<ol>
+	*	<li>Performs kmeans clustering</li>
+	*	<li>Calculates D, the sum of pairwise distances between points in one 
+	*	cluster, for each cluster</li>
+	*	<li>Calculates W, the pooled within-cluster sum of squares around the 
+	*	cluster means (sum from 1 to k of ((1/2n)*D))</li>
+	*	<li>Returns log of W.</li>
+	*	</ol>
+	* 	@param int k value which should be used to cluster
+	*	@param Matrix m data matrix that should be clustered (real expression 
+	*	data, not randomly generated. 
 	*/
 	private double calcDispersion(int k, Matrix m){
-		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
-		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
 
 		this.kmeans.setK(k);
 		this.kmeans.doClustering();
 
 		Matrix[] clusters = this.kmeans.getClusters();
 
+		double wk = calcDispersionFromClusteredValues(clusters);
+
+		return Math.log(wk);
+	}
+
+	/**
+	*	Calculates dispersion of randomly generated expression data for given 
+	*	number of clusters k. 
+	*	<ol>
+	*	<li>Performs kmeans clustering</li>
+	*	<li>Calculates D, the sum of pairwise distances between points in one 
+	*	cluster, for each cluster</li>
+	*	<li>Calculates W, the pooled within-cluster sum of squares around the 
+	*	cluster means (sum from 1 to k of ((1/2n)*D))</li>
+	*	<li>Returns log of W.</li>
+	*	</ol>
+	* 	@param int k value which should be used to cluster
+	*	@param Matrix m randomly generated matrix that should be clustered 
+	*/
+	private double calcDispersionForRandomUniform(int k, Matrix m){
+
+		/*
+		*	Init a new kmeans object with randomly generated data and k
+		*/
+		Kmeans kmo = new Kmeans(m,k,this.distCalc,this.cpInit);
+
+		/*
+		*	Perform clustering
+		*/
+		kmo.doClustering();
+
+		/*
+		*	Get randomly generated data organized into clusters
+		*/
+		Matrix[] clusters = kmo.getClusters();
+
+		double wk = calcDispersionFromClusteredValues(clusters);
+
+		return Math.log(wk);
+	}
+
+	double calcDispersionFromClusteredValues(Matrix[] clusters){
 		double wk = 0;
 
 		/*
-		*	For each cluster calculate the sum of pairwise distance of expression values
+		*	For each cluster calculate the sum of pairwise distance of 
+		*	expression values
 		*/
 		for(int x=0; x<k; x++){
 			
-			float sumOfPairwiseDistanceForCluster = 0;
+			float sumOfPairwiseDistanceForClst = 0;
 
 
 			for(int i=0; i<clusters[x].getRowSize(); i++)
 			{
 				for(int j=0; j<clusters[x].getRowSize(); j++)
 				{
-					sumOfPairwiseDistanceForCluster += distCalc.calculateProximity(clusters[x].getRowAtIndex(i),clusters[x].getRowAtIndex(j));
+					sumOfPairwiseDistanceForClst += 
+					distCalc.calculateProximity(clusters[x].getRowAtIndex(i),
+						clusters[x].getRowAtIndex(j));
 				}
 			}
 
-			wk += (1.0/(clusters[x].getRowSize()))*sumOfPairwiseDistanceForCluster;
+			wk += (1.0/(clusters[x].getRowSize()))*sumOfPairwiseDistanceForClst;
 		}
-		return Math.log(wk);
-	}
-
-	/**
-	* 	@param takes random uniform matrix should be found and current iteration of k
-	*	Performs The same calculation as calcDispersion, except for a random uniform distribution
-	*/
-	private double calcDispersionForRandomUniform(int k, Matrix m){
-		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
-		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
-		Kmeans kmo = new Kmeans(m,k,this.distCalc,this.cpInit);
-		kmo.doClustering();
-
-		Matrix[] clusters = kmo.getClusters();
-
-		double wk = 0;
-
-		for(int i=0;i<k;i++){
-			DistanceMatrix sim = new DistanceMatrix(clusters[i]);
-			wk += (1.0/(clusters[i].getRowSize()))*sim.getSumOfPairwiseDistances();
-		}
-		return Math.log(wk);
+		return wk;
 	}
 }
