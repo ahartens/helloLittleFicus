@@ -28,56 +28,63 @@ public class KmeansTest{
     }
 
 
+    /**
+    *   Check clustering of big matrix using gap stat
+    */
     @Test
-
     public void testClustering(){
 
         DistComputable dc = new DistEuclidean();
         InitClusterable ic = new InitClustMostDistant();
 
+        /*
+        *   Do gap stat to find k. should return 3
+        */
         GapStat gap = new GapStat(bigMatrix,dc,ic);
-        System.out.println("gap is finally : "+gap.getK());
+        Assert.assertEquals(3,gap.getK());
 
+        /*
+        *   Do kmeans clustering with k found by gap stat and get resulting clusters
+        */
         Kmeans km = new Kmeans(bigMatrix,gap.getK(),dc,ic);
         km.doClustering();
-        System.out.println("finished clustering");
         double[][] clusterPrototypes = km.getClusterPrototypes();
-        for(int i = 0;i<clusterPrototypes.length; i++){
-            for(int j =0; j<clusterPrototypes[0].length;j++){
-                System.out.printf("%f    ",clusterPrototypes[i][j]);
+
+
+        /*
+        *   Best cluster centroids
+        */
+        double[][] actualClusters = {{41.1,41.7},{11.9,37.8},{33.7,17.6}};
+
+        /*
+        *   Check that actual and calculated clusters equal
+        */
+        for(int i = 0;i<clusterPrototypes.length; i++)
+        {
+            for(int j =0; j<clusterPrototypes[0].length;j++)
+            {
+                Assert.assertEquals(clusterPrototypes[i][j],actualClusters[i][j],.2);
             }
-             System.out.printf("\n");
-
         }
-        
-
-    }
-    public void testInitClusters(){
-    	Kmeans km = new Kmeans(m,1,new DistEuclidean(),new InitClustBasic());
-    	int k = km.getK();
-    	Assert.assertEquals(1,k);
     }
 
-    @Test public void testInitClusters2(){
-    	Kmeans km = new Kmeans(m,42,new DistEuclidean(),new InitClustBasic());
-    	int k = km.getK();
-    	Assert.assertEquals(42,k);
+    /*
+    *   Check kmeans clustering of small matrix.
+    */
+    @Test 
+    public void testSimpleClustering() {
+        Kmeans km = new Kmeans(m,2,new DistEuclidean(),new InitClustBasic());
+        km.doClustering();
+        int[] idx = km.getClusterAssignments();
+        int cluster1 = idx[0];
+        int cluster2 = idx[1];
+        int cluster3 = idx[2];
+        Assert.assertEquals(cluster2,cluster3);
+        Assert.assertNotEquals(cluster1,cluster3);
     }
 
-    @Test public void testSimpleClustering() {
-    	Kmeans km = new Kmeans(m,2,new DistEuclidean(),new InitClustBasic());
-    	km.doClustering();
-    	int[] idx = km.getClusterAssignments();
-    	int cluster1 = idx[0];
-    	int cluster2 = idx[1];
-    	int cluster3 = idx[2];
-    	Assert.assertEquals(cluster2,cluster3);
-    	Assert.assertNotEquals(cluster1,cluster3);
-
-
-    }
-
-    @Test public void testSimpleClusteringWithInitMostDistant() {
+    @Test 
+    public void testSimpleClusteringWithInitMostDistant() {
         Kmeans km = new Kmeans(m,2,new DistEuclidean(),new InitClustMostDistant());
         km.doClustering();
         int[] idx = km.getClusterAssignments();
@@ -86,34 +93,22 @@ public class KmeansTest{
         int cluster3 = idx[2];
         Assert.assertEquals(cluster2,cluster3);
         Assert.assertNotEquals(cluster1,cluster3);
-
-
     }
 
-      /*
-
-
-        GapStat gap = new GapStat(m);
-
-        Kmeans km = new Kmeans(m,gap.getK());
-        km.performClustering();
-        double [][] protos = km.getClusterPrototypes();
-
-        for(int i=0; i<protos.length; i++){
-            for(int j=0; j<protos[0].length; j++){
-                System.out.printf("%.0f\t",protos[i][j]);
-            }
-            System.out.printf("\n");
-        }
-        System.out.println("THIS WAS THE THEW PROTOTYPE : "+ gap.getK());
-
-
-*/
-
-    @Test public void testCheckForEmptyClusterAndReassign(){
-        //Kmeans km = new Kmeans();
+    /*
+    *   Check that cluster initialization works
+    */
+    @Test
+    public void testInitClusters(){
+        Kmeans km = new Kmeans(m,1,new DistEuclidean(),new InitClustBasic());
+        int k = km.getK();
+        Assert.assertEquals(1,k);
     }
 
-
-
+    @Test 
+    public void testInitClusters2(){
+        Kmeans km = new Kmeans(m,42,new DistEuclidean(),new InitClustBasic());
+        int k = km.getK();
+        Assert.assertEquals(42,k);
+    }
 }

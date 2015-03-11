@@ -305,6 +305,10 @@ public class GapStat implements GetKable{
 		{	
 			float sumOfPairwiseDistanceForClst = 0;
 
+			/*
+			*	Calculate distance of every row to every other row and add to
+			*	sum of pairwise distance.
+			*/
 			for(int i=0; i<clusters[x].getRowSize(); i++)
 			{
 				for(int j=0; j<clusters[x].getRowSize(); j++)

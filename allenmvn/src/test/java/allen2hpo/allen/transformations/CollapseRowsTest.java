@@ -16,18 +16,34 @@ public class CollapseRowsTest{
 
     @Test
     public void CollapseRowsTest(){
-        double[][] data = {{1,2,3,4,5,6},{1,2,3,4,5,6,},{1,2,3,4,5,6},{1,2,3,4,5,6},{7,8,9,10,11,12},{7,8,9,10,11,12},{13,14,15,16,17,18}};
+        /*  Create data matrix */
+        double[][] data = {{1,2,3,4,5,6},{1,2,3,4,5,6,},{1,2,3,4,5,6},{1,2,3,4,5,6},
+                            {7,8,9,10,11,12},{7,8,9,10,11,12},
+                            {13,14,15,16,17,18}};
         Matrix m = new Matrix(data);
 
+        /*  Designate which rows should be collapsed/meaned across */
         int[][] indices = {{0,1,2,3},{4,5},{6}};
 
+        /*  Correct values : */
+        double[][] expected = {{1,2,3,4,5,6},{7,8,9,10,11,12},{13,14,15,16,17,18}};
+
+        /*  Collapse rows and get values */
         CollapseRows collapse = new CollapseRows();
         collapse.doCollapseRowsGivenIndices(m,indices);
         Matrix condensed = collapse.getData();
-        condensed.print();
 
+        /*  Check that received and correct values agree */
+        for(int i =0; i<condensed.getRowSize(); i++){
+            for (int j=0; j<condensed.getColumnSize(); j++){
+                Assert.assertEquals(condensed.getValueAtIndex(i,j),expected[i][j],.01);
+            }
+        }
     }
 
+    /*
+    *   Check that collapsing of names works correctly
+    */
     @Test
     public void CollapseRowsTestTwo(){
         /**
