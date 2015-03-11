@@ -3,6 +3,7 @@ package allen2hpo.clustering.kmeans.calck;
 import allen2hpo.matrix.*;
 import allen2hpo.clustering.kmeans.Kmeans;
 import allen2hpo.clustering.kmeans.distance.*;
+import allen2hpo.clustering.kmeans.initclust.*;
 
 /**
 *	<p>Finds optimal number of clusters using kmeans.
@@ -55,6 +56,12 @@ public class GapStat implements GetKable{
     *   constructor method.*/
     private DistComputable distCalc = null;
 
+    /** Object implementing InitClusterable interface which returns k data 
+    *   points to use for first iteration of kmeans. Default (k random points) 
+    *   is used if none provided in constructor method.*/
+    private InitClusterable cpInit = null;
+
+
 
 
     //__________________________________________________________________________
@@ -63,25 +70,20 @@ public class GapStat implements GetKable{
     //__________________________________________________________________________    
 
 	/**
-	*	Simple Constructor method using default distance measurement (euclidean)
-	*	@param Matrix m of data for which number of clusters k should be 
-	*	optimized
-	*/
-	public GapStat(Matrix m){
-		this(m,new DistEuclidean());
-	}
-
-	/**
 	*	Constructor method implementing lifecycle of gap stat. 
 	*	@param Matrix data for which optimal k value should be found
 	*	@param DistComputable distance calculation
+	*	@param InitClusterable cluster initialization object
 	*/
-	public GapStat(Matrix m, DistComputable dc){
+	public GapStat(Matrix m, DistComputable dc, InitClusterable cp)
+	{
 
 		/*
 		*	Set distance calculation object
 		*/
 		this.distCalc = dc;
+
+		this.cpInit = cp;
 
 
 		/*	Number of iterations, thus testing K values 1-20 */
@@ -90,6 +92,10 @@ public class GapStat implements GetKable{
 		/*	Number of uniform random distributions created for each k for 
 		*	which dispersion is calculated */
 		int b = 10;
+
+		//Init kmeans object that will perform kmeans on actual data
+		this.kmeans = new Kmeans(m,dc,cp);
+
 
 
 		while(this.kfinal == 0){
@@ -127,9 +133,6 @@ public class GapStat implements GetKable{
 	*	distributions to be created
 	*/
 	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m){
-
-		//Init kmeans object that will perform kmeans on actual data
-		this.kmeans = new Kmeans(m);
 
 		//Init random expression data generator with actual data
 		UniformRandomMatrixGenerator generator = new UniformRandomMatrixGenerator(m);
@@ -282,9 +285,7 @@ public class GapStat implements GetKable{
 	private double calcDispersionForRandomUniform(int k, Matrix m){
 		///THIS WILL HAVE TO PERFORM ENTIRE KMEANS AND CALCULATE LOG WK
 		//Wk = sum from r = 1 to K of (1/(2*n in cluster r) * The sum of pairwise values between all points in cluster r/
-		Kmeans kmo = new Kmeans(m);
-
-		kmo.setK(k);
+		Kmeans kmo = new Kmeans(m,k,this.distCalc,this.cpInit);
 		kmo.doClustering();
 
 		Matrix[] clusters = kmo.getClusters();

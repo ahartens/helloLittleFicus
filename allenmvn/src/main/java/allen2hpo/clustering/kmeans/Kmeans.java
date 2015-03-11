@@ -24,8 +24,6 @@ import allen2hpo.clustering.kmeans.initclust.*;
 
 public class Kmeans implements Clusterable{
 
-
-
     //__________________________________________________________________________
     //
     //  Class Variables                                   
@@ -76,30 +74,8 @@ public class Kmeans implements Clusterable{
     *   Simplest constructor method initializes only data to be clustered.
     *   @param Matrix expression data to be clustered.
     */
-    public Kmeans(Matrix mat){
-        this(mat,1);
-    }
-
-    /**
-    *   Constructor method initializing expression data to be clustered and K 
-    *   value.
-    *	@param Matrix expression data to be clustered.
-    *   @param int number of clusters data matrix should be partitioned into.
-    */
-    public Kmeans(Matrix mat, int kval){
-        this(mat,kval,new DistEuclidean());
-    }
-
-    /**
-    *   Constructor method initializing expression data to be clustered, K 
-    *   value and distance calculation.
-    *   @param Matrix expression data to be clustered.
-    *   @param int number of clusters data matrix should be partitioned into.
-    *   @param DistComputable distance calculation implementing DistComputable 
-    *   interface to customize distance calculation.
-    */
-    public Kmeans(Matrix mat, int kval, DistComputable d){
-        this(mat,kval,d,new InitClustBasic());
+    public Kmeans(Matrix mat, DistComputable dc, InitClusterable ic){
+        this(mat,1,dc,ic);
     }
 
     /**
@@ -114,17 +90,14 @@ public class Kmeans implements Clusterable{
     *   @param InitClusterable object specifying method used to initialize 
     *   cluster prototypes 
     */
-    public Kmeans(Matrix mat, int kval, DistComputable d, 
-        InitClusterable cpInit){
+    public Kmeans(Matrix mat, int kval, DistComputable dc,InitClusterable cp){
 
         if (mat == null)
             throw new IllegalArgumentException("Data not initialized");
-        if (kval == 0)
-            throw new IllegalArgumentException("k not initialized");
-        if (d == null)
+        if (dc == null)
             throw new 
         IllegalArgumentException("proximity measure object not initialized");
-        if (cpInit == null)
+        if (cp == null)
             throw new 
         IllegalArgumentException("cluster init object not initialized");
 
@@ -142,13 +115,13 @@ public class Kmeans implements Clusterable{
         /* 
         *   Set distance calculation object 
         */
-        this.distCalc = d;
+        this.distCalc = dc;
 
         /* 
         *   Initialize cluster prototype start values using InitClusterable 
         *   object
         */
-        this.cpInit = cpInit;
+        this.cpInit = cp;
 
         /* 
         *   Initialize cluster index array. While iterative clustering, the 
@@ -189,8 +162,6 @@ public class Kmeans implements Clusterable{
         */
         this.cs = new int[kval];
     }
-
-
 
 
 
@@ -380,8 +351,10 @@ public class Kmeans implements Clusterable{
         *   Initialize the cluster prototypes using specified or default 
         *   intialization method.
         */
-        this.cp = this.cpInit.initClusters(this.m,this.k);
 
+        this.cpInit.initClusters(this.k,this.m,this.distCalc);
+        this.cp = this.cpInit.getClusterPrototypes();
+    
         int maxRep = 100;
         int finishClustering = 0;
         int i = 0;
@@ -516,11 +489,8 @@ public class Kmeans implements Clusterable{
         if (countUnmoved > .99*this.ci.length)
         {
             return 1;
-
         }
-
         return 0;
-
     }
 
     /**

@@ -1,7 +1,7 @@
 package allen2hpo.clustering.kmeans.initclust;
 
 import allen2hpo.matrix.Matrix;
-
+import allen2hpo.clustering.kmeans.distance.*;
 
 /**
 *	Interface to be used by Kmeans clustering
@@ -12,6 +12,8 @@ import allen2hpo.matrix.Matrix;
 
 public interface InitClusterable {
 
-	double[][] initClusters(Matrix m, int k);
+	public void initClusters(int k, Matrix m, DistComputable distCalc);
+
+	public double[][] getClusterPrototypes();
 
 }

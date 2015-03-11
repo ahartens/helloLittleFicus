@@ -221,6 +221,11 @@ public class Allen2HPO {
         *   Write one cluster per file, one gene per line
         */
         clusteringMngr.writeClusterGenesOneClusterPerFile(this.dataPath);
+
+        /*
+        *   Write Cluster Prototypes to file
+        */
+        clusteringMngr.writeClusterPrototypesToFile(this.dataPath);
     }
 
     /**
