@@ -38,7 +38,7 @@ public class KmeansTest{
         GapStat gap = new GapStat(bigMatrix,dc,ic);
         System.out.println("gap is finally : "+gap.getK());
 
-        Kmeans km = new Kmeans(bigMatrix,3,dc,ic);
+        Kmeans km = new Kmeans(bigMatrix,gap.getK(),dc,ic);
         km.doClustering();
         System.out.println("finished clustering");
         double[][] clusterPrototypes = km.getClusterPrototypes();
