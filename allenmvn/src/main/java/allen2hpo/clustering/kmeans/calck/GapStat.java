@@ -89,7 +89,7 @@ public class GapStat implements GetKable{
 
 
 		/*	Number of iterations, thus testing K values 1-20 */
-		int k = 20;
+		int k = 30;
 		
 		/*	Number of uniform random distributions created for each k for 
 		*	which dispersion is calculated */
@@ -101,6 +101,7 @@ public class GapStat implements GetKable{
 
 
 		while(this.kfinal == 0){
+			System.out.println("First round of gap stat");
 			double[] gap_k = stepOneTwo(k,b,m);
 			double[] s_k = stepThree(k,b);
 			this.kfinal = stepFour(gap_k,s_k,b);
@@ -240,8 +241,8 @@ public class GapStat implements GetKable{
 	private int stepFour(double[] gap, double[] s, int cap_k){
 		System.out.println("step four");
 		for(int k = 0; k< cap_k - 1; k++){
-			/*System.out.printf("gk: %f  >=  %f   gk+1: %f    s:%f\n",
-			gap[k],gap[k+1] - s[k+1],gap[k+1],s[k+1]);*/
+			System.out.printf("gk: %f  >=  %f   gk+1: %f    s:%f\n",
+			gap[k],gap[k+1] - s[k+1],gap[k+1],s[k+1]);
 
 			if ( gap[k] >= gap[k+1] - s[k+1] ){
 				
