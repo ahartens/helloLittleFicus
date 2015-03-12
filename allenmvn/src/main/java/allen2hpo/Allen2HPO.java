@@ -185,7 +185,6 @@ public class Allen2HPO {
         *   Parse directory 
         */
         brainDataMngr.parseExpressionAndAnnotations();
-
         /*
         *   Average expression of probes with same gene name to create unique 
         *   gene-expression pairs
@@ -214,20 +213,59 @@ public class Allen2HPO {
         */
         clusteringMngr.printClusterGenesInTerminal();
 
-        /*
-        *   Write population file (all genes clustered one gene per line)
-        */
-        clusteringMngr.writePopulationGenesToFile(this.dataPath);
 
         /*
-        *   Write one cluster per file, one gene per line
+        *   Create a directory called clustering for output
         */
-        clusteringMngr.writeClusterGenesOneClusterPerFile(this.dataPath);
+        File outputDirectory = createOutputDirectory(dir);
+        if (outputDirectory != null)
+        {
+            /*  Create string for outputDirectory path */
+            String outputDirString = outputDirectory.getAbsolutePath()+dir.separator;
+            /*
+            *   Write population file (all genes clustered one gene per line)
+            */
+            clusteringMngr.writePopulationGenesToFile(outputDirString);
 
-        /*
-        *   Write Cluster Prototypes to file
-        */
-        clusteringMngr.writeClusterPrototypesToFile(this.dataPath);
+            /*
+            *   Write one cluster per file, one gene per line
+            */
+            clusteringMngr.writeClusterGenesOneClusterPerFile(outputDirString);
+
+            /*
+            *   Write Cluster Prototypes to file
+            */
+            clusteringMngr.writeClusterPrototypesToFile(outputDirString);
+        }
+        
+    }
+
+    private File createOutputDirectory(File parentDir){
+        File outputDirectory = new File(parentDir.getAbsolutePath()+parentDir.separator+"clustering");
+
+        // if the directory does not exist, create it
+        if (!outputDirectory.exists()) {
+            System.out.println(parentDir.getAbsolutePath()+parentDir.separator+"clustering");
+            boolean result = false;
+
+            try
+            {
+                outputDirectory.mkdir();
+                result = true;
+            } 
+            catch(SecurityException se)
+            {
+                //handle it
+            }        
+            if(result) 
+            {    
+                System.out.println("DIR created");  
+                return outputDirectory;
+            }
+            return null;
+
+        }
+        return outputDirectory;
     }
 
     /**

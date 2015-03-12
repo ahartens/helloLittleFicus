@@ -137,6 +137,7 @@ public class ClusteringMngr{
     {
         FileWriter writer = new FileWriter();
         writer.createFileWithName(outputPath+"clusterPrototypes.txt");
+                System.out.println(outputPath+"clusterPrototypes.txt");
 
         ///Write cluster prototypes to file
         for(int i =0;i<this.prototypes.length;i++){
@@ -156,10 +157,12 @@ public class ClusteringMngr{
     */
     public void writeClusterGenesOneClusterPerFile(String outputPath)
     {
+
         for(int i =0;i<this.clusteredGeneNames.length;i++){
             FileWriter writer = new FileWriter();
             writer.createFileWithName
-                (outputPath+"/cluster_"+String.valueOf(i)+".txt");
+                (outputPath+"cluster_"+String.valueOf(i)+".txt");
+                System.out.println(outputPath+"cluster_"+String.valueOf(i)+".txt");
 
             for(int j=0; j<this.clusteredGeneNames[i].length; j++){
                 writer.writeString(this.clusteredGeneNames[i][j]);
@@ -175,11 +178,11 @@ public class ClusteringMngr{
     */
     public void writePopulationGenesToFile(String outputPath)
     {
-
+        System.out.println(outputPath+"population.txt");
         String[] population = this.allenData.getAllGenes();
 
         FileWriter writer = new FileWriter();
-        writer.createFileWithName(outputPath+"/population.txt");
+        writer.createFileWithName(outputPath+"population.txt");
 
         for(int i=0; i<population.length; i++)
         {
@@ -196,7 +199,7 @@ public class ClusteringMngr{
     public void writeAllClustersGenesToOneFile(String outputPath)
     {
         FileWriter writer = new FileWriter();
-        writer.createFileWithName(outputPath+"/clusters_OUTPUT.txt");
+        writer.createFileWithName(outputPath+"clusters_OUTPUT.txt");
 
         for(int i =0; i<this.clusteredGeneNames.length; i++)
         {
