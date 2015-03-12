@@ -1,29 +1,92 @@
 package allen2hpo.allen.parsing;
 
-import java.util.*;
-import java.io.*;
+import allen2hpo.allen.parsing.ReadAnnots;
 
+import java.util.Scanner;
 
-import allen2hpo.allen.*;
 
 
 /**
-*	Reads /Probes.csv file line by line, storing whatever info required in arrays
-*	remember to set the size of the matrix rows : must know size of data file before (marked by ***)
+*	Reads /Probes.csv file line by line, storing whatever info required in 
+*	arrays
 *	Probe ID number is stored in ids array
 */
 public class ReadTissueAnnots extends ReadAnnots{
 
+	//__________________________________________________________________________
+    //
+    //  Variables                             
+    //__________________________________________________________________________
 
-	public ReadTissueAnnots(String dir){
-		String file = dir;
-		super.StartReading(file);
+	/**	Contains tissue location as three dimensional point */
+	double[][] mriVoxel = null;
+
+
+
+	//__________________________________________________________________________
+    //
+    //  Getters                             
+    //__________________________________________________________________________
+
+	/**
+	*
+	*/
+	public double[][] getMriVoxel(){
+		return this.mriVoxel;
 	}
 
 
-	@Override public void handleRow(String line, int ri){
-		///Input is a csv and some cells may contain further commas. These cells have quotes
-		///Thus first split line into components separated by commas. Handle results separately
+
+	//__________________________________________________________________________
+    //
+    //  Constructor                             
+    //__________________________________________________________________________
+
+	public ReadTissueAnnots(String file){
+		/*
+		*	Set filename to be parsed
+		*/
+		super.setFilename(file);
+
+		/*
+		*	Count number of lines
+		*/
+		super.countLines();
+
+		/*
+		*	Init array to store location of tissue
+		*/
+		this.mriVoxel = new double[super.getCount()][3];
+
+		/*
+		*	Begin reading file line by line. Line is handled here.
+		*/
+		super.parseFile();
+	}
+
+
+
+	//__________________________________________________________________________
+    //
+    //  Methods                             
+    //__________________________________________________________________________
+
+	@Override 
+	public void handleRow(String line, int ri){
+		
+		/*
+		*	Input is a csv and some cells contains further commas (in 
+		*	tissue name). These cells have quotes delimiting cell.
+		*	Format :
+		*	[0]		   [1]		 [2] [3]         [4]  
+		*	(id,_,_,_)"(acronym)"(,)"(long name)"(_,x,y,z,_,_,_)
+		*	Thus first split line into components separated by commas. 
+		*	Handle results separately
+		*/
+
+		/*
+		*	Split line by quotes
+		*/
 		Scanner quoteSc = new Scanner(line);
 		quoteSc.useDelimiter("\"");
 		String[] lineSplitByQuotes = new String[5];
@@ -33,35 +96,15 @@ public class ReadTissueAnnots extends ReadAnnots{
 			quoteCount ++;
 		}
 
-
-		///There are no commas within the name. Read each cell sequentially
-		if (quoteCount == 1){
-			///Split line into cells
-			Scanner lineSc = new Scanner(lineSplitByQuotes[0]);
-			lineSc.useDelimiter(",");
-			///Parse cells for necessary data
-			int i = 0;
-
-			while (lineSc.hasNext()) {
-				///ADD PROBE ID TO ID LIST
-				if(i==0){
-					super.setIdAtIndex(lineSc.nextInt(),ri);
-				}
-				///ADD GENE SYMBOL TO ARRAY
-				else if(i==5){
-					super.setNameAtIndex(lineSc.next(),ri);
-				}
-				else{
-					lineSc.next();
-				}
-				i++;
-			}
+		if (quoteCount != 5) {
+			System.out.println("Incorrect sample input");
 		}
+		else
+		{
 
-		///The name contains commas, thus must be handled differently
-		else{
-
-			///First string of 3 strings is the id and acronym
+			/*
+			*	FIRST STRING : contains id and acronym
+			*/
 			Scanner lineSc = new Scanner(lineSplitByQuotes[0]);
 			lineSc.useDelimiter(",");
 			int i = 0;
@@ -75,16 +118,38 @@ public class ReadTissueAnnots extends ReadAnnots{
 				i++;
 			}
 
-			///Second of 3 strings is the name (which contains commas)
+			/*	
+			*	SECOND STRING : contains tissue name (which contains commas) 
+			*/
 			super.setNameAtIndex(lineSplitByQuotes[3],ri);
 
 
-			///Third of 3 strings contains path
-
-
+			/*
+			*	THIRD STRING : contains location 
+			*/
+			lineSc = new Scanner(lineSplitByQuotes[4]);
+			lineSc.useDelimiter(",");
+			i = 0;
+			while (lineSc.hasNext()) 
+			{
+				if (i == 1)
+				{
+					mriVoxel[ri][0] = (double)lineSc.nextInt();
+				}
+				else if (i == 2)
+				{
+					mriVoxel[ri][1] = (double)lineSc.nextInt();
+				}
+				else if (i == 3)
+				{
+					mriVoxel[ri][2] = (double)lineSc.nextInt();
+				}
+				else
+				{
+					lineSc.next();
+				}
+				i++;
+			}
 		}
-
-     }
-
-
+    }
 }

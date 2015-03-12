@@ -197,6 +197,8 @@ public class Allen2HPO {
         */
         brainDataMngr.meanNormalizeData();
 
+        brainDataMngr.calculateDistanceMatrixForTissueLocations();
+
         /*
         *   Cluster Data
         */

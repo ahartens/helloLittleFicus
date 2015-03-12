@@ -1,42 +1,78 @@
 package allen2hpo.allen.parsing;
 
-import allen2hpo.allen.*;
+import allen2hpo.allen.parsing.ReadAnnots;
 
-import java.util.*;
-import java.io.*;
+import java.util.Scanner;
 
 
 /**
-*	Reads /Probes.csv file line by line, storing whatever info required in arrays
-*	remember to set the size of the matrix rows : must know size of data file before (marked by ***)
+*	Reads Probes.csv file line by line, storing whatever info required in 
+*	arrays.
 *	Probe ID number is stored in ids array
 */
 
 public class ReadProbeAnnots extends ReadAnnots{
 
+	//__________________________________________________________________________
+    //
+    //  Constructor                             
+    //__________________________________________________________________________
 
-	public ReadProbeAnnots(String dir){
-		String file = dir;
-		
-		super.StartReading(file);
+	public ReadProbeAnnots(String file){		
+		/*
+		*	Set filename to be parsed
+		*/
+		super.setFilename(file);
+
+		/*
+		*	Count number of lines
+		*/
+		super.countLines();
+
+		/*
+		*	Begin reading file line by line. Line is handled here.
+		*/
+		super.parseFile();
 	}
 
 
 
-	public void handleRow(String line, int ri){
-		///INIT SCANNER TO READ LINE
+	//__________________________________________________________________________
+    //
+    //	Methods                              
+    //__________________________________________________________________________
+
+	/**
+	*	Handle single row of Probes.csv table. Store data in relevant fields.
+	*/
+	public void handleRow(String line, int ri)
+	{
+
+		/*
+		*	Init scanner to read line with csv delimiter
+		*/
 		Scanner lineSc = new Scanner(line);
         lineSc.useDelimiter(",");
 
-		///ADD GENE NAME TO ARRAY OF GENE NAMES
+        /*
+        *	Read through fields.
+        */
 		int i = 0;
-	    while (lineSc.hasNext()) {
-	    	///ADD PROBE ID TO ID LIST
-	    	if(i==2){
+	    while (lineSc.hasNext()) 
+	    {
+	    	
+	    	/*
+	    	*	Add probe ID to id list
+	    	*/
+	    	if(i==2)
+	    	{
 	    		super.setIdAtIndex(lineSc.nextInt(),ri);
 	    	}
-	    	///ADD GENE SYMBOL TO ARRAY
-	    	else if(i==3){
+	    	/*
+	    	*	Add gene symbol to array (gene name)
+	    	*/
+	    	else if(i==3)
+	    	{
 	    		super.setNameAtIndex(lineSc.next().replace("\"",""),ri);
 	    	}
 	    	else{
@@ -44,6 +80,5 @@ public class ReadProbeAnnots extends ReadAnnots{
 	    	}
 			i++;
         }
-
      }
 }

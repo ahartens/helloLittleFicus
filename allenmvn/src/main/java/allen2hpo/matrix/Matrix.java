@@ -432,9 +432,13 @@ public class Matrix{
             for ( j = 0; j<getColumnSize()-1; j++){
                 fw.writeDouble(this.dat[i][j]);
                 fw.writeDelimit();
+                System.out.printf("%.5f\t",this.dat[i][j]);
+
             }
             //Last cell in row shouldn't have a delimiter. write next line
             fw.writeDouble(this.dat[i][j]);
+            System.out.printf("%.5f\t",this.dat[i][j]);
+
             fw.writeNextLine();
         }
 
