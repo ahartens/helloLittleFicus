@@ -206,38 +206,43 @@ public class Allen2HPO {
         /*
         *   Perform Kmeans clustering using the gap statistic to calculate k
         */
-        clusteringMngr.doKmeansClusteringWithGapStat();
+        boolean success = clusteringMngr.doKmeansClusteringWithGapStat();
 
-        /*
-        *   Print output to terminal
-        */
-        clusteringMngr.printClusterGenesInTerminal();
-
-
-        /*
-        *   Create a directory called clustering for output
-        */
-        File outputDirectory = createOutputDirectory(dir);
-        if (outputDirectory != null)
+        if(success)
         {
-            /*  Create string for outputDirectory path */
-            String outputDirString = outputDirectory.getAbsolutePath()+dir.separator;
             /*
-            *   Write population file (all genes clustered one gene per line)
+            *   Print output to terminal
             */
-            clusteringMngr.writePopulationGenesToFile(outputDirString);
+            clusteringMngr.printClusterGenesInTerminal();
+
 
             /*
-            *   Write one cluster per file, one gene per line
+            *   Create a directory called clustering for output
             */
-            clusteringMngr.writeClusterGenesOneClusterPerFile(outputDirString);
+            File outputDirectory = createOutputDirectory(dir);
+            if (outputDirectory != null)
+            {
+                /*  Create string for outputDirectory path */
+                String outputDirString = outputDirectory.getAbsolutePath()+dir.separator;
+                /*
+                *   Write population file (all genes clustered one gene per line)
+                */
+                clusteringMngr.writePopulationGenesToFile(outputDirString);
 
-            /*
-            *   Write Cluster Prototypes to file
-            */
-            clusteringMngr.writeClusterPrototypesToFile(outputDirString);
+                /*
+                *   Write one cluster per file, one gene per line
+                */
+                clusteringMngr.writeClusterGenesOneClusterPerFile(outputDirString);
+
+                /*
+                *   Write Cluster Prototypes to file
+                */
+                clusteringMngr.writeClusterPrototypesToFile(outputDirString);
+            }
         }
-        
+        else{
+            System.out.println("Clustering was unsuccessful");
+        }
     }
 
     private File createOutputDirectory(File parentDir){

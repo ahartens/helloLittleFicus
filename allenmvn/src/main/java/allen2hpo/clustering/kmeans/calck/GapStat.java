@@ -20,6 +20,12 @@ import allen2hpo.clustering.kmeans.initclust.*;
 *	calculation object (if none specified defaults to Euclidean distance).</li>
 *	<li>Call getK() to get optimal k value value.</li>
 *	</ol>
+
+*
+*	NOTE TO DO : LEGACY VERSION DID GAPSTAT CAP_K TIMES
+*	12.3.2015 : CHECKS GAP TO PREVIOUS GAP AFTER EACH TRIAL OF K : WHICH IS 
+*	BETTER?
+*
 *	@author Alex Hartenstein
 */
 
@@ -33,7 +39,7 @@ public class GapStat implements GetKable{
 
 	/**	K value with lowest Gap between log of expected dispersion and log of 
 	*	actual dispersion */
-	int kfinal;
+	int kfinal = 0;
 
 	/**	object performing kmeans or actual data. random distributions init their
 	*	own kmeans object */
@@ -89,7 +95,7 @@ public class GapStat implements GetKable{
 
 
 		/*	Number of iterations, thus testing K values 1-20 */
-		int k = 30;
+		int k = 40;
 		
 		/*	Number of uniform random distributions created for each k for 
 		*	which dispersion is calculated */
@@ -100,12 +106,18 @@ public class GapStat implements GetKable{
 
 
 
+
+		boolean optimalKFound = newStepOneTwo(k,b,m);
+
+		/*
+		OLD IMPLEMENTATION 12.5.15
+		Calculated gap for every k < cap_k then compared them
 		while(this.kfinal == 0){
 			System.out.println("First round of gap stat");
 			double[] gap_k = stepOneTwo(k,b,m);
 			double[] s_k = stepThree(k,b);
 			this.kfinal = stepFour(gap_k,s_k,b);
-		}
+		}*/
 	}
 
 
@@ -127,9 +139,8 @@ public class GapStat implements GetKable{
 
 	//__________________________________________________________________________
     //
-    //  GapStat Lifecycle Implementation                                 
+    //  Gap stat lifecycle implementation                                   
     //__________________________________________________________________________
-
 
 	/**
 	*	Step one of gap stat, returns an array capital K, with a gap value 
@@ -138,7 +149,7 @@ public class GapStat implements GetKable{
 	*	@param second int is capital B, the number of random uniform 
 	*	distributions to be created
 	*/
-	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m)
+	private boolean newStepOneTwo(int cap_k, int cap_b, Matrix m)
 	{
 
 		/* Init random expression data generator with actual data */
@@ -189,69 +200,70 @@ public class GapStat implements GetKable{
 			*	distributions created) 
 			*/
 			gap[k] = gapSum_k/cap_b;
+
+			/*
+			*	If not first value k checked, calculate gap between current 
+			*	clustering and previous clustering
+			*/
+			if (k>0) 
+			{
+				double s_k = newStepThree(cap_b,wkb_star[k]);
+
+				boolean optimalKFound = newStepFour(gap[k-1],gap[k],s_k);
+
+				if (optimalKFound) 
+				{
+					/*
+					*	Started clustering with with k + 2. singleStepThree 
+					*	calculates s for previous k
+					*/
+					this.kfinal = k+1;
+
+					return true;
+				}
+			}
 		}
 
-		return gap;
+		return false;
 	}
-
-	/**
-	*
-	*/
-	private double[] stepThree( int cap_k, int cap_b)
+	private double newStepThree( int cap_b, double[] wkb_star1)
 	{
 		/*
 		*	PART ONE
 		*	Calculate l_bar for each value k
 		*/
-		double[] lbar_k = new double[cap_k];
-
-		for (int k = 0; k<cap_k; k++)
-		{
-			for (int b = 0; b<cap_b; b++)
-			{
-				lbar_k[k] += this.wkb_star[k][b];
-			}
-			lbar_k[k] /= cap_b;
+		double lbar_k = 0;
+		for (int b = 0; b < wkb_star1.length; b++){
+			lbar_k += wkb_star1[b];
 		}
+		lbar_k /= cap_b;
 
 		/*
 		*	PART TWO
 		*	Calculate standard deviation for each value k, using l_bar
 		*/
-		double[] sd_k = new double[cap_k];
-		double[] s_k = new double[cap_k];
+		double sd_k = 0;
+		double s_k = 0;
 
-		for (int k = 0; k<cap_k; k++)
-		{
-			for (int b = 0; b<cap_b; b++)
-			{
-				sd_k[k] += Math.pow(this.wkb_star[k][b] - lbar_k[k],2);
-			}
-			
-			sd_k[k] = Math.sqrt(sd_k[k]/cap_b);
-			s_k[k] = Math.sqrt(1+(1/cap_b))*sd_k[k];
+		for (int b =0; b<cap_b; b++){
+			sd_k = Math.pow(wkb_star1[b] - lbar_k,2);
 		}
+
+		sd_k = Math.sqrt(sd_k/cap_b);
+		s_k = Math.sqrt(1+(1/cap_b))*sd_k;
+
 		return s_k;
 	}
 
-	/**
-	*	11.3.2015 changed this to not look at k = 1 (first element in gap array)
-	*	because was often greater. is this reasonable???
-	*/
-	private int stepFour(double[] gap, double[] s, int cap_k){
-		System.out.println("step four");
-		for(int k = 0; k< cap_k - 1; k++){
-			System.out.printf("gk: %f  >=  %f   gk+1: %f    s:%f\n",
-			gap[k],gap[k+1] - s[k+1],gap[k+1],s[k+1]);
-
-			if ( gap[k] >= gap[k+1] - s[k+1] ){
-				
-				/*	started with k = 2 so at position zero are values 
-				*	corresponding to a k = 2 */
-				return k+2;
-			}
+	private boolean newStepFour(double previousGap, double currentGap, double s)
+	{
+		System.out.printf("gk: %f  >=  %f   gk+1: %f    s:%f\n",
+			previousGap,currentGap - s,currentGap,s);
+		if (previousGap >= currentGap - s) 
+		{
+			return true;
 		}
-		return 0;
+		return false;
 	}
 
 
@@ -324,4 +336,138 @@ public class GapStat implements GetKable{
 		}
 		return Math.log(wk);
 	}
+
+
+
+
+	//__________________________________________________________________________
+    //
+    //  OLD 12.5.15 GapStat Lifecycle Implementation                                 
+    //__________________________________________________________________________
+
+
+	/**
+	*	Step one of gap stat, returns an array capital K, with a gap value 
+	*	corresponding index + 1
+	*	@param first int is capital K, the number of k values to be tested
+	*	@param second int is capital B, the number of random uniform 
+	*	distributions to be created
+	*/
+	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m)
+	{
+
+		/* Init random expression data generator with actual data */
+		UniformRandomMatrixGenerator generator = 
+			new UniformRandomMatrixGenerator(m);
+
+		/*	Init array that will hold calculated gap value for given k value 
+		*	(capital K long) */
+		double[] gap = new double[cap_k];
+
+		/*	Calculated dispersion for actual Data */
+		this.wk = new double[cap_k];
+
+		/*	Calculated dispersion for randomly generated data */
+		this.wkb_star = new double[cap_k][cap_b];
+
+
+		/*	For each k value perform kmeans and calculate gap */
+		for (int k = 0; k<cap_k; k++)
+		{
+
+			/*	Calculate actual log(Wk) for given k value.
+			*	Start with k = 2 */
+			wk[k] = calcMeanDispersion(k+2, null, Data.REAL);
+
+			/*	Reset sum of gaps */
+			double gapSum_k = 0;
+
+			/*	
+			*	Calculate log(Wkb_star) for given k for B uniform random 
+			*	matrices. 
+			*/
+			for (int b = 0; b<cap_b; b++)
+			{
+				/*	Create random uniform matrix and calculate dispersion
+				*	Start with k = 2 */
+
+				wkb_star[k][b] = 
+					calcMeanDispersion(k+2,generator.generateUniformRand(),
+						Data.RANDOM);
+
+				/*	Calculate gap and add to sum */
+				gapSum_k += wkb_star[k][b] - wk[k];
+			}
+			
+			/*	
+			*	Calculate actual gap by dividing by capital B (number of random 
+			*	distributions created) 
+			*/
+			gap[k] = gapSum_k/cap_b;
+
+		}
+
+		return gap;
+	}
+
+	/**
+	*
+	*/
+	private double[] stepThree( int cap_k, int cap_b)
+	{
+		/*
+		*	PART ONE
+		*	Calculate l_bar for each value k
+		*/
+		double[] lbar_k = new double[cap_k];
+
+		for (int k = 0; k<cap_k; k++)
+		{
+			for (int b = 0; b<cap_b; b++)
+			{
+				lbar_k[k] += this.wkb_star[k][b];
+			}
+			lbar_k[k] /= cap_b;
+		}
+
+		/*
+		*	PART TWO
+		*	Calculate standard deviation for each value k, using l_bar
+		*/
+		double[] sd_k = new double[cap_k];
+		double[] s_k = new double[cap_k];
+
+		for (int k = 0; k<cap_k; k++)
+		{
+			for (int b = 0; b<cap_b; b++)
+			{
+				sd_k[k] += Math.pow(this.wkb_star[k][b] - lbar_k[k],2);
+			}
+			
+			sd_k[k] = Math.sqrt(sd_k[k]/cap_b);
+			s_k[k] = Math.sqrt(1+(1/cap_b))*sd_k[k];
+		}
+		return s_k;
+	}
+
+	/**
+	*	11.3.2015 changed this to not look at k = 1 (first element in gap array)
+	*	because was often greater. is this reasonable???
+	*/
+	private int stepFour(double[] gap, double[] s, int cap_k){
+		System.out.println("step four");
+		for(int k = 0; k< cap_k - 1; k++){
+			/*System.out.printf("gk: %f  >=  %f   gk+1: %f    s:%f\n",
+			gap[k],gap[k+1] - s[k+1],gap[k+1],s[k+1]);*/
+
+			if ( gap[k] >= gap[k+1] - s[k+1] ){
+				
+				/*	started with k = 2 so at position zero are values 
+				*	corresponding to a k = 2 */
+				return k+2;
+			}
+		}
+		return 0;
+	}
+
 }

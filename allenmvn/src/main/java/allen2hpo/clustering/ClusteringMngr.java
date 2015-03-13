@@ -78,7 +78,7 @@ public class ClusteringMngr{
     *	Perform Kmeans cluster analysis using GapStat to calculate the value 
     *   of K
     */
-    public void doKmeansClusteringWithGapStat()
+    public boolean doKmeansClusteringWithGapStat()
     {
 
         DistComputable distCalc = new DistEuclidean();
@@ -89,38 +89,47 @@ public class ClusteringMngr{
         GapStat gap = 
             new GapStat(this.allenData.getExpression(),distCalc,initClust);
         
-        System.out.println("GapStat Optimal number of clusters : "+gap.getK());
-
-        /* 
-        *	Init kmeans clustering object
-		*	Use k value calculated by gap statistic
-		*	Do not specify proximity measure (Uses default proximity measure, 
-        *   euclidean distance)
-        *   Do not specify cluster initialization method (Uses default, random 
-        *   initialization)
-		*/
-        this.clusteringObject = 
-            new Kmeans(this.allenData.getExpression(),gap.getK(),distCalc,
-                initClust);
-
-
         /*
-        *	Do the clustering
+        *   Check that optimal number of clusters was found
         */
-        clusteringObject.doClustering();
+        if (gap.getK() != 0) {
+            
+            System.out.println("GapStat Optimal number of clusters : "+gap.getK());
+
+            /* 
+            *	Init kmeans clustering object
+    		*	Use k value calculated by gap statistic
+    		*	Do not specify proximity measure (Uses default proximity measure, 
+            *   euclidean distance)
+            *   Do not specify cluster initialization method (Uses default, random 
+            *   initialization)
+    		*/
+            this.clusteringObject = 
+                new Kmeans(this.allenData.getExpression(),gap.getK(),distCalc,
+                    initClust);
 
 
-        /*
-        *	Retrieve results of clustering and store
-        */
-        this.prototypes = clusteringObject.getClusterPrototypes();
-        this.clusterIndices = clusteringObject.getClusterIndices();
+            /*
+            *	Do the clustering
+            */
+            clusteringObject.doClustering();
 
-        /*
-        *   Use AllenBrainMngr to get gene names organized into clusters
-        */
-        this.clusteredGeneNames = this.allenData.getGeneClusters
-            (clusteringObject.getClusterIndices());
+
+            /*
+            *	Retrieve results of clustering and store
+            */
+            this.prototypes = clusteringObject.getClusterPrototypes();
+            this.clusterIndices = clusteringObject.getClusterIndices();
+
+            /*
+            *   Use AllenBrainMngr to get gene names organized into clusters
+            */
+            this.clusteredGeneNames = this.allenData.getGeneClusters
+                (clusteringObject.getClusterIndices());
+
+            return true;
+        }
+        return false;
     }
 
 
