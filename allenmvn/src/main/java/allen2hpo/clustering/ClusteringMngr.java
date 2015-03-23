@@ -13,8 +13,11 @@ import allen2hpo.clustering.kmeans.distance.*;
 
 /**
 *	<p>
-*	Responsible for interfacing between clustering output and 
-*   {@link allen2hpo.allen AllenDataMngr}
+*	Receives an {@link allen2hpo.allen AllenDataMngr} and is responsible for :  
+*   <ol>
+*   <li>Implementing desired clustering algorithm</li>
+*   <li>Making sense of clustering output</li>
+*   </ol> 
 *   <br>Given an {@link allen2hpo.allen AllenDataMngr}, various clustering 
 *   methods can be performed on expression data
 *	<br>Once clustering has been performed, uses results of clustering to print 

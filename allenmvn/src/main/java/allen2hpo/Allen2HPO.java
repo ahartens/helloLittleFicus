@@ -196,7 +196,10 @@ public class Allen2HPO {
         */
         brainDataMngr.meanNormalizeData();
 
-        brainDataMngr.calculateDistanceMatrixForTissueLocations();
+       // brainDataMngr.calculateDistanceMatrixForTissueLocations();
+
+        OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
+        brainDataMngr.collapseTissuesToSelectedParents(ontology);
 
         /*
         *   Cluster Data

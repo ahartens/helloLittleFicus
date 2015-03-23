@@ -3,6 +3,7 @@ package allen2hpo.allen;
 import allen2hpo.matrix.*;
 import allen2hpo.allen.parsing.*;
 import allen2hpo.allen.transformations.*;
+import allen2hpo.allen.ontology.*;
 
 /**
 *	<p>
@@ -141,6 +142,17 @@ public class AllenDataMngr{
 			+ this.data.getRowSize());
 	}
 
+	public void collapseTissuesToSelectedParents(OntologyDataMngr ontology){
+		 /*
+        *   
+        */
+        CollapseColumns make5columns = new CollapseColumns(this.data,this.tissueIds,ontology);
+        
+        make5columns.collapseExample();
+
+        this.data = make5columns.getDataCollapsed();
+	}
+
 	/**
 	*	Matrix object mean normalizes itself using.<br> 
 	*	normVal = val(x,y) - mean(x) - mean(y) + mean(all)
@@ -250,8 +262,8 @@ public class AllenDataMngr{
 	/**
 	*	Called getGenes/getTissues methods
 	*	@return String[] of strings of
-	*	@param int[] of ints, indices of desired name
-	*	@param String[] of strings, the list from which names are selected from
+	*	@param int[] indices of desired name
+	*	@param String[] list from which names are selected from
 	*/
 	private String[] getNamesAtIndexes(int[] indexes, String[] allNames){
 		String[] names = new String[indexes.length];

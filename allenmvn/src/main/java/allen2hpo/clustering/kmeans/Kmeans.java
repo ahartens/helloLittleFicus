@@ -71,8 +71,12 @@ public class Kmeans implements Clusterable{
     //__________________________________________________________________________    
 
     /**
-    *   Simplest constructor method initializes only data to be clustered.
+    *   Simplest constructor method requires no k value.
     *   @param Matrix expression data to be clustered.
+    *   @param DistComputable distance calculation implementing DistComputable 
+    *   interface to customize distance calculation.
+    *   @param InitClusterable object specifying method used to initialize 
+    *   cluster prototypes 
     */
     public Kmeans(Matrix mat, DistComputable dc, InitClusterable ic){
         this(mat,1,dc,ic);
@@ -253,16 +257,7 @@ public class Kmeans implements Clusterable{
     }
 
     /**
-    *   Two dimensional array is returned containing (row) indices of data 
-    *   points organized by cluster assignment.
-    *   <br>Imagined as a table :
-    *   <ol>
-    *   <li>There are as many rows as there are clusters. Each row of table is 
-    *   an array. (eg. in kmeans there are k rows)</li>
-    *   <li>Each column of table is a (row) index that points to the location of
-    *    a data point in microarray expression data.</li>
-    *   </ol>
-    *   @return int[][]
+    *   Clusterable interface method
     */
     public int[][] getClusterIndices(){
         
@@ -308,14 +303,7 @@ public class Kmeans implements Clusterable{
     }
 
     /**
-    *   Returns the centroids of the clusters produced.
-    *   <br>Imagined as a table:
-    *   <ol>
-    *   <li>There are as many rows as there are clusters.</li>
-    *   <li>There are as many columns as there are columns in original 
-    *   expression data. (equal dimensionality)</li>
-    *   </ol>
-    *   @return double[][] 
+    *   Clusterable interface method
     */
     public double[][] getClusterPrototypes(){
         return this.cp;
@@ -343,7 +331,6 @@ public class Kmeans implements Clusterable{
     *   <li>reach maxRep (100) or until less than 1% move during cluster 
     *   assignment</li>
     *   </ol>
-    *	@param takes an int for number of iterations to be run
     */
     public void doClustering(){
 
@@ -498,7 +485,7 @@ public class Kmeans implements Clusterable{
     *   <br>Calculates new mean of cluster after a reassignment step and saves 
     *   result in this.cp array (means are new cluster prototypes).
     */
-    private void calcClusterMean(){
+    public void calcClusterMean(){
         /*
         *   Init array where sum of each cluster is stored
         */

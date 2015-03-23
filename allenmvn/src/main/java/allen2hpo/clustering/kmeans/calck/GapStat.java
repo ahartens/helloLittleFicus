@@ -22,9 +22,10 @@ import allen2hpo.clustering.kmeans.initclust.*;
 *	</ol>
 
 *
-*	NOTE TO DO : LEGACY VERSION DID GAPSTAT CAP_K TIMES
+*	NOTE TO DO : LEGACY VERSION CALCULATED GAPSTAT CAP_K TIMES AND THEN COMPARED
+*	GAP VALUES
 *	12.3.2015 : CHECKS GAP TO PREVIOUS GAP AFTER EACH TRIAL OF K : WHICH IS 
-*	BETTER?
+*	BETTER? OBVIOUSLY MORE EFFICIENT AS DOESN'T HAVE TO DO USELESS KMEANS
 *
 *	@author Alex Hartenstein
 */
@@ -94,12 +95,12 @@ public class GapStat implements GetKable{
 		this.cpInit = cp;
 
 
-		/*	Number of iterations, thus testing K values 1-20 */
+		/*	Number of iterations, thus testing K values 2-k+2 */
 		int k = 40;
 		
 		/*	Number of uniform random distributions created for each k for 
 		*	which dispersion is calculated */
-		int b = 10;
+		int b = 2;
 
 		//Init kmeans object that will perform kmeans on actual data
 		this.kmeans = new Kmeans(m,dc,cp);
@@ -143,10 +144,20 @@ public class GapStat implements GetKable{
     //__________________________________________________________________________
 
 	/**
-	*	Step one of gap stat, returns an array capital K, with a gap value 
-	*	corresponding index + 1
-	*	@param first int is capital K, the number of k values to be tested
-	*	@param second int is capital B, the number of random uniform 
+	*	Performs kmeans on 
+	*	<ol>
+	*	<li>Actual data</li>
+	*	<li>capB generated uniform random distributions</li>
+	*	</ol>
+	*	And uses the resulting clusters to calculate the gap statistic
+	*	<br>After first iteration, the current gap calculated is compared to the
+	*	gap of the previous iteration
+	*	If the gap (after subtracting s) is greater for the previous iteration,
+	*	the optimal k value has been found, returns true
+	*	@param int capital K, the number of k values to be tested
+	*	@param int capital B, the number of random uniform 
+	*	@return boolean true when/if optimal k value is found (previous gap is
+	*	greater than current gap)
 	*	distributions to be created
 	*/
 	private boolean newStepOneTwo(int cap_k, int cap_b, Matrix m)
@@ -166,6 +177,7 @@ public class GapStat implements GetKable{
 		/*	Calculated dispersion for randomly generated data */
 		this.wkb_star = new double[cap_k][cap_b];
 
+		int firstK = 2;
 
 		/*	For each k value perform kmeans and calculate gap */
 		for (int k = 0; k<cap_k; k++)
@@ -173,7 +185,7 @@ public class GapStat implements GetKable{
 
 			/*	Calculate actual log(Wk) for given k value.
 			*	Start with k = 2 */
-			wk[k] = calcMeanDispersion(k+2, null, Data.REAL);
+			wk[k] = calcMeanDispersion(k+firstK, null, Data.REAL);
 
 			/*	Reset sum of gaps */
 			double gapSum_k = 0;
@@ -188,7 +200,7 @@ public class GapStat implements GetKable{
 				*	Start with k = 2 */
 
 				wkb_star[k][b] = 
-					calcMeanDispersion(k+2,generator.generateUniformRand(),
+					calcMeanDispersion(k+firstK,generator.generateUniformRand(),
 						Data.RANDOM);
 
 				/*	Calculate gap and add to sum */
@@ -214,10 +226,10 @@ public class GapStat implements GetKable{
 				if (optimalKFound) 
 				{
 					/*
-					*	Started clustering with with k + 2. singleStepThree 
+					*	Started clustering with with firstk. singleStepThree 
 					*	calculates s for previous k
 					*/
-					this.kfinal = k+1;
+					this.kfinal = k+firstK-1;
 
 					return true;
 				}
@@ -226,6 +238,7 @@ public class GapStat implements GetKable{
 
 		return false;
 	}
+	
 	private double newStepThree( int cap_b, double[] wkb_star1)
 	{
 		/*
@@ -283,7 +296,7 @@ public class GapStat implements GetKable{
 	*/
 	private double calcMeanDispersion(int k, Matrix m, Data realOrRandom){
 
-		this.repeat = 10;
+		this.repeat = 1;
 		double sumW = 0;
 
 		Kmeans kmo = null;
