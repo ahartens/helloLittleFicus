@@ -89,13 +89,13 @@ public class CollapseColumns{
         *   Collapse into lobi : 
         *   frontal, insula, limbic lob, parietal,temporal, occipital
         */
-        int[] brain = {4009,4268,4219,4084,4132, 4180};
+       // int[] brain = {4009,4268,4219,4084,4132, 4180};
         
         /*
         *   Collapse into developmental origin :
         *   Tel,di,mes,met,myl
-        
-        int[] brain = {4007,4391,9001,4833,9512};*/
+        */
+        int[] brain = {4007,4391,9001,4833,9512};
         
         /*
         *   Collapse
