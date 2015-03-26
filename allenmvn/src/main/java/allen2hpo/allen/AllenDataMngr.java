@@ -5,6 +5,13 @@ import allen2hpo.allen.parsing.*;
 import allen2hpo.allen.transformations.*;
 import allen2hpo.allen.ontology.*;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.FileNotFoundException;
 /**
 *	<p>
 *	This class is responsible for handling all data corresponding to one brain.
@@ -25,7 +32,7 @@ import allen2hpo.allen.ontology.*;
 *	@author Alex Hartenstein.
 */
 
-public class AllenDataMngr{
+public class AllenDataMngr implements Serializable{
 
 	//__________________________________________________________________________
     //
@@ -172,7 +179,24 @@ public class AllenDataMngr{
 			new DistanceMatrix(new Matrix(this.tissueLocations));
 	}
 
+	/**
+	*
+	*
+	*/
+	public void serializeDataToFile(String fileName){
+		try{
+			ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(fileName));
 
+		}
+		catch (FileNotFoundException e)
+		{
+
+		}
+		catch (IOException e)
+		{
+
+		}
+	}
 
 
 	//__________________________________________________________________________
