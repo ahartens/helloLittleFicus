@@ -1,10 +1,11 @@
 package allen2hpo.matrix;
+import java.io.Serializable;
 
 /**
 *   Shell for 2d array
 *   @author Alex Hartenstein
 */
-public class Matrix{
+public class Matrix implements Serializable{
 
     /** 2d array containing all data*/
     private double[][] dat=null;

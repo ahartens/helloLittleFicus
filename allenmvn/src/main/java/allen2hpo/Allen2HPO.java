@@ -17,6 +17,14 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.Parser;
 
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.FileNotFoundException;
 /**
 *   <p>
 *   Responsible for managing lifecycle of program.
@@ -35,7 +43,6 @@ import org.apache.commons.cli.Parser;
 *   </p>
 *   @author Alex Hartenstein
 */
-
 public class Allen2HPO {
 
     //__________________________________________________________________________
@@ -88,9 +95,10 @@ public class Allen2HPO {
         *   Data path provided points to a single brain donor.  Do cluster 
         *   analysis on single brain donor.
         */
-        if (allen2hpo.checkAllAllenBrainFilesPresent(parentDir)) 
+        int status = allen2hpo.checkAllAllenBrainFilesPresent(parentDir);
+        if (status != 2) 
         {
-            allen2hpo.doSingleDonorAnalysis(parentDir);
+            allen2hpo.doSingleDonorAnalysis(parentDir,status);
             donorCount ++;
         }
 
@@ -114,9 +122,11 @@ public class Allen2HPO {
                     /*  
                     *   Child is a single brain donor. Do cluster analysis. 
                     */
-                    if (allen2hpo.checkAllAllenBrainFilesPresent(child)) 
+                    status = allen2hpo.checkAllAllenBrainFilesPresent(parentDir);
+
+                    if (status != 2) 
                     {
-                        allen2hpo.doSingleDonorAnalysis(child);
+                        allen2hpo.doSingleDonorAnalysis(child,status);
                         donorCount++;
                     }
                 }
@@ -172,30 +182,42 @@ public class Allen2HPO {
     *   </ol>
     *   </p>
     */
-    private void doSingleDonorAnalysis(File dir){
+    private void doSingleDonorAnalysis(File dir, int serializedDataFound){
+        String serializedDataPath = dir.getAbsolutePath()+dir.separator+"SerializedAllenDataMngr.bin";
+        AllenDataMngr brainDataMngr = null;
+        if (serializedDataFound == 1) {
+            brainDataMngr = deserializeData(serializedDataPath);
+            System.out.println("found serialized data");
+        }
+        else
+        {
+            /*
+            *   Init AllenDataMngr object to serve as wrapper of directory 
+            *   corresponding to a single Allen Brain donor
+            */
+            brainDataMngr = new AllenDataMngr(dir.getPath());
+
+            /*
+            *   Parse directory 
+            */
+            brainDataMngr.parseExpressionAndAnnotations();
+            /*
+            *   Average expression of probes with same gene name to create unique 
+            *   gene-expression pairs
+            */
+            brainDataMngr.collapseRepeatProbesToUniqueGenes();
+
+            /*
+            *   Normalize the data
+            */
+            brainDataMngr.meanNormalizeData();
+
+            /*
+            *   Serialize data and save to directory
+            */
+            serializeDataToFile(brainDataMngr,serializedDataPath);
+        }
         
-
-        /*
-        *   Init AllenDataMngr object to serve as wrapper of directory 
-        *   corresponding to a single Allen Brain donor
-        */
-        AllenDataMngr brainDataMngr = new AllenDataMngr(dir.getPath());
-
-        /*
-        *   Parse directory 
-        */
-        brainDataMngr.parseExpressionAndAnnotations();
-        /*
-        *   Average expression of probes with same gene name to create unique 
-        *   gene-expression pairs
-        */
-        brainDataMngr.collapseRepeatProbesToUniqueGenes();
-
-        /*
-        *   Normalize the data
-        */
-        brainDataMngr.meanNormalizeData();
-
        // brainDataMngr.calculateDistanceMatrixForTissueLocations();
 
        // OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
@@ -278,6 +300,7 @@ public class Allen2HPO {
 
     /**
     *   <p>Checks for presence of all necessary files for AllenDataMngr.<br>
+    *   If finds seralized data returns
     *   Returns true if following are present in directory :
     *   <ol>
     *   <li>MicroarrayExpression.csv</li>
@@ -286,12 +309,15 @@ public class Allen2HPO {
     *   </ol>
     *   </p>
     *   @param File directory to be checked
-    *   @return boolean true if all present, false if any missing
+    *   @return int 0 if all files present
+    *   @return int 1 if serialized data is present
+    *   @return int 2 if insufficient files present
     */
-    private boolean checkAllAllenBrainFilesPresent(File dir){
+    private int checkAllAllenBrainFilesPresent(File dir){
         boolean expression = false;
         boolean probes = false;
         boolean samples = false;
+        boolean serializedData = false;
 
         /** Check for presence of all necessary files */
         for(String fileName : dir.list())
@@ -302,14 +328,68 @@ public class Allen2HPO {
                 probes = true;
             if (fileName.equals("SampleAnnot.csv") )
                 samples = true;
+            if (fileName.equals("SerializedAllenDataMngr.bin"))
+                serializedData = true;
         }
+
+        if (serializedData == true) 
+            return 1;
 
         /** If all necessary files present, return true */
         if (expression == true && probes == true && samples == true)
-            return true;
+            return 0;
 
-        return false;
+        /*  Not all files are present */
+        return 2;
     }
+
+    /**
+    *
+    *
+    */
+    public void serializeDataToFile(Serializable object, String fileName){
+        try{
+            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(fileName));
+            os.writeObject(object);
+            os.close();
+        }
+        catch (FileNotFoundException e)
+        {
+
+        }
+        catch (IOException e)
+        {
+
+        }
+    }
+
+    /**
+    *
+    *
+    */
+    private AllenDataMngr deserializeData(String fileName){
+        AllenDataMngr mngr = null;
+        try
+        {
+            ObjectInputStream is = new ObjectInputStream(new FileInputStream(fileName));
+            mngr = (AllenDataMngr)is.readObject();
+            is.close();
+        }
+        catch (FileNotFoundException e)
+        {
+
+        }
+        catch (IOException e)
+        {
+
+        }
+        catch (ClassNotFoundException e)
+        {
+
+        }
+        return mngr;
+    }
+
 
 
 
