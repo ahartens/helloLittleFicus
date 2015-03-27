@@ -31,7 +31,7 @@ public class OntologyDataMngr{
         this.structures[i].printLeveled();
     }
 
-    public int[] getIndicesOfChildrenOfStructureWithId(int id, int[] samples){
+    public int[] getIndicesOfChildrenOfStructureWithId(int id, List<Integer> samples){
         Structure parent = null;
         for (int i=0; i<this.length; i++){
 
@@ -52,8 +52,8 @@ public class OntologyDataMngr{
                 ///Go through children and find index in sample array
                 for (int i=0; i<parent.getChildCount(); i++){
 
-                    for (int j=0; j<samples.length; j++){
-                        if(children[i].getId() == samples[j]){
+                    for (int j=0; j<samples.size(); j++){
+                        if(children[i].getId() == samples.get(j)){
                             indices[i] = j;
 
                         }
@@ -126,8 +126,8 @@ public class OntologyDataMngr{
         writer.closeFile();
     }
 
-    public void printAllStructuresHierarchyClusterExpressionValues(int[] sampleIds, Matrix m){
-        FileWriter writer = new FileWriter("/Users/ahartens/Desktop/PrototypeValues.js");
+    public void printAllStructuresHierarchyClusterExpressionValues(ArrayList<Integer> sampleIds, Matrix m){
+        /*FileWriter writer = new FileWriter("/Users/ahartens/Desktop/PrototypeValues.js");
         writer.writeString("var values = [\n");
 
         CollapseColumns collapser = new CollapseColumns(m, sampleIds, this);
@@ -161,7 +161,7 @@ public class OntologyDataMngr{
 
         writer.writeString("];");
         writer.closeFile();
-
+*/
     }
 
 }

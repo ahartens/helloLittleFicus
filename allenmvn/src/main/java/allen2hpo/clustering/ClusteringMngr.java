@@ -12,6 +12,8 @@ import allen2hpo.clustering.kmeans.distance.*;
 
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+
 /**
 *	<p>
 *	Receives an {@link allen2hpo.allen AllenDataMngr} and is responsible for :  
@@ -192,15 +194,15 @@ public class ClusteringMngr{
     */
     public void writePopulationGenesToFile(String outputPath)
     {
-        String[] population = this.allenData.getAllGenes();
+        ArrayList<String> population = this.allenData.getAllGenes();
         log.info("Wrote file : "+ outputPath+"population.txt");
 
         FileWriter writer = new FileWriter();
         writer.createFileWithName(outputPath+"population.txt");
 
-        for(int i=0; i<population.length; i++)
+        for(int i=0; i<population.size(); i++)
         {
-            writer.writeString(population[i]);
+            writer.writeString(population.get(i));
             writer.writeNextLine();
         }
         writer.closeFile();

@@ -3,6 +3,7 @@ package allen2hpo.allen.transformations;
 import allen2hpo.matrix.*;
 import allen2hpo.allen.ontology.*;
 
+import java.util.ArrayList;
 
 /**
 *	This class decreases the number of columns in data by calculating mean of
@@ -28,7 +29,7 @@ public class CollapseColumns{
 
     /** Ordered array of all sample (ie tissue) ids derived from 
     *   SampleAnnot.csv. Order == columns in microarrayexpression.csv */
-    private int[] tissueIds = null;
+    private ArrayList<Integer> tissueIds = null;
 
     /**	Matrix object containing all expression data. each row is a gene, 
     *   each column a tissue sample */
@@ -53,7 +54,7 @@ public class CollapseColumns{
     /**
     *
     */
-    public CollapseColumns(Matrix m, int[] tisIds, OntologyDataMngr o){
+    public CollapseColumns(Matrix m, ArrayList<Integer> tisIds, OntologyDataMngr o){
         this.tissueIds = tisIds;
         this.data = m;
         this.ontology = o;
@@ -196,6 +197,6 @@ public class CollapseColumns{
     }
 
     public void collapseAll(){
-        collapseSamples(this.tissueIds);
+        //collapseSamples(this.tissueIds);
     }
 }

@@ -3,6 +3,7 @@ package allen2hpo.allen.parsing;
 import java.util.*;
 import java.io.*;
 
+import java.util.ArrayList;
 
 /**
 *	<p>Abstract class to read an annotation file (probe/sample).
@@ -27,10 +28,10 @@ abstract class ReadAnnots{
 	private Scanner scanner = null;
 
 	/**	Probes/samples both have names and ids */
-	private String [] names = null;
+	private ArrayList<String> names = null;
 
 	/**	Probes/samples both have names and ids */
-	private int []ids = null;
+	private ArrayList<Integer> ids = null;
 
 	/**	As reading specifies current line being read. Later is number of rows
 	*	total */
@@ -76,8 +77,8 @@ abstract class ReadAnnots{
 	public void parseFile(){
 
 		/** Initialize name/id arrays with dimension size found previously */
-		this.ids = new int[this.count];
-		this.names = new String[this.count];
+		this.ids = new ArrayList<Integer>();
+		this.names = new ArrayList<String>();
 
 		/** Parse each line of the file */
 		openFile(this.filename);
@@ -132,12 +133,12 @@ abstract class ReadAnnots{
     //__________________________________________________________________________
 
     /** @return String[] name or abbreviation */
-	public String[] getNames(){
+	public ArrayList<String> getNames(){
 		return this.names;
 	}
 
 	/** @return int[] id number */
-	public int[] getIds(){
+	public ArrayList<Integer> getIds(){
 		return this.ids;
 	}
 
@@ -157,14 +158,14 @@ abstract class ReadAnnots{
 	*	Called by handle row of subclassed objects.
 	*/
 	public void setNameAtIndex(String name, int i){
-		this.names[i] = name;
+		this.names.add(name);
 	}
 
 	/**
 	*	Called by handle row of subclassed objects.
 	*/
 	public void setIdAtIndex(int id, int i){
-		this.ids[i] = id;
+		this.ids.add(id);
 	}
 
 	/**

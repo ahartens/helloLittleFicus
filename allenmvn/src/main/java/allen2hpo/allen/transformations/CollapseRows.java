@@ -2,7 +2,8 @@ package allen2hpo.allen.transformations;
 
 import allen2hpo.matrix.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
 *	<p>
@@ -20,7 +21,7 @@ public class CollapseRows{
         private Matrix condData = null;
 
         /** Array list of unique gene names */
-        private List<String> condNames = null;
+        private ArrayList<String> condNames = null;
 
         /** Get data for unique gene names (averaged over probes) */
         public Matrix getData(){
@@ -30,12 +31,8 @@ public class CollapseRows{
         /**
         *   @return String[] of unique gene names
         */
-        public String[] getGeneNames(){
-            String[] names = new String[condNames.size()];
-            for(int i=0; i<this.condNames.size(); i++){
-                names[i] = this.condNames.get(i);
-            }
-            return names;
+        public ArrayList<String> getGeneNames(){
+            return this.condNames;
         }
 
         public CollapseRows(){
@@ -51,7 +48,7 @@ public class CollapseRows{
         *   @param int[] all gene Ids (with repeating gene names. each row corresponds to row of matrix)
         *   @param String[] all gene names. Condensed in parallel to data matrix
         */
-        public void doCollapseRowsGivenGeneIds(Matrix m, int[] geneIds, String[] geneNames){
+        public void doCollapseRowsGivenGeneIds(Matrix m, ArrayList<Integer> geneIds, ArrayList<String> geneNames){
             /** 
             *   Get indices of rows that correspond to one gene using 
             *   Form an array of arrays.
@@ -99,7 +96,7 @@ public class CollapseRows{
         *   @param  int[] array of gene names with repeated gene ids
         *   @return List<List<Number>> 2d array where each row is a unique gene and each column is the index of expressionvalue that corresponds to gene
         */
-        private List<List<Number>> createCollapsedIndicesArray(int[] geneIds, String[] geneNames){
+        private List<List<Number>> createCollapsedIndicesArray(ArrayList<Integer> geneIds, ArrayList<String> geneNames){
 
             /**
             *   Init 2d array list that will contain one array per gene
@@ -119,13 +116,13 @@ public class CollapseRows{
             /** 
             *   Iterate through each probe id 
             */
-            for(int i=0; i<geneIds.length; i++)
+            for(int i=0; i<geneIds.size(); i++)
             {
                 /** 
                 *   If the gene id is the same as the one before it, add the 
                 *   index of the probe to the unique gene it corresponds to
                 */
-                if (geneIds[i] == previousGeneId)
+                if (geneIds.get(i) == previousGeneId)
                 {
                     condensedIndices.get(currentCount-1).add(i);
                 }
@@ -138,7 +135,7 @@ public class CollapseRows{
                 else
                 {
 
-                    this.condNames.add(geneNames[i]);
+                    this.condNames.add(geneNames.get(i));
                     List<Number> newGene = new ArrayList<Number>();
                     newGene.add(i);
                     condensedIndices.add(newGene);
@@ -147,7 +144,7 @@ public class CollapseRows{
                     *   Previous gene Id is first of unique genes
                     *   Compare next gene in list (during next iteration) to see if repeat
                     */
-                    previousGeneId = geneIds[i];
+                    previousGeneId = geneIds.get(i);
 
                     /**
                     *   Increment count of unique genes

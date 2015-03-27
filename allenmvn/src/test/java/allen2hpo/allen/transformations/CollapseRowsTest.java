@@ -10,7 +10,8 @@ import allen2hpo.matrix.*;
 import allen2hpo.clustering.*;
 import allen2hpo.allen.*;
 import allen2hpo.allen.transformations.*;
-
+import java.util.Arrays;
+import java.util.ArrayList;
 
 public class CollapseRowsTest{
 
@@ -55,11 +56,13 @@ public class CollapseRowsTest{
         /**
          *  
          */
-        int[] indices = {12,12,12,12,11,11,33};
-        String[] names = {"one","one","one","one","two","two","three"};
+        Integer[] indices = {12,12,12,12,11,11,33};
+        ArrayList<Integer> indexList = new ArrayList<Integer>(Arrays.asList(indices));
 
+        String[] names = {"one","one","one","one","two","two","three"};
+        ArrayList<String> nameList = new ArrayList<String>(Arrays.asList(names));
         CollapseRows collapse = new CollapseRows();
-        collapse.doCollapseRowsGivenGeneIds(m,indices,names);
+        collapse.doCollapseRowsGivenGeneIds(m,indexList,nameList);
 
         Matrix condensed = collapse.getData();
         double[][] correct = {{1,2,3,4,5,6},{7,8,9,10,11,12},{13,14,15,16,17,18}};
@@ -70,11 +73,11 @@ public class CollapseRowsTest{
         }
 
 
-        String[] namesCondensed = collapse.getGeneNames();
+        ArrayList<String> namesCondensed = collapse.getGeneNames();
         String[] correctNames = {"one","two","three"};
 
-        for(int i=0; i<namesCondensed.length; i++){
-            Assert.assertEquals(namesCondensed[i], correctNames[i]);
+        for(int i=0; i<namesCondensed.size(); i++){
+            Assert.assertEquals(namesCondensed.get(i), correctNames[i]);
         }
     }
 }

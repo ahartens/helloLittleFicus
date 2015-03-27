@@ -39,18 +39,18 @@ public class AllenDataMngr implements Serializable{
 
 	/** Ordered array of all gene abbreviations derived from probes.csv file. 
 	*	Order == rows in microarrayexpression.csv */
-	private String[] geneNames = null;
+	private ArrayList<String> geneNames = null;
 
 	/** Ordered array of all gene ids from probes.csv file.*/
-	private int[] geneIds = null;
+	private ArrayList<Integer> geneIds = null;
 
 	/** Ordered array of all sample (ie tissue) ids derived from 
 	*	SampleAnnot.csv. Order == columns in microarrayexpression.csv */
-	private int[] tissueIds = null;
+	private ArrayList<Integer> tissueIds = null;
 
 	/** Ordered array of all sample (ie tissue) names derived from 
 	*	SampleAnnot.csv. Order == columns in microarrayexpression.csv */
-	private String[] tissueNames = null;
+	private ArrayList<String> tissueNames = null;
 
 	/**	Ordered array of MRI voxels for tissues parsed from SampleAnnot */
 	private double[][] tissueLocations = null;
@@ -124,7 +124,7 @@ public class AllenDataMngr implements Serializable{
 		*/
 		ReadExpression expression = 
 			new ReadExpression(this.dataPath+"/MicroarrayExpression.csv",
-				this.geneNames.length,this.tissueIds.length,true);
+				this.geneNames.size(),this.tissueIds.size(),true);
 		this.data = expression.getData();
 
 		/*System.out.println("sample annotations parsed");
@@ -210,7 +210,7 @@ public class AllenDataMngr implements Serializable{
 	*	@return String []all gene names(abbreviations) corresponds to columns of
 	*	expression data matrix 
 	*/
-	public String[] getAllGenes(){
+	public ArrayList<String> getAllGenes(){
 		return this.geneNames;
 	}
 
@@ -218,7 +218,7 @@ public class AllenDataMngr implements Serializable{
 	*	@return int [] list of all sample/tissue ids. corresponds to columns of 
 	*	expression data matrix 
 	*/
-	public int[] getTissueIds(){
+	public ArrayList<Integer> getTissueIds(){
 		return this.tissueIds;
 	}
 
@@ -235,7 +235,7 @@ public class AllenDataMngr implements Serializable{
 			String[] c = new String[ci[i].length];
         	gc[i] = c;
 			for(int j=0; j<ci[i].length; j++){
-				gc[i][j] = this.geneNames[ci[i][j]];
+				gc[i][j] = this.geneNames.get(ci[i][j]);
 			}
 		}
 		return gc;
@@ -284,10 +284,10 @@ public class AllenDataMngr implements Serializable{
 	*	@param int[] indices of desired name
 	*	@param String[] list from which names are selected from
 	*/
-	private String[] getNamesAtIndexes(int[] indexes, String[] allNames){
+	private String[] getNamesAtIndexes(int[] indexes, ArrayList<String> allNames){
 		String[] names = new String[indexes.length];
 		for(int i = 0; i<indexes.length;i++){
-			names[i] = (allNames[indexes[i]]);
+			names[i] = allNames.get(indexes[i]);
 		}
 
 		return names;
