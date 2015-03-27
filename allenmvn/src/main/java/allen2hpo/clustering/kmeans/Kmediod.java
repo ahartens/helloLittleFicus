@@ -11,6 +11,7 @@ import allen2hpo.clustering.kmeans.calck.*;
 import allen2hpo.clustering.kmeans.distance.*;
 import allen2hpo.clustering.kmeans.initclust.*;
 
+//import org.apache.log4j.Logger;
 
 /**
 *   <p>Performs kmeans cluster analysis.
@@ -72,6 +73,9 @@ public class Kmediod implements Clusterable{
 
     private Matrix distanceMatrix = null;
 
+    /** Logger object to output info/warnings */
+   // static Logger logger = Logger.getLogger(Kmediod.class);
+
     //__________________________________________________________________________
     //
     //  Constructors                                   
@@ -98,6 +102,7 @@ public class Kmediod implements Clusterable{
     *   cluster prototypes 
     */
     public Kmediod(Matrix mat, int kval, DistComputable dc,InitClusterable cp){
+
 
         if (mat == null)
             throw new IllegalArgumentException("Data not initialized");

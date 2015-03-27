@@ -10,6 +10,7 @@ import allen2hpo.clustering.kmeans.calck.GapStat;
 import allen2hpo.clustering.kmeans.initclust.*;
 import allen2hpo.clustering.kmeans.distance.*;
 
+import org.apache.log4j.Logger;
 
 /**
 *	<p>
@@ -53,7 +54,8 @@ public class ClusteringMngr{
     *   AllenDataMngr takes indices and returns corresponding names */
     private String [][] clusteredGeneNames;
 
-
+    /** Logger object to output info/warnings */
+    static Logger log = Logger.getLogger(ClusteringMngr.class.getName());
 
     //__________________________________________________________________________
     //
@@ -97,8 +99,7 @@ public class ClusteringMngr{
         */
         if (gap.getK() != 0) {
             
-            System.out.println("GapStat Optimal number of clusters : "+gap.getK());
-
+            log.info("GapStat successful, beginning Kmeans clustering");
             /* 
             *	Init kmeans clustering object
     		*	Use k value calculated by gap statistic
@@ -149,7 +150,7 @@ public class ClusteringMngr{
     {
         FileWriter writer = new FileWriter();
         writer.createFileWithName(outputPath+"clusterPrototypes.txt");
-                System.out.println(outputPath+"clusterPrototypes.txt");
+        log.info("Wrote file : "+ outputPath+"clusterPrototypes.txt");
 
         ///Write cluster prototypes to file
         for(int i =0;i<this.prototypes.length;i++){
@@ -174,7 +175,8 @@ public class ClusteringMngr{
             FileWriter writer = new FileWriter();
             writer.createFileWithName
                 (outputPath+"cluster_"+String.valueOf(i)+".txt");
-                System.out.println(outputPath+"cluster_"+String.valueOf(i)+".txt");
+            log.info("Wrote file : "+outputPath+"cluster_"
+                +String.valueOf(i)+".txt");
 
             for(int j=0; j<this.clusteredGeneNames[i].length; j++){
                 writer.writeString(this.clusteredGeneNames[i][j]);
@@ -190,8 +192,8 @@ public class ClusteringMngr{
     */
     public void writePopulationGenesToFile(String outputPath)
     {
-        System.out.println(outputPath+"population.txt");
         String[] population = this.allenData.getAllGenes();
+        log.info("Wrote file : "+ outputPath+"population.txt");
 
         FileWriter writer = new FileWriter();
         writer.createFileWithName(outputPath+"population.txt");
@@ -212,6 +214,7 @@ public class ClusteringMngr{
     {
         FileWriter writer = new FileWriter();
         writer.createFileWithName(outputPath+"clusters_OUTPUT.txt");
+        log.info("Wrote file : "+ outputPath+"clusters_OUTPUT.txt");
 
         for(int i =0; i<this.clusteredGeneNames.length; i++)
         {

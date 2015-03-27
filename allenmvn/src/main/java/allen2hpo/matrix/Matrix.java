@@ -1,5 +1,7 @@
 package allen2hpo.matrix;
+
 import java.io.Serializable;
+
 
 /**
 *   Shell for 2d array
@@ -21,6 +23,8 @@ public class Matrix implements Serializable{
 
     double meanAll = 0;
 
+    /** Logger object to output info/warnings */
+   // static Logger logger = Logger.getLogger(Matrix.class);
 
     public Matrix(){
     }
@@ -30,6 +34,9 @@ public class Matrix implements Serializable{
     *   @param requires initialized 2d data array of non zero column and row size
     */
     public Matrix(double[][] data) {
+        /*  Set up logger */
+       // BasicConfigurator.configure();
+
 	   setMatrix(data);
     }
 

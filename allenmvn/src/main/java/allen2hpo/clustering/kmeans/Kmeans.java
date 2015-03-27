@@ -8,6 +8,8 @@ import allen2hpo.clustering.kmeans.calck.*;
 import allen2hpo.clustering.kmeans.distance.*;
 import allen2hpo.clustering.kmeans.initclust.*;
 
+//import org.apache.log4j.Logger;
+
 
 /**
 *   <p>Performs kmeans cluster analysis.
@@ -61,7 +63,8 @@ public class Kmeans implements Clusterable{
     *   is used if none provided in constructor method.*/
     private InitClusterable cpInit = null;
 
-
+    /** Logger object to output info/warnings */
+    //static Logger logger = Logger.getLogger(Kmeans.class);
 
 
 

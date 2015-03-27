@@ -6,7 +6,9 @@ import allen2hpo.allen.transformations.*;
 import allen2hpo.allen.ontology.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
 
 /**
 *	<p>
@@ -53,12 +55,19 @@ public class AllenDataMngr implements Serializable{
 	/**	Ordered array of MRI voxels for tissues parsed from SampleAnnot */
 	private double[][] tissueLocations = null;
 
+	/** ArrayList containing row index of probes whose probe name and gene name
+	*	are identical (column 1 and column 2 of probes.csv are identical) */
+	private ArrayList<Integer> indicesUnkownProbes = null;
+
 	/**	Matrix object containing all expression data. each row is a gene, each 
 	*	column a tissue sample */
 	private Matrix data = null;
 
 	/** String path to directory which should be parsed */
 	private String dataPath = null;
+
+	/** Logger object to output info/warnings */
+    static Logger log = Logger.getLogger(AllenDataMngr.class.getName());
 
 
 
@@ -94,6 +103,7 @@ public class AllenDataMngr implements Serializable{
 			new ReadProbeAnnots(this.dataPath+"/Probes.csv");
 		this.geneIds = probes.getIds();
 		this.geneNames = probes.getNames();
+		this.indicesUnknownProbes = probes.getIndicesUnknownProbes();
 
 
 		/**
@@ -117,7 +127,15 @@ public class AllenDataMngr implements Serializable{
 				this.geneNames.length,this.tissueIds.length,true);
 		this.data = expression.getData();
 
-	}
+		/*System.out.println("sample annotations parsed");
+		if (logger.isInfoEnabled()){
+            logger.info("Sample Annotations parsed");
+        }*/
+        log.info("Sample Annotations parsed");
+
+    }
+
+   
 
 	/**
 	*	Mean across rows (probes) that refer to single gene.

@@ -5,6 +5,8 @@ import allen2hpo.clustering.kmeans.Kmeans;
 import allen2hpo.clustering.kmeans.distance.*;
 import allen2hpo.clustering.kmeans.initclust.*;
 
+import org.apache.log4j.Logger;
+
 /**
 *	<p>Finds optimal number of clusters using kmeans.
 *	<br>GapStat itself performs Kmeans, in an iterative fashion.
@@ -71,6 +73,9 @@ public class GapStat implements GetKable{
     *	randomly generated */
     private enum Data {REAL,RANDOM};
 
+    /** Logger object to output info/warnings */
+    static Logger log = Logger.getLogger(GapStat.class.getName());
+
 
 
     //__________________________________________________________________________
@@ -86,7 +91,6 @@ public class GapStat implements GetKable{
 	*/
 	public GapStat(Matrix m, DistComputable dc, InitClusterable cp)
 	{
-
 		/*
 		*	Set distance calculation object
 		*/
@@ -223,6 +227,9 @@ public class GapStat implements GetKable{
 
 				boolean optimalKFound = newStepFour(gap[k-1],gap[k],s_k);
 
+				log.info(String.format("k : %d gk: %f  >=  %f   gk+1: %f    s:%f\n",
+					k+firstK-1,gap[k-1],gap[k] - s_k,gap[k],s_k));
+
 				if (optimalKFound) 
 				{
 					/*
@@ -270,8 +277,7 @@ public class GapStat implements GetKable{
 
 	private boolean newStepFour(double previousGap, double currentGap, double s)
 	{
-		System.out.printf("gk: %f  >=  %f   gk+1: %f    s:%f\n",
-			previousGap,currentGap - s,currentGap,s);
+
 		if (previousGap >= currentGap - s) 
 		{
 			return true;

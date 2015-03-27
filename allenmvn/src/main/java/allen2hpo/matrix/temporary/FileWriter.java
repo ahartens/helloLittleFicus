@@ -17,10 +17,8 @@ public class FileWriter{
 	public void createFileWithName(String name){
 		try{
 			writer = new PrintWriter(name, "UTF-8");
-			System.out.println("opened file to print!");
 		}
 		catch(Exception e){
-			System.out.println("couldn't open up file to print");
 		}
 	}
 

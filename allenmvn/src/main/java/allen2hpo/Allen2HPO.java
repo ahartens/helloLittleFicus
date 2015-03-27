@@ -25,6 +25,15 @@ import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.FileNotFoundException;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.BasicConfigurator;
+import java.util.Properties;
+import org.apache.log4j.PropertyConfigurator;
+import java.io.InputStream;
+
+
+
 /**
 *   <p>
 *   Responsible for managing lifecycle of program.
@@ -67,7 +76,6 @@ public class Allen2HPO {
         
         /*  Parse the command line for directory path */
         allen2hpo.parseCommandLine(args);
-
 
         /*
         *   Read in the ontology file
@@ -122,7 +130,8 @@ public class Allen2HPO {
                     /*  
                     *   Child is a single brain donor. Do cluster analysis. 
                     */
-                    status = allen2hpo.checkAllAllenBrainFilesPresent(parentDir);
+                    status = 
+                        allen2hpo.checkAllAllenBrainFilesPresent(parentDir);
 
                     if (status != 2) 
                     {
@@ -163,6 +172,22 @@ public class Allen2HPO {
         return this.dataPath;
     }
 
+    /** Logger object to output info/warnings */
+    static Logger log = Logger.getLogger(Allen2HPO.class.getName());
+
+
+
+    //__________________________________________________________________________
+    //
+    //  Constructor                                   
+    //__________________________________________________________________________
+
+    public Allen2HPO(){
+        /*  Set up logger */
+        PropertyConfigurator.configure("src/test/resources/log4j.properties");
+
+    }
+
 
 
     //__________________________________________________________________________
@@ -183,12 +208,26 @@ public class Allen2HPO {
     *   </p>
     */
     private void doSingleDonorAnalysis(File dir, int serializedDataFound){
-        String serializedDataPath = dir.getAbsolutePath()+dir.separator+"SerializedAllenDataMngr.bin";
         AllenDataMngr brainDataMngr = null;
+        
+
+
+        /*
+        *   If serialized data present deserialize to use for clustering
+        */
+        String serializedDataPath = dir.getAbsolutePath()
+            +dir.separator+"SerializedAllenDataMngr.bin";
+
         if (serializedDataFound == 1) {
             brainDataMngr = deserializeData(serializedDataPath);
-            System.out.println("found serialized data");
+            if (log.isInfoEnabled())
+                log.info("Found serialized data, using for clustering");
         }
+
+        /*
+        *   No serialized data exists, parse files and serialize data to 
+            directory
+        */
         else
         {
             /*
@@ -202,8 +241,8 @@ public class Allen2HPO {
             */
             brainDataMngr.parseExpressionAndAnnotations();
             /*
-            *   Average expression of probes with same gene name to create unique 
-            *   gene-expression pairs
+            *   Average expression of probes with same gene name to create 
+            *   unique gene-expression pairs
             */
             brainDataMngr.collapseRepeatProbesToUniqueGenes();
 
@@ -238,7 +277,7 @@ public class Allen2HPO {
             /*
             *   Print output to terminal
             */
-            clusteringMngr.printClusterGenesInTerminal();
+            //clusteringMngr.printClusterGenesInTerminal();
 
 
             /*
@@ -248,7 +287,8 @@ public class Allen2HPO {
             if (outputDirectory != null)
             {
                 /*  Create string for outputDirectory path */
-                String outputDirString = outputDirectory.getAbsolutePath()+dir.separator;
+                String outputDirString = outputDirectory.getAbsolutePath()
+                    +dir.separator;
                 /*
                 *   Write population file (all genes clustered one gene per line)
                 */
@@ -266,16 +306,19 @@ public class Allen2HPO {
             }
         }
         else{
-            System.out.println("Clustering was unsuccessful");
+            log.info("Clustering was unsuccessful");
         }
     }
 
     private File createOutputDirectory(File parentDir){
-        File outputDirectory = new File(parentDir.getAbsolutePath()+parentDir.separator+"clustering");
+        File outputDirectory = 
+            new File(parentDir.getAbsolutePath()+parentDir.separator
+                +"clustering");
 
         // if the directory does not exist, create it
         if (!outputDirectory.exists()) {
-            System.out.println(parentDir.getAbsolutePath()+parentDir.separator+"clustering");
+            System.out.println(parentDir.getAbsolutePath()+parentDir.separator
+                +"clustering");
             boolean result = false;
 
             try
@@ -349,7 +392,8 @@ public class Allen2HPO {
     */
     public void serializeDataToFile(Serializable object, String fileName){
         try{
-            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(fileName));
+            ObjectOutputStream os = 
+                new ObjectOutputStream(new FileOutputStream(fileName));
             os.writeObject(object);
             os.close();
         }
@@ -371,25 +415,26 @@ public class Allen2HPO {
         AllenDataMngr mngr = null;
         try
         {
-            ObjectInputStream is = new ObjectInputStream(new FileInputStream(fileName));
+            ObjectInputStream is = 
+                new ObjectInputStream(new FileInputStream(fileName));
             mngr = (AllenDataMngr)is.readObject();
             is.close();
         }
         catch (FileNotFoundException e)
         {
-
+            log.warn("No file to deserialize found");
         }
         catch (IOException e)
         {
+            log.warn("Deserialize IOException");
 
         }
         catch (ClassNotFoundException e)
         {
-
+            log.warn("Deserialized data is not correct class");
         }
         return mngr;
     }
-
 
 
 

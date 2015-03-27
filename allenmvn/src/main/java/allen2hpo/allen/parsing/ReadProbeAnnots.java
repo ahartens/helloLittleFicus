@@ -4,7 +4,7 @@ import allen2hpo.allen.parsing.ReadAnnots;
 
 import java.util.Scanner;
 
-
+import java.util.ArrayList;
 /**
 *	Reads Probes.csv file line by line, storing whatever info required in 
 *	arrays.
@@ -13,6 +13,7 @@ import java.util.Scanner;
 
 public class ReadProbeAnnots extends ReadAnnots{
 
+	private ArrayList<Integer> indicesOfUnknownProbes = null;
 	//__________________________________________________________________________
     //
     //  Constructor                             
@@ -29,6 +30,8 @@ public class ReadProbeAnnots extends ReadAnnots{
 		*/
 		super.countLines();
 
+		this.indicesOfUnknownProbes = new ArrayList<Integer>();
+
 		/*
 		*	Begin reading file line by line. Line is handled here.
 		*/
@@ -37,6 +40,17 @@ public class ReadProbeAnnots extends ReadAnnots{
 
 
 
+	//__________________________________________________________________________
+    //
+    //	Getters                              
+    //__________________________________________________________________________
+
+	public ArrayList<Integer> getIndicesUnknownProbes(){
+		return this.indicesOfUnknownProbes;
+	}
+
+
+	
 	//__________________________________________________________________________
     //
     //	Methods                              
@@ -58,9 +72,14 @@ public class ReadProbeAnnots extends ReadAnnots{
         *	Read through fields.
         */
 		int i = 0;
+
+		String *probeName;
+		String *geneName;
 	    while (lineSc.hasNext()) 
 	    {
-	    	
+	    	if (i == 1){
+	    		probeName = lineSc.next();
+	    	}
 	    	/*
 	    	*	Add probe ID to id list
 	    	*/
@@ -73,7 +92,11 @@ public class ReadProbeAnnots extends ReadAnnots{
 	    	*/
 	    	else if(i==3)
 	    	{
-	    		super.setNameAtIndex(lineSc.next().replace("\"",""),ri);
+	    		geneName = lineSc.next();
+	    		if (probeName.equals(probeName)){
+	    			this.indicesOfUnknownProbes.add(ri);
+	    		}
+	    		super.setNameAtIndex(geneName.replace("\"",""),ri);
 	    	}
 	    	else{
 	    		lineSc.next();
