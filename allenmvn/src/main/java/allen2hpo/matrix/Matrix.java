@@ -1,7 +1,7 @@
 package allen2hpo.matrix;
 
 import java.io.Serializable;
-
+import java.util.ArrayList;
 
 /**
 *   Shell for 2d array
@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class Matrix implements Serializable{
 
     /** 2d array containing all data*/
-    private double[][] dat=null;
+    private ArrayList<double[]> data = null;
 
     /** arrays containing column means and max*/
     private double[] colMeans = null;
@@ -37,25 +37,24 @@ public class Matrix implements Serializable{
         /*  Set up logger */
        // BasicConfigurator.configure();
 
-	   setMatrix(data);
+       setMatrix(data);
     }
 
     /**
     *   Sets data of matrix object. Can be called by subclasses using 'super.setMatrix'
     */
-    public void setMatrix(double[][] data){
+    public void setMatrix(double[][] dat){
 
-        this.dat = data;
-
-        if (this.dat==null)
-           throw new IllegalArgumentException("Data not initialized");
-        if (this.dat.length == 0){
-           //System.out.println("data matrix is empty");
-            this.dat = new double[1][1];
+        this.data = new ArrayList<double[]>();
+        for(int i = 0; i<dat.length; i++){
+            this.data.add(dat[i]);
         }
-        if (this.dat[0].length == 0){
-           System.out.println("data matrix has 0 columns");
-           this.dat = new double[1][1];
+
+        if (this.data==null)
+           throw new IllegalArgumentException("Data not initialized");
+        if (this.data.size() == 0){
+           //System.out.println("data matrix is empty");
+            this.data = new ArrayList<double[]>();
         }
     }
 
@@ -65,7 +64,10 @@ public class Matrix implements Serializable{
     *   @param int number of columns
     */
     public void setMatrixSize(int row, int col){
-        this.dat = new double[row][col];
+        for(int i =0; i<row; i++){
+            double[] rowArray = new double[col];
+            this.data.add(rowArray);
+        }
     }
 
     /**
@@ -75,21 +77,27 @@ public class Matrix implements Serializable{
     *   @param double value to be set
     */
     public void setValueAtIndex(int r, int c, double val){
-        this.dat[r][c] = val;
+        double[] row = this.data.get(r);
+        row[c] = val;
+    }
+
+    public void removeRowAtIndex(int r){
+        
     }
 
     /**
     *   @return int number of rows of the data matrix
     */
     public int getRowSize() {
-	   return this.dat.length;
+        return this.data.size();
     }
 
     /**
     *   @return int number of columns of the data matrix
     */
     public int getColumnSize() {
-       return this.dat[0].length;
+        double[] row = this.data.get(0);
+        return row.length;
     }
 
     /**
@@ -99,7 +107,8 @@ public class Matrix implements Serializable{
     public double getValueAtIndex(int row, int col){
         if (row >= getRowSize() || col >= getColumnSize())
             throw new IllegalArgumentException("Requested value is out of bounds of matrix");
-        return this.dat[row][col];
+        double[] rowArray = this.data.get(row);
+        return rowArray[col];
     }
 
     /**
@@ -110,7 +119,7 @@ public class Matrix implements Serializable{
         if (idx >= getRowSize() || idx < 0)
             throw new IllegalArgumentException("Index is out of bounds of matrix");
         double row[] = new double[getColumnSize()];
-        System.arraycopy(this.dat[idx],0,row,0,getColumnSize());
+        System.arraycopy(this.data.get(idx),0,row,0,getColumnSize());
         return row;
     }
 
@@ -123,7 +132,7 @@ public class Matrix implements Serializable{
             throw new IllegalArgumentException("Index is out of bounds of matrix");
         double col[] = new double[getRowSize()];
         for (int i=0;i<getRowSize();i++){
-            col[i] = this.dat[i][idx];
+            col[i] = getValueAtIndex(i,idx);
         }
         return col;
     }
@@ -191,7 +200,7 @@ public class Matrix implements Serializable{
 
         for (int i=0;i<getRowSize();i++){
             for(int j=0;j<getColumnSize();j++){
-                this.dat[i][j] += b[i][j];
+                setValueAtIndex(i,j,b[i][j]);
             }
         }
     }
@@ -210,12 +219,13 @@ public class Matrix implements Serializable{
 
 
         ///RESULTING MATRIX OF (NxM)*(MxP) = (NxP)
-        double[][] c = new double[getRowSize()][b[0].length];
+        ArrayList<double[]> productMatrix = new ArrayList<double[]>();
 
         ///FILL IN EACH COLUMN OF DOT PRODUCT MATRIX ONE BY ONE
-        for (int z=0;z<c[0].length;z++){
+        for (int z=0;z<b[0].length;z++){
             ///FOR EACH ROW IN THIS.DAT
             for (int i=0;i<getRowSize();i++){
+                double[] newRow = new double[b[0].length];
                 ///SUM IS INITIALIZED AS ZERO
                 double rowSum = 0;
                 ///ITERATE ACROSS THE ROW OF THIS.DAT AND DOWN THE COLUMN OF B
@@ -223,11 +233,12 @@ public class Matrix implements Serializable{
                     rowSum += getValueAtIndex(i,j)*b[j][z];
                 }
                 ///ASSIGN VALUE TO DOTPRODUCT MATRIX
-                c[i][z]=rowSum;
+                newRow[z]=rowSum;
+                productMatrix.add(newRow);
             }
         }
         ///REASSIGN THIS.DAT
-        this.dat = c;
+        this.data = productMatrix;
     }
 
     /**
@@ -237,7 +248,7 @@ public class Matrix implements Serializable{
     public void multiply(double b){
         for(int i=0;i<getRowSize();i++){
             for(int j=0;j<getColumnSize();j++){
-                this.dat[i][j] *= b;
+                //this.dat[i][j] *= b;
             }
         }
     }
@@ -246,13 +257,13 @@ public class Matrix implements Serializable{
     *   Transpose matrix
     */
     public void transpose(){
-        double[][] t = new double[getColumnSize()][getRowSize()];
+       /* double[][] t = new double[getColumnSize()][getRowSize()];
         for (int i = 0;i<getRowSize();i++){
             for(int j=0;j<getColumnSize();j++){
                 t[j][i] = this.dat[i][j];
             }
         }
-        this.dat = t;
+        this.dat = t;*/
     }
 
     /**
@@ -272,25 +283,25 @@ public class Matrix implements Serializable{
 
         //Initialize columne max/mins with values in first row
         for(int j = 0; j<getColumnSize(); j++){
-            columnSums[j] = this.dat[0][j];
-            this.colMax[j] = this.dat[0][j];
-            this.colMin[j] = this.dat[0][j];
+            columnSums[j] = getValueAtIndex(0,j);
+            this.colMax[j] = getValueAtIndex(0,j);
+            this.colMin[j] = getValueAtIndex(0,j);
         }
 
         ///Initialize row max/mins with value in first cell
-        double rowSum = this.dat[0][0];
-        this.rowMin[0] = this.dat[0][0];
-        this.rowMax[0] = this.dat[0][0];
+        double rowSum = getValueAtIndex(0,0);
+        this.rowMin[0] = getValueAtIndex(0,0);
+        this.rowMax[0] = getValueAtIndex(0,0);
 
         ///Handle first row in totality IS THIS NECESSARY!??! WILL LOOK AT LATER SICK OF HTIS
         for(int j = 1;j<getColumnSize();j++){
             ///Handle row sum/max/min
-            rowSum += this.dat[0][j];
-            if(this.dat[0][j]<this.rowMin[0]){
-                this.rowMin[0] = this.dat[0][j];
+            rowSum += getValueAtIndex(0,j);
+            if(getValueAtIndex(0,j)<this.rowMin[0]){
+                this.rowMin[0] = getValueAtIndex(0,j);
             }
-            if(this.dat[0][j]>this.rowMax[0]){
-                this.rowMax[0] = this.dat[0][j];
+            if(getValueAtIndex(0,j)>this.rowMax[0]){
+                this.rowMax[0] = getValueAtIndex(0,j);
             }
         }
         this.rowMeans[0] = rowSum/getColumnSize();
@@ -302,8 +313,8 @@ public class Matrix implements Serializable{
         //from second row onwards, iterate through each row
         for(int i = 1;i<getRowSize();i++){
             ///Initialize row max/mins with value in first cell
-            this.rowMin[i] = this.dat[i][0];
-            this.rowMax[i] = this.dat[i][0];
+            this.rowMin[i] = getValueAtIndex(i,0);
+            this.rowMax[i] = getValueAtIndex(i,0);
 
             ///Reset row sum to zero
             rowSum = 0;
@@ -313,21 +324,21 @@ public class Matrix implements Serializable{
             for(int j = 0;j<getColumnSize();j++){
 
                 ///Handle row sum/max/min
-                rowSum += this.dat[i][j];
-                if(this.dat[i][j]<this.rowMin[i]){
-                    this.rowMin[i] = this.dat[i][j];
+                rowSum += getValueAtIndex(i,j);
+                if(getValueAtIndex(i,j)<this.rowMin[i]){
+                    this.rowMin[i] = getValueAtIndex(i,j);
                 }
-                if(this.dat[i][j]>this.rowMax[i]){
-                    this.rowMax[i] = this.dat[i][j];
+                if(getValueAtIndex(i,j)>this.rowMax[i]){
+                    this.rowMax[i] = getValueAtIndex(i,j);
                 }
 
                 ///Handle column sum/max/min
-                columnSums[j] += this.dat[i][j];
-                if(this.dat[i][j]<this.colMin[j]){
-                    this.colMin[j] = this.dat[i][j];
+                columnSums[j] += getValueAtIndex(i,j);
+                if(getValueAtIndex(i,j)<this.colMin[j]){
+                    this.colMin[j] = getValueAtIndex(i,j);
                 }
-                if(this.dat[i][j]>this.colMax[j]){
-                    this.colMax[j] = this.dat[i][j];
+                if(getValueAtIndex(i,j)>this.colMax[j]){
+                    this.colMax[j] = getValueAtIndex(i,j);
                 }
             }
             this.rowMeans[i] = rowSum/getColumnSize();
@@ -438,14 +449,14 @@ public class Matrix implements Serializable{
         for (int i = 0; i<getRowSize(); i++){
             //Iterate through all cells in row except the last
             for ( j = 0; j<getColumnSize()-1; j++){
-                fw.writeDouble(this.dat[i][j]);
+                fw.writeDouble(getValueAtIndex(i,j));
                 fw.writeDelimit();
-                System.out.printf("%.5f\t",this.dat[i][j]);
+                System.out.printf("%.5f\t",getValueAtIndex(i,j));
 
             }
             //Last cell in row shouldn't have a delimiter. write next line
-            fw.writeDouble(this.dat[i][j]);
-            System.out.printf("%.5f\t",this.dat[i][j]);
+            fw.writeDouble(getValueAtIndex(i,j));
+            System.out.printf("%.5f\t",getValueAtIndex(i,j));
 
             fw.writeNextLine();
         }
@@ -460,7 +471,7 @@ public class Matrix implements Serializable{
     public void print(){
         for(int i = 0;i<getRowSize();i++){
             for(int j = 0;j<getColumnSize();j++){
-                System.out.printf("%.5f\t",this.dat[i][j]);
+                System.out.printf("%.5f\t",getValueAtIndex(i,j));
             }
             System.out.printf("\n");
         }
