@@ -99,10 +99,8 @@ abstract class ReadAnnots{
 	private void openFile(String filename){
 		try{
 			scanner = new Scanner(new File(this.filename));
-			System.out.println("file Opened");
 		}
 		catch (Exception e){
-			System.out.println("File could not be opened");
 		}
 	}
 

@@ -230,6 +230,8 @@ public class Allen2HPO {
         */
         else
         {
+            log.info("No serialized data found begin parsing");
+
             /*
             *   Init AllenDataMngr object to serve as wrapper of directory 
             *   corresponding to a single Allen Brain donor
@@ -261,8 +263,9 @@ public class Allen2HPO {
         
        // brainDataMngr.calculateDistanceMatrixForTissueLocations();
 
-       // OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
-       // brainDataMngr.collapseTissuesToSelectedParents(ontology);
+        //OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
+       
+        //brainDataMngr.collapseTissuesToSelectedParents(ontology);
 
         /*
         *   Cluster Data
@@ -398,6 +401,8 @@ public class Allen2HPO {
                 new ObjectOutputStream(new FileOutputStream(fileName));
             os.writeObject(object);
             os.close();
+            log.info("AllenDataMngr serialized to : "+fileName);
+
         }
         catch (FileNotFoundException e)
         {
@@ -421,6 +426,7 @@ public class Allen2HPO {
                 new ObjectInputStream(new FileInputStream(fileName));
             mngr = (AllenDataMngr)is.readObject();
             is.close();
+
         }
         catch (FileNotFoundException e)
         {

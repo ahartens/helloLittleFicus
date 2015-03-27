@@ -99,21 +99,26 @@ public class AllenDataMngr implements Serializable{
 		/**
 		*	Parse Probes.csv and set gene Ids and names
 		*/
+		log.info("Begin parsing probe annotation");
+
 		ReadProbeAnnots probes = 
 			new ReadProbeAnnots(this.dataPath+"/Probes.csv");
 		this.geneIds = probes.getIds();
 		this.geneNames = probes.getNames();
 		this.indicesUnknownProbes = probes.getIndicesUnknownProbes();
+        log.info("Finished parsing probe annotations : " + this.geneIds.size());
 
 
 		/**
 		*	Parse SampleAnnot.csv and set tissue ids and names
 		*/
+		log.info("Begin parsing sample annotation");
 		ReadTissueAnnots tissues = 
 			new ReadTissueAnnots(this.dataPath+"/SampleAnnot.csv");
 		this.tissueIds = tissues.getIds();
 		this.tissueNames = tissues.getNames();
 		this.tissueLocations = tissues.getMriVoxel();
+        log.info("Finished parsing sample annotations : " + this.tissueIds.size());
 
 		/**
 		*	Parse MicroarrayExpression.csv
@@ -122,16 +127,13 @@ public class AllenDataMngr implements Serializable{
 		*	True because first column is a header specifying probe id (should 
 		*	be parsed and stored separately frome expression data)
 		*/
+		log.info("Begin parsing microarry expression");
 		ReadExpression expression = 
 			new ReadExpression(this.dataPath+"/MicroarrayExpression.csv",
 				this.geneNames.size(),this.tissueIds.size(),true);
 		this.data = expression.getData();
-
-		/*System.out.println("sample annotations parsed");
-		if (logger.isInfoEnabled()){
-            logger.info("Sample Annotations parsed");
-        }*/
-        log.info("Sample Annotations parsed");
+        log.info("Finished parsing expression matrix : " 
+        		+ this.data.getRowSize() + " x " +this.data.getColumnSize());
 
     }
 
@@ -172,6 +174,8 @@ public class AllenDataMngr implements Serializable{
         make5columns.collapseExample();
 
         this.data = make5columns.getDataCollapsed();
+        log.info("Finished collapsing tissue samples number of dimensions : "+this.data.getColumnSize());
+
 	}
 
 	/**
@@ -179,7 +183,10 @@ public class AllenDataMngr implements Serializable{
 	*	normVal = val(x,y) - mean(x) - mean(y) + mean(all)
 	*/
 	public void meanNormalizeData(){
+		log.info("Mean normalizing data");
 		this.data.meanNormalizeAcrossGenesAndSamples();
+		log.info("Finished mean normalizing data");
+
 	}
 
 
@@ -200,32 +207,23 @@ public class AllenDataMngr implements Serializable{
 			+ this.geneNames.size());
 		log.info("Number of gene Ids Names : "
 			+ this.geneIds.size());
-		log.info("Number of expression rows : "
+		log.info("Number of rows in expression matrix : "
 			+ this.data.getRowSize());
 
-		for (int i = 0; i<this.indicesUnknownProbes.size(); i++){
-			System.out.println("unknown :"+this.indicesUnknownProbes.get(i));
-		}
-
-		for(int i=0; i<this.geneNames.size(); i++){
-			System.out.println(this.geneNames.get(i));
-			//System.out.println(this.geneIds.get(i));
-
-		}
 		for(int i=this.indicesUnknownProbes.size()-1; i>=0; i--){
-			System.out.println("removing "+i);
 			int index = this.indicesUnknownProbes.get(i);
 			this.geneNames.remove(index);
 			this.geneIds.remove(index);
 			this.data.removeRowAtIndex(index);
 
 		}
-
-		for(int i=0; i<this.geneNames.size(); i++){
-			System.out.println(this.geneNames.get(i));
-			//System.out.println(this.geneIds.get(i));
-
-		}
+		log.info("Number of gene Names after removal : "
+			+ this.geneNames.size());
+		log.info("Number of gene Names after removal : "
+			+ this.geneIds.size());
+		log.info("Number of rows in expression matrix after removal: "
+			+ this.data.getRowSize());
+		
 	}
 
 

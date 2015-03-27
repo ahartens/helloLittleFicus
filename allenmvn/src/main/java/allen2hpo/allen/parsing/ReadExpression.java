@@ -75,11 +75,9 @@ public class ReadExpression{
 		try
 		{
 			scanner = new Scanner(new File(filename));
-			System.out.println("File Opened");
 		}
 		catch (Exception e)
 		{
-			System.out.println("File could not be opened");
 		}
 	}
 

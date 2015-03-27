@@ -111,6 +111,7 @@ public class GapStat implements GetKable{
 
 
 
+		log.info("Starting Gap Stat");
 
 		boolean optimalKFound = newStepOneTwo(k,b,m);
 
@@ -186,10 +187,15 @@ public class GapStat implements GetKable{
 		/*	For each k value perform kmeans and calculate gap */
 		for (int k = 0; k<cap_k; k++)
 		{
+			int kCurrent = k + firstK;
+			log.info("Begin gap stat for k = "+kCurrent);
 
 			/*	Calculate actual log(Wk) for given k value.
 			*	Start with k = 2 */
+			log.info("Begin calculating mean dispersion of real data (wk)");
+
 			wk[k] = calcMeanDispersion(k+firstK, null, Data.REAL);
+			log.info("Finished calculating mean dispersion of real data (wk)");
 
 			/*	Reset sum of gaps */
 			double gapSum_k = 0;
@@ -198,8 +204,12 @@ public class GapStat implements GetKable{
 			*	Calculate log(Wkb_star) for given k for B uniform random 
 			*	matrices. 
 			*/
+			log.info("Begin calculating mean dispersion of randomized data (wkb_*)");
+
 			for (int b = 0; b<cap_b; b++)
 			{
+				log.info("current b : "+b);
+
 				/*	Create random uniform matrix and calculate dispersion
 				*	Start with k = 2 */
 
@@ -210,6 +220,8 @@ public class GapStat implements GetKable{
 				/*	Calculate gap and add to sum */
 				gapSum_k += wkb_star[k][b] - wk[k];
 			}
+			log.info("Finished calculating mean dispersion of randomized data (wkb_*)");
+
 			
 			/*	
 			*	Calculate actual gap by dividing by capital B (number of random 
