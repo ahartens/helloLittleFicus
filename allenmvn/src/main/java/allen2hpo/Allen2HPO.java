@@ -240,6 +240,8 @@ public class Allen2HPO {
             *   Parse directory 
             */
             brainDataMngr.parseExpressionAndAnnotations();
+
+            brainDataMngr.removeUnknownProbeData();
             /*
             *   Average expression of probes with same gene name to create 
             *   unique gene-expression pairs

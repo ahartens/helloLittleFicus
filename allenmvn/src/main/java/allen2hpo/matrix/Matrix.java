@@ -82,7 +82,7 @@ public class Matrix implements Serializable{
     }
 
     public void removeRowAtIndex(int r){
-        
+        this.data.remove(r);
     }
 
     /**

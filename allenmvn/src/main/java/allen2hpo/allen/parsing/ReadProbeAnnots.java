@@ -3,6 +3,8 @@ package allen2hpo.allen.parsing;
 import allen2hpo.allen.parsing.ReadAnnots;
 
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java.util.ArrayList;
 /**
@@ -14,6 +16,9 @@ import java.util.ArrayList;
 public class ReadProbeAnnots extends ReadAnnots{
 
 	private ArrayList<Integer> indicesOfUnknownProbes = null;
+
+	private Pattern pattern = null;
+	
 	//__________________________________________________________________________
     //
     //  Constructor                             
@@ -31,6 +36,8 @@ public class ReadProbeAnnots extends ReadAnnots{
 		super.countLines();
 
 		this.indicesOfUnknownProbes = new ArrayList<Integer>();
+
+     	this.pattern =  Pattern.compile("A_*");;
 
 		/*
 		*	Begin reading file line by line. Line is handled here.
@@ -93,7 +100,8 @@ public class ReadProbeAnnots extends ReadAnnots{
 	    	else if(i==3)
 	    	{
 	    		geneName = lineSc.next();
-	    		if (probeName.equals(probeName)){
+	    		Matcher matcher = this.pattern.matcher(geneName);
+	    		if (matcher.find()){
 	    			this.indicesOfUnknownProbes.add(ri);
 	    		}
 	    		super.setNameAtIndex(geneName.replace("\"",""),ri);

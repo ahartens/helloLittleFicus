@@ -10,12 +10,7 @@ import org.junit.Assert;
 public class MatrixTest {
 
 
-	///CONSTRUCTOR TESTING
-	@Test(expected = IllegalArgumentException.class)
-    public void testMatrixArgNull(){
-    	double[][] d = null;
-    	Matrix m = new Matrix(d);
-    }
+
 
    /*THESE CONDITIONS WERE REMOVED ON 27.1.2015 BC OF EMPTY CLUSTER ISSUE.. MAYBE PUT BACK 
 	@Test(expected = IllegalArgumentException.class)

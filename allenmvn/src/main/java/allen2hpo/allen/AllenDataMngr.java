@@ -57,7 +57,7 @@ public class AllenDataMngr implements Serializable{
 
 	/** ArrayList containing row index of probes whose probe name and gene name
 	*	are identical (column 1 and column 2 of probes.csv are identical) */
-	private ArrayList<Integer> indicesUnkownProbes = null;
+	private ArrayList<Integer> indicesUnknownProbes = null;
 
 	/**	Matrix object containing all expression data. each row is a gene, each 
 	*	column a tissue sample */
@@ -103,7 +103,7 @@ public class AllenDataMngr implements Serializable{
 			new ReadProbeAnnots(this.dataPath+"/Probes.csv");
 		this.geneIds = probes.getIds();
 		this.geneNames = probes.getNames();
-		//this.indicesUnknownProbes = probes.getIndicesUnknownProbes();
+		this.indicesUnknownProbes = probes.getIndicesUnknownProbes();
 
 
 		/**
@@ -159,7 +159,7 @@ public class AllenDataMngr implements Serializable{
 		this.geneNames = collapser.getGeneNames();
 
 
-		System.out.println("Number of unique genes : "
+		log.info("Number of unique genes : "
 			+ this.data.getRowSize());
 	}
 
@@ -191,6 +191,41 @@ public class AllenDataMngr implements Serializable{
 
 		DistanceMatrix tissueLocationsMatrix = 
 			new DistanceMatrix(new Matrix(this.tissueLocations));
+	}
+
+	public void removeUnknownProbeData(){
+		log.info("Number of unknown probes : "
+				+ this.indicesUnknownProbes.size());
+		log.info("Number of gene Names : "
+			+ this.geneNames.size());
+		log.info("Number of gene Ids Names : "
+			+ this.geneIds.size());
+		log.info("Number of expression rows : "
+			+ this.data.getRowSize());
+
+		for (int i = 0; i<this.indicesUnknownProbes.size(); i++){
+			System.out.println("unknown :"+this.indicesUnknownProbes.get(i));
+		}
+
+		for(int i=0; i<this.geneNames.size(); i++){
+			System.out.println(this.geneNames.get(i));
+			//System.out.println(this.geneIds.get(i));
+
+		}
+		for(int i=this.indicesUnknownProbes.size()-1; i>=0; i--){
+			System.out.println("removing "+i);
+			int index = this.indicesUnknownProbes.get(i);
+			this.geneNames.remove(index);
+			this.geneIds.remove(index);
+			this.data.removeRowAtIndex(index);
+
+		}
+
+		for(int i=0; i<this.geneNames.size(); i++){
+			System.out.println(this.geneNames.get(i));
+			//System.out.println(this.geneIds.get(i));
+
+		}
 	}
 
 
