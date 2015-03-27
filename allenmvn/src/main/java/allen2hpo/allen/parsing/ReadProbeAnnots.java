@@ -73,8 +73,8 @@ public class ReadProbeAnnots extends ReadAnnots{
         */
 		int i = 0;
 
-		String *probeName;
-		String *geneName;
+		String probeName = null;
+		String geneName = null;
 	    while (lineSc.hasNext()) 
 	    {
 	    	if (i == 1){
@@ -83,7 +83,7 @@ public class ReadProbeAnnots extends ReadAnnots{
 	    	/*
 	    	*	Add probe ID to id list
 	    	*/
-	    	if(i==2)
+	    	else if(i==2)
 	    	{
 	    		super.setIdAtIndex(lineSc.nextInt(),ri);
 	    	}

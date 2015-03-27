@@ -103,7 +103,7 @@ public class AllenDataMngr implements Serializable{
 			new ReadProbeAnnots(this.dataPath+"/Probes.csv");
 		this.geneIds = probes.getIds();
 		this.geneNames = probes.getNames();
-		this.indicesUnknownProbes = probes.getIndicesUnknownProbes();
+		//this.indicesUnknownProbes = probes.getIndicesUnknownProbes();
 
 
 		/**
