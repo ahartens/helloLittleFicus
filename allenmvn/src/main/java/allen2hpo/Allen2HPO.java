@@ -108,6 +108,7 @@ public class Allen2HPO {
         {
             allen2hpo.doSingleDonorAnalysis(parentDir,status);
             donorCount ++;
+            hello
         }
 
 
@@ -167,6 +168,10 @@ public class Allen2HPO {
     *   into dataPath given in Clusters_OUTPUT.csv*/
     private String outputPath = null;
 
+    /** Path to hpo annotations file */
+    private String hpoAnnotationPath = null;
+
+
     /** @return Data path specified by user as parsed from command line */
     public String getDataPath(){
         return this.dataPath;
@@ -218,17 +223,25 @@ public class Allen2HPO {
         String serializedDataPath = dir.getAbsolutePath()
             +dir.separator+"SerializedAllenDataMngr.bin";
 
+        boolean deserializeSuccessful = false;
+
         if (serializedDataFound == 1) {
             brainDataMngr = deserializeData(serializedDataPath);
-            if (log.isInfoEnabled())
+            if(brainDataMngr != null){
+                deserializeSuccessful = true;
+                log.info("Serialized data found but could not be successfully read");
+            }
+            else
+            {
                 log.info("Found serialized data, using for clustering");
+            }
         }
 
         /*
         *   No serialized data exists, parse files and serialize data to 
             directory
         */
-        else
+        if (deserializeSuccessful == false) 
         {
             log.info("No serialized data found begin parsing");
 
@@ -461,8 +474,8 @@ public class Allen2HPO {
             Options options = new Options();
 
             options.addOption(new Option("D","data",true,"Path to data"));
-            options.addOption(new Option("S","size",true,"NumberOf"));
-     
+            options.addOption(new Option("O","hpo",true,"Hpo annotation file path"));
+
             Parser parser = new GnuParser();
             CommandLine cmd = parser.parse(options, args);
 
@@ -470,11 +483,14 @@ public class Allen2HPO {
                 this.dataPath = cmd.getOptionValue("D");
                 this.outputPath = this.dataPath+"/Clusters_OUTPUT.csv";
 
-            } else 
+            } 
+            else 
             {
                 usage();
             }
-
+            if (cmd.hasOption("O")) {
+                this.hpoAnnotationPath = cmd.getOptionValue("O");
+            } 
 
         }
         catch (ParseException pe) 
