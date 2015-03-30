@@ -236,7 +236,7 @@ public class Allen2HPO {
             *   Init AllenDataMngr object to serve as wrapper of directory 
             *   corresponding to a single Allen Brain donor
             */
-            brainDataMngr = new AllenDataMngr(dir.getPath());
+            brainDataMngr = new AllenDataMngr(dir);
 
             /*
             *   Parse directory 

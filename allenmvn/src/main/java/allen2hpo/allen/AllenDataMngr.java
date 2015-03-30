@@ -8,6 +8,8 @@ import allen2hpo.allen.ontology.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import java.io.File;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -64,7 +66,7 @@ public class AllenDataMngr implements Serializable{
 	private Matrix data = null;
 
 	/** String path to directory which should be parsed */
-	private String dataPath = null;
+	private File dataPath = null;
 
 	/** Logger object to output info/warnings */
     static Logger log = Logger.getLogger(AllenDataMngr.class.getName());
@@ -79,7 +81,7 @@ public class AllenDataMngr implements Serializable{
 	/**
 	*	Constructor method sets data path of directory to be parsed
 	*/
-	public AllenDataMngr(String dir){
+	public AllenDataMngr(File dir){
 		this.dataPath = dir;
 	}
 
@@ -102,7 +104,8 @@ public class AllenDataMngr implements Serializable{
 		log.info("Begin parsing probe annotation");
 
 		ReadProbeAnnots probes = 
-			new ReadProbeAnnots(this.dataPath+"/Probes.csv");
+			new ReadProbeAnnots(this.dataPath.getAbsolutePath()
+            +this.dataPath.separator+"Probes.csv");
 		this.geneIds = probes.getIds();
 		this.geneNames = probes.getNames();
 		this.indicesUnknownProbes = probes.getIndicesUnknownProbes();
@@ -114,7 +117,8 @@ public class AllenDataMngr implements Serializable{
 		*/
 		log.info("Begin parsing sample annotation");
 		ReadTissueAnnots tissues = 
-			new ReadTissueAnnots(this.dataPath+"/SampleAnnot.csv");
+			new ReadTissueAnnots(this.dataPath.getAbsolutePath()
+            +this.dataPath.separator+"SampleAnnot.csv");
 		this.tissueIds = tissues.getIds();
 		this.tissueNames = tissues.getNames();
 		this.tissueLocations = tissues.getMriVoxel();
@@ -129,7 +133,8 @@ public class AllenDataMngr implements Serializable{
 		*/
 		log.info("Begin parsing microarry expression");
 		ReadExpression expression = 
-			new ReadExpression(this.dataPath+"/MicroarrayExpression.csv",
+			new ReadExpression(this.dataPath.getAbsolutePath()
+            +this.dataPath.separator+"MicroarrayExpression.csv",
 				this.geneNames.size(),this.tissueIds.size(),true);
 		this.data = expression.getData();
         log.info("Finished parsing expression matrix : " 
