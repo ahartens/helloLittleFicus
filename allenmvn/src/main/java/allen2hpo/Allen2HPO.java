@@ -181,11 +181,6 @@ public class Allen2HPO {
         return this.dataPath;
     }
 
-    /** Returns path to hpo annotation file as parsed from command line */
-    public String getHpoPath(){
-        return this.hpoAnnotationPath;
-    }
-
     /** Logger object to output info/warnings */
     static Logger log = Logger.getLogger(Allen2HPO.class.getName());
 
@@ -254,7 +249,7 @@ public class Allen2HPO {
             brainDataMngr = deserializeData(serializedDataPath);
             if(brainDataMngr != null){
                 deserializeSuccessful = true;
-                log.info("Serialized data found but could not be successfully read");
+                log.info("Serialized data found and could be successfully read");
             }
             else
             {

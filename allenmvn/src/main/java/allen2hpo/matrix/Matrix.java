@@ -21,6 +21,8 @@ public class Matrix implements Serializable{
     private double[] rowMax = null;
     private double[] rowMin = null;
 
+    private double[] colStdDevs = null;
+
     double meanAll = 0;
 
 
@@ -359,6 +361,20 @@ public class Matrix implements Serializable{
         this.meanAll /= (getRowSize()*getColumnSize());
     }
 
+    public void calcColumnStdDevs(){
+        if (this.colMeans == null) {
+            System.out.println("calculating column means before standard deviation");
+        }
+        this.colStdDevs = new double[getColumnSize()];
+        for(int i = 0; i<getColumnSize(); i++){
+            this.colStdDevs[i] = 0;
+            for (int j=0; j<getRowSize(); j++){
+                this.colStdDevs[i] += Math.pow((getValueAtIndex(j,i) - this.colMeans[i]),2);
+            }
+            this.colStdDevs[i] = Math.sqrt(this.colStdDevs[i]/getColumnSize());
+        }
+    }
+
 
     public double getColumnMin(int idx){
         return this.colMin[idx];
@@ -382,6 +398,10 @@ public class Matrix implements Serializable{
 
     public double getColumnMean(int idx){
         return this.colMeans[idx];
+    }
+
+    public double getColumnStdDev(int idx){
+        return this.colStdDevs[idx];
     }
 
     public void meanNormalize(){
@@ -452,7 +472,6 @@ public class Matrix implements Serializable{
         int j;
         //Iterate through all rows
         for (int i = 0; i<getRowSize(); i++){
-            System.out.println(i);
             //Iterate through all cells in row except the last
             for ( j = 0; j<getColumnSize()-1; j++){
 
