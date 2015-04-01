@@ -3,6 +3,7 @@ package allen2hpo.allen.parsing;
 import allen2hpo.allen.parsing.ReadAnnots;
 
 import java.util.Scanner;
+import java.util.ArrayList;
 
 
 
@@ -18,7 +19,7 @@ public class ReadTissueAnnots extends ReadAnnots{
     //  Variables                             
     //__________________________________________________________________________
 
-	/**	Contains tissue location as three dimensional point */
+	/**	list of entrez gene symbols */
 	double[][] mriVoxel = null;
 
 

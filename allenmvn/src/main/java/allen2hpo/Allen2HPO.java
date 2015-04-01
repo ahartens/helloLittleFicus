@@ -5,6 +5,8 @@ import allen2hpo.allen.ontology.*;
 import allen2hpo.clustering.ClusteringMngr;
 import allen2hpo.matrix.*;
 
+import allen2hpo.hpo.HPOMngr;
+
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.io.File;
@@ -88,7 +90,7 @@ public class Allen2HPO {
             //new OntologyDataMngr(allen2hpo.getDataPath());
 
 
-        /*
+        /**
         *   Go through each brain donor directory. For each directory :
         *   1) Extract microarray expression and corresponding annotations
         *   (probe,sample)
@@ -99,7 +101,7 @@ public class Allen2HPO {
         File parentDir = new File(allen2hpo.getDataPath());
         int donorCount = 0;
 
-        /*  
+        /**  
         *   Data path provided points to a single brain donor.  Do cluster 
         *   analysis on single brain donor.
         */
@@ -108,11 +110,10 @@ public class Allen2HPO {
         {
             allen2hpo.doSingleDonorAnalysis(parentDir,status);
             donorCount ++;
-            hello
         }
 
 
-        /* 
+        /** 
         *   Data path provided points to a directory of brain donors 
         *   (ie contains subdirectories).
         *   Find Allen Brain subdirectories and analyze them consecutively
@@ -151,6 +152,8 @@ public class Allen2HPO {
             System.out.println("No compatible Allen Brain directories found");
         }
 
+
+
     }
 
 
@@ -169,12 +172,18 @@ public class Allen2HPO {
     private String outputPath = null;
 
     /** Path to hpo annotations file */
-    private String hpoAnnotationPath = null;
+    private String hpoGeneToPhenotypePath = null;
+    private String hpoPhenotypeToGenePath = null;
 
 
-    /** @return Data path specified by user as parsed from command line */
+    /** Returns path to allen brain data as parsed from command line */
     public String getDataPath(){
         return this.dataPath;
+    }
+
+    /** Returns path to hpo annotation file as parsed from command line */
+    public String getHpoPath(){
+        return this.hpoAnnotationPath;
     }
 
     /** Logger object to output info/warnings */
@@ -213,10 +222,26 @@ public class Allen2HPO {
     *   </p>
     */
     private void doSingleDonorAnalysis(File dir, int serializedDataFound){
+        
+        AllenDataMngr brainDataMngr = getAllenDataFromDirectory(dir,serializedDataFound);
+        
+        //clusterAllenBrainData(brainDataMngr,dir);
+        ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
+        clusteringMngr.writePopulationGenesToFile("/Users/ahartens/Desktop/population.txt");
+        doHpoTermAnalysis(brainDataMngr);
+       // brainDataMngr.calculateDistanceMatrixForTissueLocations();
+
+        //OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
+       
+        //brainDataMngr.collapseTissuesToSelectedParents(ontology);
+
+        
+    }
+
+    private AllenDataMngr getAllenDataFromDirectory(File dir, int serializedDataFound){
+        
         AllenDataMngr brainDataMngr = null;
         
-
-
         /*
         *   If serialized data present deserialize to use for clustering
         */
@@ -273,13 +298,10 @@ public class Allen2HPO {
             */
             serializeDataToFile(brainDataMngr,serializedDataPath);
         }
-        
-       // brainDataMngr.calculateDistanceMatrixForTissueLocations();
+        return brainDataMngr;
+    }
 
-        //OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
-       
-        //brainDataMngr.collapseTissuesToSelectedParents(ontology);
-
+    private void clusterAllenBrainData(AllenDataMngr brainDataMngr, File dir){
         /*
         *   Cluster Data
         */
@@ -327,6 +349,17 @@ public class Allen2HPO {
             log.info("Clustering was unsuccessful");
         }
     }
+
+    /**
+    *
+    *
+    */
+    public void doHpoTermAnalysis(AllenDataMngr brainDataMngr){
+        HPOMngr hpoMngr = new HPOMngr(this.hpoGeneToPhenotypePath,this.hpoPhenotypeToGenePath);
+        hpoMngr.parseHPO();
+        hpoMngr.getExpressionDataForHpoAnnotatedGenes(brainDataMngr);
+    }
+
 
     private File createOutputDirectory(File parentDir){
         File outputDirectory = 
@@ -474,7 +507,8 @@ public class Allen2HPO {
             Options options = new Options();
 
             options.addOption(new Option("D","data",true,"Path to data"));
-            options.addOption(new Option("O","hpo",true,"Hpo annotation file path"));
+            options.addOption(new Option("G","hpo",true,"genes to phenotype Hpo annotation file path"));
+            options.addOption(new Option("P","hpo",true,"phenotype to genes Hpo annotation file path"));
 
             Parser parser = new GnuParser();
             CommandLine cmd = parser.parse(options, args);
@@ -488,8 +522,11 @@ public class Allen2HPO {
             {
                 usage();
             }
-            if (cmd.hasOption("O")) {
-                this.hpoAnnotationPath = cmd.getOptionValue("O");
+            if (cmd.hasOption("G")) {
+                this.hpoGeneToPhenotypePath = cmd.getOptionValue("G");
+            } 
+            if (cmd.hasOption("P")) {
+                this.hpoPhenotypeToGenePath = cmd.getOptionValue("P");
             } 
 
         }

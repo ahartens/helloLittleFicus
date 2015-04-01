@@ -23,8 +23,6 @@ public class Matrix implements Serializable{
 
     double meanAll = 0;
 
-    /** Logger object to output info/warnings */
-   // static Logger logger = Logger.getLogger(Matrix.class);
 
     public Matrix(){
     }
@@ -34,10 +32,15 @@ public class Matrix implements Serializable{
     *   @param requires initialized 2d data array of non zero column and row size
     */
     public Matrix(double[][] data) {
-        /*  Set up logger */
-       // BasicConfigurator.configure();
-
        setMatrix(data);
+    }
+
+    /**
+    *   Constructor method takes 2d array
+    *   @param requires initialized 2d data array of non zero column and row size
+    */
+    public Matrix(ArrayList<double[]> array) {
+       this.data = array;
     }
 
     /**
@@ -120,6 +123,8 @@ public class Matrix implements Serializable{
             throw new IllegalArgumentException("Index is out of bounds of matrix");
         double row[] = new double[getColumnSize()];
         System.arraycopy(this.data.get(idx),0,row,0,getColumnSize());
+
+
         return row;
     }
 
@@ -447,16 +452,17 @@ public class Matrix implements Serializable{
         int j;
         //Iterate through all rows
         for (int i = 0; i<getRowSize(); i++){
+            System.out.println(i);
             //Iterate through all cells in row except the last
             for ( j = 0; j<getColumnSize()-1; j++){
+
                 fw.writeDouble(getValueAtIndex(i,j));
                 fw.writeDelimit();
-                System.out.printf("%.5f\t",getValueAtIndex(i,j));
 
             }
             //Last cell in row shouldn't have a delimiter. write next line
+
             fw.writeDouble(getValueAtIndex(i,j));
-            System.out.printf("%.5f\t",getValueAtIndex(i,j));
 
             fw.writeNextLine();
         }
