@@ -104,7 +104,7 @@ public class GapStat implements GetKable{
 		
 		/*	Number of uniform random distributions created for each k for 
 		*	which dispersion is calculated */
-		int b = 2;
+		int b = 5;
 
 		//Init kmeans object that will perform kmeans on actual data
 		this.kmeans = new Kmeans(m,dc,cp);
@@ -182,7 +182,7 @@ public class GapStat implements GetKable{
 		/*	Calculated dispersion for randomly generated data */
 		this.wkb_star = new double[cap_k][cap_b];
 
-		int firstK = 2;
+		int firstK = 5;
 
 		/*	For each k value perform kmeans and calculate gap */
 		for (int k = 0; k<cap_k; k++)

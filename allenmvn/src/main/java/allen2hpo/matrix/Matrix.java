@@ -367,11 +367,11 @@ public class Matrix implements Serializable{
         }
         this.colStdDevs = new double[getColumnSize()];
         for(int i = 0; i<getColumnSize(); i++){
-            this.colStdDevs[i] = 0;
+            double sum = 0;
             for (int j=0; j<getRowSize(); j++){
-                this.colStdDevs[i] += Math.pow((getValueAtIndex(j,i) - this.colMeans[i]),2);
+                sum += Math.pow(getValueAtIndex(j,i) - getColumnMean(i),2);
             }
-            this.colStdDevs[i] = Math.sqrt(this.colStdDevs[i]/getColumnSize());
+            this.colStdDevs[i] = Math.sqrt(sum/(getRowSize()-1));
         }
     }
 
