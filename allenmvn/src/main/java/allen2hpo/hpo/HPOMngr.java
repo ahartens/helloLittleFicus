@@ -29,6 +29,7 @@ public class HPOMngr implements Serializable{
 	/** String path to directory which should be parsed */
 	private String geneToPhenotypePath = null;
 	private String phenotypeToGenePath = null;
+	private String outputPath = null;
 
 	/** Logger object to output info/warnings */
     static Logger log = Logger.getLogger(HPOMngr.class.getName());
@@ -52,12 +53,13 @@ public class HPOMngr implements Serializable{
 	/**	All genes annotated to hpo term found in parallel array 
 	*	hpoOrganizedNames*/
 	ArrayList<ArrayList<Integer>> hpoOrganizedGeneIndices = null;
-
-
-	ArrayList<double[]> expressionForAnnotatedGenes = null;
-
+	
+	/**	Matrix object containing tvalues for gene expression corresponding to 
+	*	hpo term (one t value per tissue sample) */ 
 	Matrix tValMatrix = null;
 
+	/**	Expression and annotations of genes for which hpo annotation and allen
+	*	data exists */
 	AllenDataMngr hpoAnnotatedGeneExpressionMngr = null;
 
 	//__________________________________________________________________________
@@ -220,7 +222,7 @@ public class HPOMngr implements Serializable{
 		//	Init arrays to store info pertaining to genes for which annotation 
 		//	and expression exists
 		ArrayList<String> hpoGenesWithExpression = new ArrayList<String>();
-		this.expressionForAnnotatedGenes = new ArrayList<double[]>();
+		ArrayList<double[]> expressionForAnnotatedGenes = new ArrayList<double[]>();
 
 		//	For each gene with hpo annotation, search for gene in list of all
 		//	genes in allen brain object (ie expression data exists)
@@ -244,7 +246,7 @@ public class HPOMngr implements Serializable{
 
 					//	Add gene name + expression 
 					double[] row = allenExpressionData.getRowAtIndex(j);
-					this.expressionForAnnotatedGenes.add(row);
+					expressionForAnnotatedGenes.add(row);
 					hpoGenesWithExpression.add(currentName);
 
 					geneFound = true;
@@ -261,10 +263,10 @@ public class HPOMngr implements Serializable{
 		/*printGenesInHpoButNotInAllenData(genesNotFoundNames
 			, genesNotFoundIndices);*/
         log.info("Intersection of hpo genes and allen brain genes : "
-        	+this.expressionForAnnotatedGenes.size());
+        	+expressionForAnnotatedGenes.size());
 
         //	Create Matrix object with expression data 
-        Matrix dataMtrx = new Matrix(this.expressionForAnnotatedGenes);
+        Matrix dataMtrx = new Matrix(expressionForAnnotatedGenes);
 
         //	Write to file
         dataMtrx.printToFile("/Users/ahartens/Desktop/HpoannotatedTerms.csv");
@@ -286,10 +288,9 @@ public class HPOMngr implements Serializable{
 	*	Each hpo term has a set of genes annotated to it
 	*	Get expression for each of these genes and organize into a matrix
 	*	So each hpo term has a matrix of expression values, each row a gene
-	*	assigned to it
+	*	assigned to hpo term
 	*	Do unpaired t test on this expression data, column by column
-	*	As data is mean normalized, null hypothesis is that the mean is zero and
-	*	standard deviation is 1.
+	*	As data is mean normalized, null hypothesis is that the mean is zero
 	*	@param Matrix expression data for genes with hpo annotation and allen
 	*	brain expression value
 	*	@param ArrayList<String> annotations to the matrix m. Each row is a gene
@@ -350,6 +351,9 @@ public class HPOMngr implements Serializable{
 					
 				
 					Matrix matrixForTerm = new Matrix(expressionForTerm);
+					System.out.println(this.hpoOrganizedNames.get(i) + " n : "+n);
+					matrixForTerm.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/geneExpressionForHPOTerms/"+this.hpoOrganizedNames.get(i).replace("/","").replace(" ","_")+".csv");
+
 					matrixForTerm.calcSummary();
 					matrixForTerm.calcColumnStdDevs();
 
@@ -366,7 +370,7 @@ public class HPOMngr implements Serializable{
 		}
 		
 		this.tValMatrix = new Matrix(tValues);
-		this.tValMatrix.printToFile("/Users/ahartens/Desktop/AllTValues.csv");
+		this.tValMatrix.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/AllTValues.csv");
 	}
 
 	/**
@@ -376,7 +380,7 @@ public class HPOMngr implements Serializable{
 		ArrayList<String> hpoGenesWithExpression)
 	{
 		FileWriter writer = new FileWriter();
-        writer.createFileWithName("/Users/ahartens/Desktop/HpoannotatedGenesWithExpression.txt");
+        writer.createFileWithName("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/HpoannotatedGenesWithExpression.txt");
 
         for(int i=0; i<hpoGenesWithExpression.size(); i++)
         {
@@ -453,7 +457,7 @@ public class HPOMngr implements Serializable{
 
 	//__________________________________________________________________________
     //
-    //  Setters : till now used only by junit testing                              
+    //  Getters : till now used only by junit testing                              
     //__________________________________________________________________________
 
     public AllenDataMngr getHpoAnnotedGeneExpression(){
