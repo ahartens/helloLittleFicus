@@ -74,35 +74,29 @@ public class Allen2HPO {
         Allen2HPO allen2hpo = new Allen2HPO();
 
         
-        /*  Parse the command line for directory path */
+        // Parse the command line for directory path 
         allen2hpo.parseCommandLine(args);
 
-        /*
-        *   Read in the ontology file
-        *   Can be used by cluster analysis to modify proximity measure 
-        *   calculation
-        *   Currently not being used
-        */
+        //   Read in the ontology file
+        //   Can be used by cluster analysis to modify proximity measure 
+        //   calculation
+        //   Currently not being used
         
         //OntologyDataMngr ontology = 
             //new OntologyDataMngr(allen2hpo.getDataPath());
 
 
-        /*
-        *   Go through each brain donor directory. For each directory :
-        *   1) Extract microarray expression and corresponding annotations
-        *   (probe,sample)
-        *   2) Perform cluster analysis
-        *   3) Print cluster files
-        */
+        //   Go through each brain donor directory. For each directory :
+        //   1) Extract microarray expression and corresponding annotations
+        //   (probe,sample)
+        //   2) Perform cluster analysis
+        //   3) Print cluster files
         
         File parentDir = new File(allen2hpo.getDataPath());
         int donorCount = 0;
 
-        /*  
-        *   Data path provided points to a single brain donor.  Do cluster 
-        *   analysis on single brain donor.
-        */
+        //   Data path provided points to a single brain donor.  Do cluster 
+        //   analysis on single brain donor.
         int status = allen2hpo.checkAllAllenBrainFilesPresent(parentDir);
         if (status != 2) 
         {
@@ -111,15 +105,13 @@ public class Allen2HPO {
         }
 
 
-        /* 
-        *   Data path provided points to a directory of brain donors 
-        *   (ie contains subdirectories).
-        *   Find Allen Brain subdirectories and analyze them consecutively
-        */
+        //   Data path provided points to a directory of brain donors 
+        //   (ie contains subdirectories).
+        //   Find Allen Brain subdirectories and analyze them consecutively
         else
         {
-            /*  Get name of all files in parent directory, check if allenBrain
-            *   compatible */
+            //  Get name of all files in parent directory, check if allenBrain
+            //  compatible
             String[] files = parentDir.list();
             for(String fileName : files)
             {
@@ -127,9 +119,8 @@ public class Allen2HPO {
                     + parentDir.separator + fileName);
                 if (child.isDirectory())
                 {
-                    /*  
-                    *   Child is a single brain donor. Do cluster analysis. 
-                    */
+                    //   Child is a single brain donor. Do analysis. 
+        
                     status = 
                         allen2hpo.checkAllAllenBrainFilesPresent(parentDir);
 
@@ -141,10 +132,8 @@ public class Allen2HPO {
                 }
             }
         }
-
-        /** 
-        *   Data path doesn't point to a compatible file 
-        */
+ 
+        //   Data path doesn't point to a compatible file 
         if (donorCount == 0)
         {
             System.out.println("No compatible Allen Brain directories found");
@@ -183,7 +172,7 @@ public class Allen2HPO {
     //__________________________________________________________________________
 
     public Allen2HPO(){
-        /*  Set up logger */
+        //  Set up logger
         PropertyConfigurator.configure("src/test/resources/log4j.properties");
 
     }
@@ -208,13 +197,12 @@ public class Allen2HPO {
     *   </p>
     */
     private void doSingleDonorAnalysis(File dir, int serializedDataFound){
+        
         AllenDataMngr brainDataMngr = null;
         
 
 
-        /*
-        *   If serialized data present deserialize to use for clustering
-        */
+        //  If serialized data present deserialize to use for clustering
         String serializedDataPath = dir.getAbsolutePath()
             +dir.separator+"SerializedAllenDataMngr.bin";
 
@@ -224,89 +212,78 @@ public class Allen2HPO {
                 log.info("Found serialized data, using for clustering");
         }
 
-        /*
-        *   No serialized data exists, parse files and serialize data to 
-            directory
-        */
+        //  No serialized data exists, parse files and serialize data to 
+        //  directory
         else
         {
             log.info("No serialized data found begin parsing");
 
-            /*
-            *   Init AllenDataMngr object to serve as wrapper of directory 
-            *   corresponding to a single Allen Brain donor
-            */
+            //  Init AllenDataMngr object to serve as wrapper of directory 
+            //  corresponding to a single Allen Brain donor
+
             brainDataMngr = new AllenDataMngr(dir);
 
-            /*
-            *   Parse directory 
-            */
+            //  Parse directory 
+
             brainDataMngr.parseExpressionAndAnnotations();
 
+            //  Remove probes where gene name and probe name are identical
+           
             brainDataMngr.removeUnknownProbeData();
-            /*
-            *   Average expression of probes with same gene name to create 
-            *   unique gene-expression pairs
-            */
+            
+            //  Average expression of probes with same gene name to create 
+            //  unique gene-expression pairs
+           
             brainDataMngr.collapseRepeatProbesToUniqueGenes();
 
-            /*
-            *   Normalize the data
-            */
+            //  Normalize the data
+
             brainDataMngr.meanNormalizeData();
 
-            /*
-            *   Serialize data and save to directory
-            */
+            //  Serialize data and save to directory
+
             serializeDataToFile(brainDataMngr,serializedDataPath);
         }
         
-       // brainDataMngr.calculateDistanceMatrixForTissueLocations();
+        // brainDataMngr.calculateDistanceMatrixForTissueLocations();
 
         //OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
        
         //brainDataMngr.collapseTissuesToSelectedParents(ontology);
 
-        /*
-        *   Cluster Data
-        */
+        //  Cluster Data
         ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
 
-        /*
-        *   Perform Kmeans clustering using the gap statistic to calculate k
-        */
+        //  Perform Kmeans clustering using the gap statistic to calculate k
         boolean success = clusteringMngr.doKmeansClusteringWithGapStat();
 
         if(success)
         {
-            /*
-            *   Print output to terminal
-            */
+            //  Print output to terminal
+
             //clusteringMngr.printClusterGenesInTerminal();
 
 
-            /*
-            *   Create a directory called clustering for output
-            */
+            //  Create a directory called clustering for output
+
             File outputDirectory = createOutputDirectory(dir);
             if (outputDirectory != null)
             {
-                /*  Create string for outputDirectory path */
+                //  Create string for outputDirectory path 
+                
                 String outputDirString = outputDirectory.getAbsolutePath()
                     +dir.separator;
-                /*
-                *   Write population file (all genes clustered one gene per line)
-                */
+                
+                //  Write population file (all genes clustered one gene per line)
+    
                 clusteringMngr.writePopulationGenesToFile(outputDirString);
 
-                /*
-                *   Write one cluster per file, one gene per line
-                */
+                //  Write one cluster per file, one gene per line
+    
                 clusteringMngr.writeClusterGenesOneClusterPerFile(outputDirString);
 
-                /*
-                *   Write Cluster Prototypes to file
-                */
+                //  Write Cluster Prototypes to file
+    
                 clusteringMngr.writeClusterPrototypesToFile(outputDirString);
             }
         }
@@ -317,10 +294,11 @@ public class Allen2HPO {
 
     private File createOutputDirectory(File parentDir){
         File outputDirectory = 
+            
             new File(parentDir.getAbsolutePath()+parentDir.separator
                 +"clustering");
 
-        // if the directory does not exist, create it
+        //  If the directory does not exist, create it
         if (!outputDirectory.exists()) {
             System.out.println(parentDir.getAbsolutePath()+parentDir.separator
                 +"clustering");
@@ -333,7 +311,7 @@ public class Allen2HPO {
             } 
             catch(SecurityException se)
             {
-                //handle it
+                //  handle it
             }        
             if(result) 
             {    
@@ -367,7 +345,8 @@ public class Allen2HPO {
         boolean samples = false;
         boolean serializedData = false;
 
-        /** Check for presence of all necessary files */
+        //  Check for presence of all necessary files
+        
         for(String fileName : dir.list())
         {
             if (fileName.equals("MicroarrayExpression.csv") )
@@ -383,11 +362,13 @@ public class Allen2HPO {
         if (serializedData == true) 
             return 1;
 
-        /** If all necessary files present, return true */
+        //  If all necessary files present, return true
+        
         if (expression == true && probes == true && samples == true)
             return 0;
 
-        /*  Not all files are present */
+        //  Not all files are present
+        
         return 2;
     }
 
