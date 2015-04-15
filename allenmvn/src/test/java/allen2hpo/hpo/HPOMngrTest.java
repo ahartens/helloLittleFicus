@@ -8,7 +8,7 @@ import org.junit.Assert;
 import java.util.ArrayList;
 
 import allen2hpo.matrix.Matrix;
-
+import allen2hpo.allen.AllenDataMngr;
 public class HPOMngrTest{
 
 
@@ -34,13 +34,13 @@ public class HPOMngrTest{
     @Test
     public void testMngr(){
         HPOMngr mngr = new HPOMngr();
-
+        AllenDataMngr allenMngr = new AllenDataMngr();
         //  make 'hpo terms' (3 in total)
         ArrayList<String> hpoOrganizedNames = new ArrayList<String>();
         hpoOrganizedNames.add("hpoTerm1");
         hpoOrganizedNames.add("hpoTerm2");
         hpoOrganizedNames.add("hpoTerm3");
-        mngr.setHpoOrganizedNames(hpoOrganizedNames);
+        mngr.setPtg_PhenotypeList(hpoOrganizedNames);
 
         //  make gene indices assigned to hpo term
         ArrayList<ArrayList<Integer>> hpoOrganizedGeneIndices = new ArrayList<ArrayList<Integer>>();
@@ -61,7 +61,7 @@ public class HPOMngrTest{
         thirdTerm.add(7);
         thirdTerm.add(8);
         hpoOrganizedGeneIndices.add(thirdTerm);
-        mngr.setHpoOrganizedGeneIndices(hpoOrganizedGeneIndices);
+        mngr.setPtg_GeneIndicesForPL(hpoOrganizedGeneIndices);
 
 
         //  Make 'expression' matrix
@@ -71,6 +71,7 @@ public class HPOMngrTest{
             data.add(array);
         }
         Matrix m = new Matrix(data);
+        allenMngr.setExpression(m);
 
         //  make corresponding 'gene' names
         ArrayList<String> names = new ArrayList<String>();
@@ -84,14 +85,17 @@ public class HPOMngrTest{
         names.add("eight");
         names.add("nine");
         names.add("ten");
-        mngr.setGeneOrganizedNames(names);
+        allenMngr.setGeneAnnotations(names);
+        mngr.setGtp_GeneList(names);
+        mngr.setHpoAnnotatedGeneExpressionMngr(allenMngr);
 
         //  make 'not existent in allen data' gene names
         ArrayList<String> notEqual = new ArrayList<String>();
+        mngr.setGenesInHpoButNotInAllenNames(notEqual);
         notEqual.add("ten");
 
         //  organize expression by hpo terms
-        mngr.organizeExpressionDataByHpo(m,names,notEqual);
+        mngr.ptg_organizeHPOAnnotatedExpressionDataByHpo();
 
         // get t values
         Matrix tval = mngr.getTvalMatrix();
@@ -102,7 +106,7 @@ public class HPOMngrTest{
             Assert.assertEquals(tval.getValueAtIndex(i,0),correctTVal[i],.1);
 
         }
-
+    
     }
 
 }

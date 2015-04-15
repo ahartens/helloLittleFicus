@@ -352,9 +352,11 @@ public class Allen2HPO {
     public void doHpoTermAnalysis(AllenDataMngr brainDataMngr, File dir){
         HPOMngr hpoMngr = new HPOMngr(this.hpoGeneToPhenotypePath,this.hpoPhenotypeToGenePath);
         hpoMngr.parseHPO();
+        hpoMngr.getExpressionDataForHpoAnnotatedGenes(brainDataMngr);
+        hpoMngr.ptg_organizeHPOAnnotatedExpressionDataByHpo();
+        hpoMngr.gtp_organizeHPOAnnotatedExpressionDataByHpo();
+        //hpoMngr.organizeParsedData();
 
-        hpoMngr.organizeParsedData();
-        
         //hpoMngr.getExpressionDataForHpoAnnotatedGenes(brainDataMngr);
 
        // AllenDataMngr hpoAnnotedExpressionMngr = hpoMngr.getHpoAnnotedGeneExpression();

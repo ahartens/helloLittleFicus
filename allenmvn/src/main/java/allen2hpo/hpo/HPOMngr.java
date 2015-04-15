@@ -70,6 +70,23 @@ public class HPOMngr implements Serializable{
 	*	data exists */
 	AllenDataMngr hpoAnnotatedGeneExpressionMngr = null;
 
+
+	ArrayList<String> ptg_parsedGenes = null;
+	ArrayList<String> ptg_parsedPhenotypes = null;
+
+	ArrayList<String> ptg_PhenotypeList = null;
+	ArrayList<ArrayList<Integer>> ptg_GeneIndicesForPL = null;
+
+
+
+	ArrayList<String> gtp_parsedGenes = null;
+	ArrayList<String> gtp_parsedPhenotypes = null;
+
+	ArrayList<String> gtp_GeneList = null;
+	ArrayList<ArrayList<String>> gtp_PhenotypesForGL = null;
+	ArrayList<String> gtp_PhenotypeList = null;
+	ArrayList<ArrayList<Integer>> gtp_GeneIndicesForPL = null;
+
 	//__________________________________________________________________________
     //
     //  Constructor                              
@@ -92,296 +109,42 @@ public class HPOMngr implements Serializable{
     //  Public Methods                              
     //__________________________________________________________________________
 
-	/** 
-    *   Parse 3 major files in Allen Brain directory. 
-    *	<br>(Probes.csv, SampleAnnot.csv, MicroarrayExpression.csv)
-    */
-	public void parseHPO(){
-		log.info("Started parsing hpo");
 
-		/**
-		*	Read file line by line, storing column 2 + 3 in gene names and terms
-		*/
-		ReadHPOAnnotsGeneToPhenotype parser = 
+	public void parseHPO(){
+		log.info("Started parsing genes to phenotype");
+
+		
+		//	Read file line by line, storing column 2 + 3 in gene names and terms
+		ReadHPOAnnotsGeneToPhenotype gtpParser = 
 			new ReadHPOAnnotsGeneToPhenotype(this.geneToPhenotypePath);
-        this.entrezGeneSymbols = parser.getEntrezGeneSymbols();
-        this.hpoTermNames = parser.getHpoTermNames();
-        parser = null;
-		log.info("Finished parsing hpo : "+this.entrezGeneSymbols.size() 
+        this.gtp_parsedGenes = gtpParser.getEntrezGeneSymbols();
+        this.gtp_parsedPhenotypes = gtpParser.getHpoTermNames();
+        gtpParser = null;
+		log.info("Finished parsing genes to phenotype : "
+			+this.gtp_parsedGenes.size() 
+			+" lines");
+		
+
+		//	Read PhenotypeToGene file line by line storing column
+		log.info("Started parsing phenotypes to gene");
+		ReadHPOAnnotsPhenotypeToGene ptgParser = 
+			new ReadHPOAnnotsPhenotypeToGene(this.phenotypeToGenePath);
+		this.ptg_parsedGenes = ptgParser.getEntrezGeneSymbols();
+        this.ptg_parsedPhenotypes = ptgParser.getHpoTermNames();
+        ptgParser = null;
+        log.info("Finished parsing phenotypes to gene : "
+			+this.ptg_parsedPhenotypes.size() 
 			+" lines");
 
-		ReadHPOAnnotsPhenotypeToGene parser2 = new ReadHPOAnnotsPhenotypeToGene(this.phenotypeToGenePath);
-		GTPorganizeGeneNamesAndAnnotations();
-
-		PTGOrganizeGenesByPhenotypeToGeneFile(parser2.getEntrezGeneSymbols(),parser2.getHpoTermNames());
-	}
-
-
-	public void organizeParsedData(){
-
-
-	}
-	//__________________________________________________________________________
-    //
-    //	Gene to Phenotype                              
-    //__________________________________________________________________________
-
-	
-	/**
-	*	Creates two parallel arrays
-	*	this.geneOrganizedNames is list of all genes with annotations
-	*	this.geneOrganizedHpoTerms contains corresponding hpo terms that are 
-	*	annotated to gene (gene located at same index in 
-	*	this.geneOrganizedNames)
-	*	Read through parsed data organizing into unique genes and corresponding 
-	*	annotations
-	*/
-	public void GTPorganizeGeneNamesAndAnnotations(){
-        
-        //	Init neccessary arrays
-        this.geneOrganizedNames = new ArrayList<String>();
-        this.geneOrganizedHpoTerms = new ArrayList<ArrayList<String>>();
-        this.hpoOrganizedNames = new ArrayList<String>();
-        this.hpoOrganizedGeneIndices = new ArrayList<ArrayList<Integer>>();
-
-
-       	//	Set values for first gene
-        this.geneOrganizedNames.add(this.entrezGeneSymbols.get(0));
-        this.hpoOrganizedNames.add(this.hpoTermNames.get(0));
-    	
-
-    	//	Gene organized : Temporary array holding all hpo terms for current 
-    	//	unique gene. New array made each time new gene is found
-        ArrayList<String> hpoTermsForGene = new ArrayList<String>();
-        hpoTermsForGene.add(this.hpoTermNames.get(0));
-
-
-    	//	Hpo Organized : Array for gene indices annotated to whatever hpo 
-    	//	term currently looking at. New array made each new hpo term found
-    	//	and stored in hpoOrganizedGeneIndices
-    	ArrayList geneIndicesForHpoTerm = new ArrayList<Integer>();
-		geneIndicesForHpoTerm.add(0);
-		this.hpoOrganizedGeneIndices.add(geneIndicesForHpoTerm);
-
-
-        String previousGeneName = this.entrezGeneSymbols.get(0);
-        //	Counter for unique gene names
-        int geneIndex = 0;		
-		
-		//	Compare each new gene name to previous gene name: if equal just
-       	//	store annotation
-       	//	Otherwise add new gene name to unique gene names array        
-        for (int i = 1; i<this.entrezGeneSymbols.size(); i++) 
-        {
-        	String currentGeneName = this.entrezGeneSymbols.get(i);
-
-        	//	Still on same gene. Add hpo term to array of terms corresponding
-        	//	to current gene
-        	if (currentGeneName.equals(previousGeneName)) 
-        	{
-        		hpoTermsForGene.add(this.hpoTermNames.get(i));
-        	}
-
-        	//	New gene found. 
-        	//	1. Store hpoterms annotated to previous gene and
-        	//	2. Init new array for current gene, add first hpo term to it
-        	//	3. Add new gene to list of gene names
-        	else{
-        		previousGeneName = currentGeneName;
-        		this.geneOrganizedHpoTerms.add(hpoTermsForGene);
-        		hpoTermsForGene = new ArrayList<String>();
-        		this.geneOrganizedNames.add(currentGeneName);
-        		geneIndex ++;
-				
-        	}
-        	//	Store hpo organized info
-        	addGeneIndexToHpoOrganizedList(i,geneIndex);
-        }
-        log.info("Finished organizing hpo. Unique genes with annotations : "
-        	+this.geneOrganizedNames.size()+" Unique HPO phenotype terms : "
-        	+this.hpoOrganizedNames.size());
-	}
-
-
-
-	//__________________________________________________________________________
-    //
-    //  Phenotype to Gene                              
-    //__________________________________________________________________________
-
-	/**
-	*	<p>Given output of parsed phenotype to gene file, parses list into 
-	*	unique phenotypes and corresponding gene indices annotated to that gene
-	*	<br>Phenotype to gene file has repeated rows corresponding to one 
-	*	one phenotype, on each row a gene annotated to that phenotype
-	*	</p>
-	*	@param ArrayList<String> list of all genes parsed from file (index equal
-	*	to row in file)
-	*	@param ArrayList<String> list of all phenotypes parsed from file
-	*/
-	public void PTGOrganizeGenesByPhenotypeToGeneFile(ArrayList<String> geneNames, ArrayList<String> phenotypes){
-
-		//	Init array to hold one phenotype per line
-		this.ptgHpoOrganizedNames = new ArrayList<String>();
-
-		//	Init first values to first row
-		String currentPhenotype = phenotypes.get(0);
-		this.ptgHpoOrganizedNames.add(currentPhenotype);
-
-		//	Init array of arrays to hold gene indices corresponding to phenotype
-		this.ptgHpoOrganizedGeneIndices = new ArrayList<ArrayList<Integer>>();
-		
-		//	Init first array to hold indices for first phenotype
-		ArrayList<Integer> currentPhenotypeGeneIndices = new ArrayList<Integer>();
-		currentPhenotypeGeneIndices.add(0);
-
-		//	Iterate through each 'line'
-		for (int i = 1; i< phenotypes.size(); i++)
-		{
-			//	Gene on this line belongs to current phenotype. add index
-			if (currentPhenotype.equals(phenotypes.get(i))) 
-			{
-				currentPhenotypeGeneIndices.add(i);
-			}
-			//	New phenotype. Init new array to store gene indices
-			else{
-				this.ptgHpoOrganizedGeneIndices.add(currentPhenotypeGeneIndices);
-				currentPhenotypeGeneIndices = new ArrayList<Integer>();
-				currentPhenotypeGeneIndices.add(i);
-				currentPhenotype = phenotypes.get(i);
-				this.ptgHpoOrganizedNames.add(currentPhenotype);
-			}
-		}
-
-		//	Add gene indices for last phenotype
-		this.ptgHpoOrganizedGeneIndices.add(currentPhenotypeGeneIndices);
-
-		
-	}
-
-
-	/**
-	*	Get gene expression values corresponding to this.hpoOrganizedGeneIndices
-	*	In effect 3d array 
-	*	Each hpo term has a set of genes annotated to it
-	*	Get expression for each of these genes and organize into a matrix
-	*	So each hpo term has a matrix of expression values, each row a gene
-	*	assigned to hpo term
-	*	Do unpaired t test on this expression data, column by column
-	*	As data is mean normalized, null hypothesis is that the mean is zero
-	*	@param Matrix expression data for genes with hpo annotation and allen
-	*	brain expression value
-	*	@param ArrayList<String> annotations to the matrix m. Each row is a gene
-	*	name whose expression data is at same row index in matrix 
-	*	@param ArrayList<String> gene names for which no expression data exists
-	*/
-	public void PTGorganizeExpressionDataByHpo(Matrix m, 
-		ArrayList<String>geneAnnots)
-	{
-		//	Init required arrays
-		ArrayList<double[]> tValues = new ArrayList<double[]>();
-		ArrayList<String> tValueAnnots = new ArrayList<String>();
-		ArrayList<Integer> tValueSizeN = new ArrayList<Integer>();
-
-
-		log.info("Started to organize expression data by hpo");
-
-		//	Iterate through each hpo term 
-		for(int i = 0; i<this.ptgHpoOrganizedNames.size(); i++)
-		{
-			//	Get indices of genes annotated to hpo term
-			ArrayList<Integer>geneIndicesForTerm = 
-				this.ptgHpoOrganizedGeneIndices.get(i);
-			//	Init counter for # of genes annotated to hpo term
-			int n = 0;
-
-			//	If more than two genes annotated to term
-			//	1) get expression and store in a matrix object
-			//	2) do t test on each column
-			if (geneIndicesForTerm.size() >= 2) 
-			{
-				ArrayList<double[]>expressionForTerm = 
-					new ArrayList<double[]>();
-
-				//	For each gene assigned to term
-				//	1) get index of expression data for gene
-				//	2) add expression to 
-				for(int j=0; j<geneIndicesForTerm.size(); j++)
-				{
-					//	Index of gene in this.geneOrganizedNames
-					int geneIndex = geneIndicesForTerm.get(j);
-					String geneName = this.geneOrganizedNames.get(geneIndex);
-					//	Check if gene has hpo annotation but no allen data
-					if(this.genesInHpoButNotInAllenNames.contains(geneName)){
-						log.info(geneName +" in hpo but not in allen");
-					}
-					//	Have both allen + hpo data
-					else{
-						//	Index of expression in expression matrix
-						int geneIdxInMtrx = geneAnnots.indexOf(geneName);
-						expressionForTerm.add(m.getRowAtIndex(geneIdxInMtrx));
-						n++;
-					}
-				}
-				//	Have to check again for size because 
-				if (expressionForTerm.size() > 2) {
-					
-				
-					Matrix matrixForTerm = new Matrix(expressionForTerm);
-					System.out.println(this.hpoOrganizedNames.get(i) + " n : "+n);
-					matrixForTerm.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/geneExpressionForHPOTerms/"+this.hpoOrganizedNames.get(i).replace("/","").replace(" ","_")+".csv");
-
-					matrixForTerm.calcSummary();
-					matrixForTerm.calcColumnStdDevs();
-
-					double[] tScores = new double[matrixForTerm.getColumnSize()];
-					for(int j=0; j<matrixForTerm.getColumnSize(); j++){
-						double stdError = matrixForTerm.getColumnStdDev(j)/Math.sqrt(matrixForTerm.getRowSize());
-						tScores[j] = matrixForTerm.getColumnMean(j)/stdError;
-					}
-					tValues.add(tScores);
-					tValueAnnots.add(this.hpoOrganizedNames.get(i));
-					tValueSizeN.add(n);
-				}
-			}
-		}
-		
-		this.tValMatrix = new Matrix(tValues);
-		this.tValMatrix.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/AllTValues.csv");
-	}
-
-
-	/**
-	*	Called by organizeGeneNamesAndAnnotations at each iteration to store 
-	*	gene index at proper hpo annotation
-	*/
-	private void addGeneIndexToHpoOrganizedList(int i, int geneIndex){
-		
-		//	Check if have seen hpo term before.
-		//	If previously seen, get array of gene indices corresponding 
-		//	to that term and add current index
-		if(this.hpoOrganizedNames.contains(this.hpoTermNames.get(i))){
-			int indexOfHpoTerm = 
-				this.hpoOrganizedNames.indexOf(this.hpoTermNames.get(i));
-			ArrayList<Integer> geneIndicesForHpoTerm = 
-				this.hpoOrganizedGeneIndices.get(indexOfHpoTerm);
-			geneIndicesForHpoTerm.add(geneIndex);
-		}
-		
-		//	If haven't see this hpoterm yet, add to unique term list and
-		//	create array to add genes that correspond to it;
-		else
-		{
-			this.hpoOrganizedNames.add(this.hpoTermNames.get(i));
-			ArrayList<Integer> geneIndicesForHpoTerm = new ArrayList<Integer>();
-			geneIndicesForHpoTerm.add(geneIndex);
-			this.hpoOrganizedGeneIndices.add(geneIndicesForHpoTerm);
-		}
+        gtp_OrganizeParsedData();
+		ptg_OrganizeParsedData();
 	}
 
 	/**
 	*	Creates Matrix object containing all expression data of genes for which 
 	*	an hpo annotation exists
+	*	<br>Creates AllenDataMngr object that contains this Matrix object and
+	*	corresponding Gene annotations
 	*	@param AllenDataMngr containing expression data + gene names
 	*/
 	public void getExpressionDataForHpoAnnotatedGenes(AllenDataMngr allenData){
@@ -404,9 +167,9 @@ public class HPOMngr implements Serializable{
 		this.genesInHpoButNotInAllenNames = new ArrayList<String>();
 		
 		//	Iterate through every gene with hpo annotation
-		for (int i = 0; i<this.geneOrganizedNames.size(); i++)
+		for (int i = 0; i<this.gtp_GeneList.size(); i++)
 		{
-			String currentName = this.geneOrganizedNames.get(i);
+			String currentName = this.gtp_GeneList.get(i);
 			geneFound = false;
 
 			//	Iterate through every allen brain gene (probe)
@@ -442,11 +205,10 @@ public class HPOMngr implements Serializable{
 
         //	Write to file
         dataMtrx.printToFile("/Users/ahartens/Desktop/HpoannotatedTerms.csv");
-        writeHpoAnnotatedGenesWithExpressionToFile(hpoGenesWithExpression);
-        printhpoOrganizedGeneIndicesByHpoTermToTerminal();
+        //writeHpoAnnotatedGenesWithExpressionToFile(hpoGenesWithExpression);
+        //printhpoOrganizedGeneIndicesByHpoTermToTerminal();
 
-        organizeExpressionDataByHpo(dataMtrx,hpoGenesWithExpression,
-        	this.genesInHpoButNotInAllenNames);
+
 
         this.hpoAnnotatedGeneExpressionMngr = new AllenDataMngr();
         this.hpoAnnotatedGeneExpressionMngr.setExpression(dataMtrx);
@@ -454,24 +216,24 @@ public class HPOMngr implements Serializable{
 
 	}
 
+
 	/**
-	*	Get gene expression values corresponding to this.hpoOrganizedGeneIndices
-	*	In effect 3d array 
+	*	Does unpaired t test on all genes annotated to a term. Uses phenotype to
+	*	Gene parsed data so ALL GENES annotated to a term (including all its
+	*	children) 
+	*	Get gene expression values corresponding to this.ptg_GeneIndicesForPL
+	*	Creates a 3d array 
 	*	Each hpo term has a set of genes annotated to it
 	*	Get expression for each of these genes and organize into a matrix
 	*	So each hpo term has a matrix of expression values, each row a gene
 	*	assigned to hpo term
 	*	Do unpaired t test on this expression data, column by column
 	*	As data is mean normalized, null hypothesis is that the mean is zero
-	*	@param Matrix expression data for genes with hpo annotation and allen
-	*	brain expression value
-	*	@param ArrayList<String> annotations to the matrix m. Each row is a gene
-	*	name whose expression data is at same row index in matrix 
-	*	@param ArrayList<String> gene names for which no expression data exists
 	*/
-	public void organizeExpressionDataByHpo(Matrix m, 
-		ArrayList<String>geneAnnots)
+	public void ptg_organizeHPOAnnotatedExpressionDataByHpo()
 	{
+		Matrix m = this.hpoAnnotatedGeneExpressionMngr.getExpression();
+		ArrayList<String>geneAnnots = this.hpoAnnotatedGeneExpressionMngr.getAllGenes();
 		//	Init required arrays
 		ArrayList<double[]> tValues = new ArrayList<double[]>();
 		ArrayList<String> tValueAnnots = new ArrayList<String>();
@@ -481,11 +243,12 @@ public class HPOMngr implements Serializable{
 		log.info("Started to organize expression data by hpo");
 
 		//	Iterate through each hpo term 
-		for(int i = 0; i<this.hpoOrganizedGeneIndices.size(); i++)
+		for(int i = 0; i<this.ptg_PhenotypeList.size(); i++)
 		{
+
 			//	Get indices of genes annotated to hpo term
 			ArrayList<Integer>geneIndicesForTerm = 
-				this.hpoOrganizedGeneIndices.get(i);
+				this.ptg_GeneIndicesForPL.get(i);
 			//	Init counter for # of genes annotated to hpo term
 			int n = 0;
 
@@ -504,7 +267,7 @@ public class HPOMngr implements Serializable{
 				{
 					//	Index of gene in this.geneOrganizedNames
 					int geneIndex = geneIndicesForTerm.get(j);
-					String geneName = this.geneOrganizedNames.get(geneIndex);
+					String geneName = this.gtp_GeneList.get(geneIndex);
 					//	Check if gene has hpo annotation but no allen data
 					if(this.genesInHpoButNotInAllenNames.contains(geneName)){
 						log.info(geneName +" in hpo but not in allen");
@@ -517,13 +280,14 @@ public class HPOMngr implements Serializable{
 						n++;
 					}
 				}
-				//	Have to check again for size because 
+				//	Have to check again for size because some genes are not in the
+				//	allen brain data and therefore some terms may have less than
+				//	2 rows of expression data
 				if (expressionForTerm.size() > 2) {
 					
 				
 					Matrix matrixForTerm = new Matrix(expressionForTerm);
-					System.out.println(this.hpoOrganizedNames.get(i) + " n : "+n);
-					matrixForTerm.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/geneExpressionForHPOTerms/"+this.hpoOrganizedNames.get(i).replace("/","").replace(" ","_")+".csv");
+					matrixForTerm.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/"+this.ptg_PhenotypeList.get(i).replace("/","").replace(" ","_")+".csv");
 
 					matrixForTerm.calcSummary();
 					matrixForTerm.calcColumnStdDevs();
@@ -534,15 +298,317 @@ public class HPOMngr implements Serializable{
 						tScores[j] = matrixForTerm.getColumnMean(j)/stdError;
 					}
 					tValues.add(tScores);
-					tValueAnnots.add(this.hpoOrganizedNames.get(i));
+					tValueAnnots.add(this.ptg_PhenotypeList.get(i));
 					tValueSizeN.add(n);
 				}
 			}
 		}
 		
 		this.tValMatrix = new Matrix(tValues);
-		this.tValMatrix.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/AllTValues.csv");
+		this.tValMatrix.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/PTGAllTValues.csv");
 	}
+
+
+		/**
+	*	Does unpaired t test on all genes annotated to a term. Uses phenotype to
+	*	Gene parsed data so ALL GENES annotated to a term (including all its
+	*	children) 
+	*	Get gene expression values corresponding to this.ptg_GeneIndicesForPL
+	*	Creates a 3d array 
+	*	Each hpo term has a set of genes annotated to it
+	*	Get expression for each of these genes and organize into a matrix
+	*	So each hpo term has a matrix of expression values, each row a gene
+	*	assigned to hpo term
+	*	Do unpaired t test on this expression data, column by column
+	*	As data is mean normalized, null hypothesis is that the mean is zero
+	*/
+	public void gtp_organizeHPOAnnotatedExpressionDataByHpo()
+	{
+		Matrix m = this.hpoAnnotatedGeneExpressionMngr.getExpression();
+		ArrayList<String>geneAnnots = this.hpoAnnotatedGeneExpressionMngr.getAllGenes();
+		
+		//	Init required arrays
+		ArrayList<double[]> tValues = new ArrayList<double[]>();
+		ArrayList<String> tValueAnnots = new ArrayList<String>();
+		ArrayList<Integer> tValueSizeN = new ArrayList<Integer>();
+
+
+		log.info("Started to organize expression data by hpo");
+
+		//	Iterate through each hpo term 
+		for(int i = 0; i<this.gtp_PhenotypeList.size(); i++)
+		{
+			//	Get indices of genes annotated to hpo term
+			ArrayList<Integer>geneIndicesForTerm = 
+				this.gtp_GeneIndicesForPL.get(i);
+			//	Init counter for # of genes annotated to hpo term
+			int n = 0;
+
+			//	If more than two genes annotated to term
+			//	1) get expression and store in a matrix object
+			//	2) do t test on each column
+			if (geneIndicesForTerm.size() >= 2) 
+			{
+				ArrayList<double[]>expressionForTerm = 
+					new ArrayList<double[]>();
+
+				//	For each gene assigned to term
+				//	1) get index of expression data for gene
+				//	2) add expression to 
+				for(int j=0; j<geneIndicesForTerm.size(); j++)
+				{
+					//	Index of gene in this.geneOrganizedNames
+					int geneIndex = geneIndicesForTerm.get(j);
+					String geneName = this.gtp_GeneList.get(geneIndex);
+					//	Check if gene has hpo annotation but no allen data
+					if(this.genesInHpoButNotInAllenNames.contains(geneName)){
+						log.info(geneName +" in hpo but not in allen");
+					}
+					//	Have both allen + hpo data
+					else{
+						//	Index of expression in expression matrix
+						int geneIdxInMtrx = geneAnnots.indexOf(geneName);
+						expressionForTerm.add(m.getRowAtIndex(geneIdxInMtrx));
+						n++;
+					}
+				}
+				//	Have to check again for size because some genes are not in the
+				//	allen brain data and therefore some terms may have less than
+				//	2 rows of expression data
+				if (expressionForTerm.size() > 2) {
+					
+				
+					Matrix matrixForTerm = new Matrix(expressionForTerm);
+					matrixForTerm.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/gtp/"+this.gtp_PhenotypeList.get(i).replace("/","").replace(" ","_")+".csv");
+
+					matrixForTerm.calcSummary();
+					matrixForTerm.calcColumnStdDevs();
+
+					double[] tScores = new double[matrixForTerm.getColumnSize()];
+					for(int j=0; j<matrixForTerm.getColumnSize(); j++){
+						double stdError = matrixForTerm.getColumnStdDev(j)/Math.sqrt(matrixForTerm.getRowSize());
+						tScores[j] = matrixForTerm.getColumnMean(j)/stdError;
+					}
+					tValues.add(tScores);
+					tValueAnnots.add(this.gtp_PhenotypeList.get(i));
+					tValueSizeN.add(n);
+				}
+			}
+		}
+		
+		this.tValMatrix = new Matrix(tValues);
+		this.tValMatrix.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/GTPAllTValues.csv");
+	}
+
+
+	//__________________________________________________________________________
+    //
+    //	Gene to Phenotype                              
+    //__________________________________________________________________________
+
+	/**
+	*	<p>
+	*	Organizes Gene To Phenotype hpo parsed data. Requires that file is 
+	*	parsed into :
+	*	<ol>
+	*	<li>gtp_parsedGenes : contains all genes found in file. File is
+	*	organized to this list, so see multiple repeats of a single gene
+	*	in consecutive cells</li>
+	*	<li>gtp_parsedPhenotypes : MOST SPECIFIC phenotype annotated to gene
+	*	(at same index in parsedGenes). So will contain 'dystonia' rather than
+	*	'neurological disorder' (as opposed to phenotype to gene, which is most 
+	*	general)</li>
+	*	</ol>
+	*	Then organizes parsed data by gene and by phenotype.
+	*	<ol>
+	*	<li>Gene Organized
+		*	<ol>
+	   	*	<li>GeneList : list of all genes found (unique)</li>
+	    *	<li>PhenotypesForGL : most specific phenotypes annotated to gene at
+	    *	same row in geneList.</li>
+	    *	</ol>
+    *	</li>
+    *	<li>Phenotype organized
+		*	<ol>
+	   	*	<li>PhenotypeList : list of all phenotypes found</li>
+	    *	<li>GeneIndicesForPhenotypeList : index of all genes annotated to 
+	    *	(most specific) phenotype at row. New array made each new phenotype 
+	    *	found.</li>
+	    *	</ol>
+    *	</li>
+    *	</ol>
+    *	</p>
+	*/
+	public void gtp_OrganizeParsedData(){
+   
+        //	Init neccessary arrays
+        this.gtp_GeneList = new ArrayList<String>();
+        this.gtp_PhenotypesForGL = new ArrayList<ArrayList<String>>();
+        
+        this.gtp_PhenotypeList = new ArrayList<String>();
+        this.gtp_GeneIndicesForPL = new ArrayList<ArrayList<Integer>>();
+
+
+       	//	Set values for first gene
+        this.gtp_GeneList.add(this.gtp_parsedGenes.get(0));
+        this.gtp_PhenotypeList.add(this.gtp_parsedPhenotypes.get(0));
+    	
+
+    	//	Gene organized : Temporary array holding all phenotypes for current 
+    	//	unique gene. New array made each time new gene is found
+        ArrayList<String> phenotypesForCurrentGene = new ArrayList<String>();
+        phenotypesForCurrentGene.add(this.gtp_parsedPhenotypes.get(0));
+
+
+    	//	Phenotype organized : New array made each new phenotype found, gene
+    	//	indices added as they are come across
+    	ArrayList<Integer> geneIndicesForHpoTerm = new ArrayList<Integer>();
+		geneIndicesForHpoTerm.add(0);
+		this.gtp_GeneIndicesForPL.add(geneIndicesForHpoTerm);
+
+
+        String previousGeneName = this.gtp_parsedGenes.get(0);
+        //	Counter for unique gene names
+        int geneIndex = 0;		
+		
+		//	Compare each new gene name to previous gene name: if equal just
+       	//	store annotation
+       	//	Otherwise add new gene name to unique gene names array        
+        for (int i = 1; i<this.gtp_parsedGenes.size(); i++) 
+        {
+        	String currentGeneName = this.gtp_parsedGenes.get(i);
+
+        	//	Still on same gene. Add hpo term to array of terms corresponding
+        	//	to current gene
+        	if (currentGeneName.equals(previousGeneName)) 
+        	{
+        		phenotypesForCurrentGene.add(this.gtp_parsedPhenotypes.get(i));
+        	}
+
+        	//	New gene found. 
+        	//	1. Store hpoterms annotated to previous gene and
+        	//	2. Init new array for current gene, add first hpo term to it
+        	//	3. Add new gene to list of gene names
+        	else{
+        		previousGeneName = currentGeneName;
+        		this.gtp_PhenotypesForGL.add(phenotypesForCurrentGene);
+        		phenotypesForCurrentGene = new ArrayList<String>();
+        		this.gtp_GeneList.add(currentGeneName);
+        		geneIndex ++;
+				
+        	}
+        	//	Store hpo organized info
+        	gtp_AddGeneToGeneIndexForPL(i,geneIndex);
+        }
+        log.info("Finished organizing hpo. Unique genes with annotations : "
+        	+this.gtp_GeneList.size()+" Unique HPO phenotype terms : "
+        	+this.gtp_PhenotypesForGL.size());
+
+	}
+
+	/**
+	*	<p>
+	*	Called by gtp_OrganizeParsedData at each iteration to store 
+	*	gene index to proper hpo phenotype annotation.
+	*	</p>
+	*/
+	private void gtp_AddGeneToGeneIndexForPL(int i, int geneIndex ){
+		
+		String currentPhenotype = this.gtp_parsedPhenotypes.get(i);
+
+		//	Check if have seen hpo term before.
+		//	If previously seen, get array of gene indices corresponding 
+		//	to that term and add current index
+		if(this.gtp_PhenotypeList.contains(currentPhenotype)){
+			//	Get array of gene indices
+			//	HPO term itself is stored 
+			int indexOfHpoTerm = 
+				this.gtp_PhenotypeList.indexOf(currentPhenotype);
+			ArrayList<Integer> geneIndicesForHpoTerm = 
+				this.gtp_GeneIndicesForPL.get(indexOfHpoTerm);
+			geneIndicesForHpoTerm.add(geneIndex);
+		}
+		
+		//	If haven't see this hpoterm yet, add to unique term list and
+		//	create array to add genes that correspond to it;
+		else
+		{
+			this.gtp_PhenotypeList.add(currentPhenotype);
+			ArrayList<Integer> geneIndicesForHpoTerm = new ArrayList<Integer>();
+			geneIndicesForHpoTerm.add(geneIndex);
+			this.gtp_GeneIndicesForPL.add(geneIndicesForHpoTerm);
+		}
+	}
+
+
+
+	//__________________________________________________________________________
+    //
+    //	Phenotype to gene                              
+    //__________________________________________________________________________
+
+
+	public void ptg_OrganizeParsedData(){
+		//	Init array to hold one phenotype per line
+		this.ptg_PhenotypeList = new ArrayList<String>();
+
+		//	Init first values to first row
+		String currentPhenotype = this.ptg_parsedPhenotypes.get(0);
+		this.ptg_PhenotypeList.add(currentPhenotype);
+
+		//	Init array of arrays to hold gene indices corresponding to phenotype
+		this.ptg_GeneIndicesForPL = new ArrayList<ArrayList<Integer>>();
+		
+		//	Init first array to hold indices for first phenotype
+		ArrayList<Integer> currentPhenotypeGeneIndices = 
+			new ArrayList<Integer>();
+		ptg_addGeneIndexInGtpToPhenotype(0,currentPhenotypeGeneIndices);
+
+
+		//	Iterate through each 'line'
+		for (int i = 1; i< this.ptg_parsedPhenotypes.size(); i++)
+		{
+			//	Gene on this line belongs to current phenotype. add index
+			if (currentPhenotype.equals(this.ptg_parsedPhenotypes.get(i))) 
+			{
+				ptg_addGeneIndexInGtpToPhenotype(i,currentPhenotypeGeneIndices);
+
+			}
+			//	New phenotype. Init new array to store gene indices
+			else{
+				this.ptg_GeneIndicesForPL.add(currentPhenotypeGeneIndices);
+				currentPhenotypeGeneIndices = new ArrayList<Integer>();
+				
+				ptg_addGeneIndexInGtpToPhenotype(i,currentPhenotypeGeneIndices);
+				
+				currentPhenotype = this.ptg_parsedPhenotypes.get(i);
+				this.ptg_PhenotypeList.add(currentPhenotype);
+			}
+		}
+
+		//	Add gene indices for last phenotype
+		this.ptg_GeneIndicesForPL.add(currentPhenotypeGeneIndices);
+
+	}
+
+	/**
+	*	Get Index of current gene corresponding to expression data (which is
+	*	organized by gene to phenotype file parsed data) and add to current
+	*	phenotype
+	*/
+	private void ptg_addGeneIndexInGtpToPhenotype(int i, 
+		ArrayList<Integer> currentPhenotypeGeneIndices)
+	{
+		String currentGene = this.ptg_parsedGenes.get(i);
+		int indexCurrentGene = this.gtp_GeneList.indexOf(currentGene);
+		currentPhenotypeGeneIndices.add(indexCurrentGene);
+	}
+
+
+
+
+
+
 
 	/**
 	*	Print list of genes for which annotation and gene expression exists
@@ -609,17 +675,24 @@ public class HPOMngr implements Serializable{
     //  Setters : till now used only by junit testing                              
     //__________________________________________________________________________
 
-
-	public void setHpoOrganizedGeneIndices(ArrayList<ArrayList<Integer>> array){
-		this.hpoOrganizedGeneIndices = array;
+	public void setPtg_GeneIndicesForPL(ArrayList<ArrayList<Integer>>array){
+		this.ptg_GeneIndicesForPL = array;
 	}
 
-	public void setGeneOrganizedNames(ArrayList<String> array){
-		this.geneOrganizedNames = array;
+	public void setHpoAnnotatedGeneExpressionMngr(AllenDataMngr mngr){
+		this.hpoAnnotatedGeneExpressionMngr = mngr;
 	}
 
-	public void setHpoOrganizedNames(ArrayList<String> array){
-		this.hpoOrganizedNames = array;
+	public void setPtg_PhenotypeList(ArrayList<String>array){
+		this.ptg_PhenotypeList = array;
+	}
+
+	public void setGtp_GeneList(ArrayList<String>array){
+		this.gtp_GeneList = array;
+	}
+
+	public void setGenesInHpoButNotInAllenNames(ArrayList<String>array){
+		this.genesInHpoButNotInAllenNames = array;
 	}
 
 	public Matrix getTvalMatrix(){
