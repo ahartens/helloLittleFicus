@@ -1,9 +1,10 @@
-package allen2hpo.allen.parsing;
+package allen2hpo.hpo;
 
 import allen2hpo.allen.parsing.ReadAnnots;
 
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.io.File;
 
 
 
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 *	arrays
 *	Probe ID number is stored in ids array
 */
-public class ReadTissueAnnots extends ReadAnnots{
+public class ReadHPOAnnotsGeneToPhenotype extends ReadAnnots{
 
 	//__________________________________________________________________________
     //
@@ -20,9 +21,10 @@ public class ReadTissueAnnots extends ReadAnnots{
     //__________________________________________________________________________
 
 	/**	list of entrez gene symbols */
-	double[][] mriVoxel = null;
+	ArrayList<String> entrezGeneSymbols = null;
 
-
+	/**	list of hpo terms */
+	ArrayList<String> hpoTermNames = null;
 
 	//__________________________________________________________________________
     //
@@ -32,8 +34,15 @@ public class ReadTissueAnnots extends ReadAnnots{
 	/**
 	*
 	*/
-	public double[][] getMriVoxel(){
-		return this.mriVoxel;
+	public ArrayList<String> getEntrezGeneSymbols(){
+		return this.entrezGeneSymbols;
+	}
+
+	/**
+	*
+	*/
+	public ArrayList<String> getHpoTermNames(){
+		return this.hpoTermNames;
 	}
 
 
@@ -43,21 +52,17 @@ public class ReadTissueAnnots extends ReadAnnots{
     //  Constructor                             
     //__________________________________________________________________________
 
-	public ReadTissueAnnots(String file){
+	public ReadHPOAnnotsGeneToPhenotype(String file){
 		/*
 		*	Set filename to be parsed
 		*/
 		super.setFilename(file);
 
 		/*
-		*	Count number of lines
+		*	Init arraylists to read data
 		*/
-		super.countLines();
-
-		/*
-		*	Init array to store location of tissue
-		*/
-		this.mriVoxel = new double[super.getCount()][3];
+		this.entrezGeneSymbols = new ArrayList<String>();
+		this.hpoTermNames = new ArrayList<String>();
 
 		/*
 		*	Begin reading file line by line. Line is handled here.
@@ -85,72 +90,23 @@ public class ReadTissueAnnots extends ReadAnnots{
 		*	Handle results separately
 		*/
 
-		/*
-		*	Split line by quotes
-		*/
-		Scanner quoteSc = new Scanner(line);
-		quoteSc.useDelimiter("\"");
-		String[] lineSplitByQuotes = new String[5];
-		int quoteCount = 0;
-		while(quoteSc.hasNext()){
-			lineSplitByQuotes[quoteCount] = quoteSc.next();
-			quoteCount ++;
-		}
-
-		if (quoteCount != 5) {
-			System.out.println("Incorrect sample input");
-		}
-		else
-		{
-
-			/*
-			*	FIRST STRING : contains id and acronym
-			*/
-			Scanner lineSc = new Scanner(lineSplitByQuotes[0]);
-			lineSc.useDelimiter(",");
-			int i = 0;
-			while (lineSc.hasNext()) {
-				if(i==0){
-					super.setIdAtIndex(lineSc.nextInt(),ri);
-				}
-				else{
-					lineSc.next();
-				}
-				i++;
+		
+		Scanner lineSc = new Scanner(line);
+		lineSc.useDelimiter("\t");
+		int i = 0;
+		while (lineSc.hasNext()) {
+			if(i==1){
+				this.entrezGeneSymbols.add(lineSc.next());
 			}
-
-			/*	
-			*	SECOND STRING : contains tissue name (which contains commas) 
-			*/
-			super.setNameAtIndex(lineSplitByQuotes[3],ri);
-
-
-			/*
-			*	THIRD STRING : contains location 
-			*/
-			lineSc = new Scanner(lineSplitByQuotes[4]);
-			lineSc.useDelimiter(",");
-			i = 0;
-			while (lineSc.hasNext()) 
-			{
-				if (i == 1)
-				{
-					mriVoxel[ri][0] = (double)lineSc.nextInt();
-				}
-				else if (i == 2)
-				{
-					mriVoxel[ri][1] = (double)lineSc.nextInt();
-				}
-				else if (i == 3)
-				{
-					mriVoxel[ri][2] = (double)lineSc.nextInt();
-				}
-				else
-				{
-					lineSc.next();
-				}
-				i++;
+			else if(i==2){
+				this.hpoTermNames.add(lineSc.next());
 			}
+			else{
+				lineSc.next();
+			}
+			i++;
 		}
+
+			
     }
 }

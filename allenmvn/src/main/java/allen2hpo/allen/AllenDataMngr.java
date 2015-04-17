@@ -85,6 +85,9 @@ public class AllenDataMngr implements Serializable{
 		this.dataPath = dir;
 	}
 
+	public AllenDataMngr(){
+	}
+
 
 
 	//__________________________________________________________________________
@@ -206,13 +209,13 @@ public class AllenDataMngr implements Serializable{
 	}
 
 	public void removeUnknownProbeData(){
-		log.info("Number of unknown probes : "
+		log.info("Number of unknown probes (probes beginning with A_) : "
 				+ this.indicesUnknownProbes.size());
-		log.info("Number of gene Names : "
-			+ this.geneNames.size());
-		log.info("Number of gene Ids Names : "
-			+ this.geneIds.size());
-		log.info("Number of rows in expression matrix : "
+		log.info("Dimensions before removal : Gene names : "
+			+ this.geneNames.size()
+			+" Gene IDs : "
+			+ this.geneIds.size()
+			+" Rows in expression matrix : "
 			+ this.data.getRowSize());
 
 		for(int i=this.indicesUnknownProbes.size()-1; i>=0; i--){
@@ -222,11 +225,11 @@ public class AllenDataMngr implements Serializable{
 			this.data.removeRowAtIndex(index);
 
 		}
-		log.info("Number of gene Names after removal : "
-			+ this.geneNames.size());
-		log.info("Number of gene Names after removal : "
-			+ this.geneIds.size());
-		log.info("Number of rows in expression matrix after removal: "
+			log.info("Dimensions after removal of unknowns : Gene names : "
+			+ this.geneNames.size()
+			+" Gene IDs : "
+			+ this.geneIds.size()
+			+" Rows in expression matrix : "
 			+ this.data.getRowSize());
 		
 	}
@@ -258,6 +261,14 @@ public class AllenDataMngr implements Serializable{
 	*/
 	public ArrayList<Integer> getTissueIds(){
 		return this.tissueIds;
+	}
+
+	/** 
+	*	@return int [] list of all sample/tissue ids. corresponds to columns of 
+	*	expression data matrix 
+	*/
+	public ArrayList<String> getTissueNames(){
+		return this.tissueNames;
 	}
 
 	/**
@@ -331,4 +342,20 @@ public class AllenDataMngr implements Serializable{
 		return names;
 	}
 
+	//__________________________________________________________________________
+    //
+    //  Setters                              
+    //__________________________________________________________________________
+
+    public void setExpression(Matrix m){
+    	this.data = m;
+    }
+
+    public void setGeneAnnotations(ArrayList<String> names){
+    	this.geneNames = names;
+    }
+
+    public void setSampleAnnotations(ArrayList<String> names){
+    	this.tissueNames = names;
+    }
 }

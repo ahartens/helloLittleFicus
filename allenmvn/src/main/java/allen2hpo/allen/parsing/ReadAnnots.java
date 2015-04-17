@@ -14,7 +14,7 @@ import java.util.ArrayList;
 *	@author Alex Hartenstein
 */
 
-abstract class ReadAnnots{
+public abstract class ReadAnnots{
 
 	//__________________________________________________________________________
     //

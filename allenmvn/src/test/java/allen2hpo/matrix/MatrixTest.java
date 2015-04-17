@@ -315,6 +315,23 @@ public class MatrixTest {
 	}
 
 
+	@Test
+	public void testStdDev(){
+		double [][] d = {{1,2,3,4,5,6},{7,8,9,10,11,12},{18,17,16,15,14,13},{12,11,10,9,8,1}};
+		Matrix m = new Matrix(d);
+		m.calcSummary();
+		m.calcColumnStdDevs();
 
+		double[] mean = {9.5,9.5,9.5,9.5,9.5,8};
+		double[] variance = {52.33,39,38.33,20.33,15,31.3};
+		double [] stdev = {7.23,6.245,5.32,4.51,3.87,5.59};
+
+		for(int i = 0;i<d[0].length;i++){
+			Assert.assertEquals(m.getColumnMean(i),mean[i],.1);
+		}
+		for(int i = 0;i<d[0].length;i++){
+			Assert.assertEquals(m.getColumnStdDev(i),stdev[i],.1);
+		}
+	}
 
 }

@@ -5,6 +5,8 @@ import allen2hpo.allen.ontology.*;
 import allen2hpo.clustering.ClusteringMngr;
 import allen2hpo.matrix.*;
 
+import allen2hpo.hpo.HPOMngr;
+
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.io.File;
@@ -97,6 +99,7 @@ public class Allen2HPO {
 
         //   Data path provided points to a single brain donor.  Do cluster 
         //   analysis on single brain donor.
+
         int status = allen2hpo.checkAllAllenBrainFilesPresent(parentDir);
         if (status != 2) 
         {
@@ -108,6 +111,7 @@ public class Allen2HPO {
         //   Data path provided points to a directory of brain donors 
         //   (ie contains subdirectories).
         //   Find Allen Brain subdirectories and analyze them consecutively
+
         else
         {
             //  Get name of all files in parent directory, check if allenBrain
@@ -139,6 +143,8 @@ public class Allen2HPO {
             System.out.println("No compatible Allen Brain directories found");
         }
 
+
+
     }
 
 
@@ -156,7 +162,12 @@ public class Allen2HPO {
     *   into dataPath given in Clusters_OUTPUT.csv*/
     private String outputPath = null;
 
-    /** @return Data path specified by user as parsed from command line */
+    /** Path to hpo annotations file */
+    private String hpoGeneToPhenotypePath = null;
+    private String hpoPhenotypeToGenePath = null;
+
+
+    /** Returns path to allen brain data as parsed from command line */
     public String getDataPath(){
         return this.dataPath;
     }
@@ -198,23 +209,49 @@ public class Allen2HPO {
     */
     private void doSingleDonorAnalysis(File dir, int serializedDataFound){
         
-        AllenDataMngr brainDataMngr = null;
+        //AllenDataMngr brainDataMngr = null;
         
+        AllenDataMngr brainDataMngr = getAllenDataFromDirectory(dir,serializedDataFound);
+        
+        //clusterAllenBrainData(brainDataMngr,dir);
+        ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
+        clusteringMngr.writePopulationGenesToFile("/Users/ahartens/Desktop/population.txt");
+        doHpoTermAnalysis(brainDataMngr,dir);
+       // brainDataMngr.calculateDistanceMatrixForTissueLocations();
 
+        //OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
+       
+        //brainDataMngr.collapseTissuesToSelectedParents(ontology);
+
+        
+    }
 
         //  If serialized data present deserialize to use for clustering
+    private AllenDataMngr getAllenDataFromDirectory(File dir, int serializedDataFound){
+        
+        AllenDataMngr brainDataMngr = null;
+        
         String serializedDataPath = dir.getAbsolutePath()
-            +dir.separator+"SerializedAllenDataMngr.bin";
+        +dir.separator+"SerializedAllenDataMngr.bin";
+
+        boolean deserializeSuccessful = false;
 
         if (serializedDataFound == 1) {
             brainDataMngr = deserializeData(serializedDataPath);
-            if (log.isInfoEnabled())
+            if(brainDataMngr != null){
+                deserializeSuccessful = true;
+                log.info("Serialized data found and could be successfully read");
+            }
+            else
+            {
                 log.info("Found serialized data, using for clustering");
+            }
         }
+
 
         //  No serialized data exists, parse files and serialize data to 
         //  directory
-        else
+        if (deserializeSuccessful == false) 
         {
             log.info("No serialized data found begin parsing");
 
@@ -252,6 +289,13 @@ public class Allen2HPO {
         //brainDataMngr.collapseTissuesToSelectedParents(ontology);
 
         //  Cluster Data
+        return brainDataMngr;
+    }
+
+    private void clusterAllenBrainData(AllenDataMngr brainDataMngr, File dir){
+        /*
+        *   Cluster Data
+        */
         ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
 
         //  Perform Kmeans clustering using the gap statistic to calculate k
@@ -291,6 +335,25 @@ public class Allen2HPO {
             log.info("Clustering was unsuccessful");
         }
     }
+
+    /**
+    *
+    *
+    */
+    public void doHpoTermAnalysis(AllenDataMngr brainDataMngr, File dir){
+        HPOMngr hpoMngr = new HPOMngr(this.hpoGeneToPhenotypePath,this.hpoPhenotypeToGenePath);
+        hpoMngr.parseHPO();
+        hpoMngr.getExpressionDataForHpoAnnotatedGenes(brainDataMngr);
+        hpoMngr.ptg_organizeHPOAnnotatedExpressionDataByHpo();
+        hpoMngr.gtp_organizeHPOAnnotatedExpressionDataByHpo();
+        //hpoMngr.organizeParsedData();
+
+        //hpoMngr.getExpressionDataForHpoAnnotatedGenes(brainDataMngr);
+
+       // AllenDataMngr hpoAnnotedExpressionMngr = hpoMngr.getHpoAnnotedGeneExpression();
+       // clusterAllenBrainData(hpoAnnotedExpressionMngr,dir);
+    }
+
 
     private File createOutputDirectory(File parentDir){
         File outputDirectory = 
@@ -442,8 +505,9 @@ public class Allen2HPO {
             Options options = new Options();
 
             options.addOption(new Option("D","data",true,"Path to data"));
-            options.addOption(new Option("S","size",true,"NumberOf"));
-     
+            options.addOption(new Option("G","hpo",true,"genes to phenotype Hpo annotation file path"));
+            options.addOption(new Option("P","hpo",true,"phenotype to genes Hpo annotation file path"));
+
             Parser parser = new GnuParser();
             CommandLine cmd = parser.parse(options, args);
 
@@ -451,11 +515,17 @@ public class Allen2HPO {
                 this.dataPath = cmd.getOptionValue("D");
                 this.outputPath = this.dataPath+"/Clusters_OUTPUT.csv";
 
-            } else 
+            } 
+            else 
             {
                 usage();
             }
-
+            if (cmd.hasOption("G")) {
+                this.hpoGeneToPhenotypePath = cmd.getOptionValue("G");
+            } 
+            if (cmd.hasOption("P")) {
+                this.hpoPhenotypeToGenePath = cmd.getOptionValue("P");
+            } 
 
         }
         catch (ParseException pe) 
