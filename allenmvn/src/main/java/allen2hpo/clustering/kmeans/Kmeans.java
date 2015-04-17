@@ -383,49 +383,36 @@ public class Kmeans implements Clusterable{
     */
     private int assignPointsToCluster(){
 
-        /*
-        *   Init array where the calculated distances of one row to every 
-        *   cluster will be stored.
-        */
+        //   Init array where the calculated distances of one row to every 
+        //   cluster will be stored.
         double[] allDists = new double[this.k];
 
-        /*
-        *   Reinit arrays to store size of clusters (cs) sum of squared error
-        *   (sse)
-        */
+        
+        //   Reinit arrays to store size of clusters (cs) sum of squared error
+        //  (sse)
         this.cs = new int[this.k];
         this.sses = new double[this.k];
 
-        /*
-        *   Init counter of points which do not change cluster assignment
-        */
+        //   Init counter of points which do not change cluster assignment
         int countUnmoved = 0;
 
-        /*
-        *   Place each row(gene) in the nearest cluster
-        */
+        //   Place each row(gene) in the nearest cluster
         for (int i=0; i<this.m.getRowSize(); i++) 
         {
 
-            /*
-            *   For each cluster prototype, calculate distance to current row 
-            */
+            //   For each cluster prototype, calculate distance to current row 
             for (int j=0; j<this.k; j++) 
             {
                 double[] p1 = m.getRowAtIndex(i);   // point to be clustered
                 double[] p2 = this.cp[j];           // cluster prototype
 
-                /*
-                *   Calculate distance and store in allDistances array 
-                */
+                //   Calculate distance and store in allDistances array 
                 allDists[j] = this.distCalc.calculateProximity(p1,p2);
             }
 
-            /*
-            *   Find index corresponding to minimum distance (this is the 
-            *   cluster assignment) and store in cluster indices array (ci) at 
-            *   index i (current row in expression data)
-            */
+            //   Find index corresponding to minimum distance (this is the 
+            //   cluster assignment) and store in cluster indices array (ci) at 
+            //   index i (current row in expression data)
             int indexOfMinDist = 0;
             double minDist = allDists[0];
 
@@ -438,10 +425,8 @@ public class Kmeans implements Clusterable{
                 }
             }
 
-            /*
-            *   Check if just found cluster assignment has changed from previous
-            *   iteration through all data points. I
-            */
+            //   Check if just found cluster assignment has changed from previous
+            //   iteration through all data points. I
             if(this.ci[i] == indexOfMinDist)
             {
                 countUnmoved ++;
@@ -451,31 +436,23 @@ public class Kmeans implements Clusterable{
                 this.ci[i] = indexOfMinDist;
             }
 
-            /*
-            *   Increment cluster size variable for found cluster
-            */
+            //   Increment cluster size variable for found cluster
             this.cs[indexOfMinDist]+=1;
 
-            /*
-            *   Add squared error (distance squared) to sse for found cluster 
-            */
+            //   Add squared error (distance squared) to sse for found cluster 
             this.sses[indexOfMinDist] += Math.pow(minDist,2);
         }
 
-        /*
-        *   Check for empty cluster. If found then assign empty cluster a data
-        *   point and continue clustering
-        */
+        //   Check for empty cluster. If found then assign empty cluster a data
+        //   point and continue clustering
         boolean emptyClusterFound = checkForEmptyClusterAndReassign();
         if (emptyClusterFound) 
         {
             return 0;
         }
 
-        /*
-        *   If less than 1% of data points change cluster assignment, end 
-        *   clustering
-        */
+        //   If less than 1% of data points change cluster assignment, end 
+        //   clustering
         if (countUnmoved > .99*this.ci.length)
         {
             return 1;

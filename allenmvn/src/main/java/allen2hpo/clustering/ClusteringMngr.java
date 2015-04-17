@@ -9,6 +9,7 @@ import allen2hpo.clustering.kmeans.Kmeans;
 import allen2hpo.clustering.kmeans.calck.GapStat;
 import allen2hpo.clustering.kmeans.initclust.*;
 import allen2hpo.clustering.kmeans.distance.*;
+import allen2hpo.clustering.kmeans.KmeansParallel;
 
 import org.apache.log4j.Logger;
 

@@ -215,8 +215,10 @@ public class Allen2HPO {
         
         //clusterAllenBrainData(brainDataMngr,dir);
         ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
-        clusteringMngr.writePopulationGenesToFile("/Users/ahartens/Desktop/population.txt");
-        doHpoTermAnalysis(brainDataMngr,dir);
+        //clusteringMngr.writePopulationGenesToFile("/Users/ahartens/Desktop/population.txt");
+        
+        clusteringMngr.doParallelKmeansClustering();
+        //doHpoTermAnalysis(brainDataMngr,dir);
        // brainDataMngr.calculateDistanceMatrixForTissueLocations();
 
         //OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
