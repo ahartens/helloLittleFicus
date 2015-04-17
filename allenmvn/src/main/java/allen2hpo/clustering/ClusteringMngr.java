@@ -138,6 +138,32 @@ public class ClusteringMngr{
         return false;
     }
 
+    /**
+    *   Perform Kmeans cluster analysis using GapStat to calculate the value 
+    *   of K
+    */
+    public boolean doParallelKmeansClustering()
+    {
+
+        DistComputable distCalc = new DistEuclidean();
+        InitClusterable initClust = new InitClustMostDistant();
+       
+     
+        this.clusteringObject = 
+            new KmeansParallel(this.allenData.getExpression(),5,distCalc,
+                    initClust);
+
+
+            /*
+            *   Do the clustering
+            */
+            clusteringObject.doClustering();
+
+
+           
+         return false;
+       
+    }
 
 
     //__________________________________________________________________________
