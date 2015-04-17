@@ -34,32 +34,6 @@ public class HPOMngr implements Serializable{
 	/** Logger object to output info/warnings */
     static Logger log = Logger.getLogger(HPOMngr.class.getName());
 
-	/**	list of entrez gene symbols */
-	ArrayList<String> entrezGeneSymbols = null;
-
-	/**	list of hpo terms */
-	ArrayList<String> hpoTermNames = null;
-
-	/**	All genes with hpo annotation (one gene per row), no repeats */
-	ArrayList<String> geneOrganizedNames = null;
-
-    /** Parallel array to geneOrganizedNames. Each row contains corresponding 
-    *	hpo terms for gene at row index */
-	ArrayList<ArrayList<String>> geneOrganizedHpoTerms = null;
-
-	/**	All hpo annotations, one term per row, no repeats */
-	ArrayList<String> hpoOrganizedNames = null;
-
-	/**	All genes annotated to hpo term found in parallel array 
-	*	hpoOrganizedNames*/
-	ArrayList<ArrayList<Integer>> hpoOrganizedGeneIndices = null;
-
-	/**	All genes annotated to hpo term found in parallel array 
-	*	hpoOrganizedNames*/
-	ArrayList<ArrayList<Integer>> ptgHpoOrganizedGeneIndices = null;
-	ArrayList<String> ptgHpoOrganizedNames = null;
-
-
 	ArrayList<String> genesInHpoButNotInAllenNames = null;
 	
 	/**	Matrix object containing tvalues for gene expression corresponding to 
@@ -111,10 +85,8 @@ public class HPOMngr implements Serializable{
 
 
 	public void parseHPO(){
-		log.info("Started parsing genes to phenotype");
-
-		
-		//	Read file line by line, storing column 2 + 3 in gene names and terms
+		//	Read file line by line, storing column 2 + 3 in gene names and terms		
+		log.info("Started parsing genes to phenotype");		
 		ReadHPOAnnotsGeneToPhenotype gtpParser = 
 			new ReadHPOAnnotsGeneToPhenotype(this.geneToPhenotypePath);
         this.gtp_parsedGenes = gtpParser.getEntrezGeneSymbols();
@@ -205,9 +177,6 @@ public class HPOMngr implements Serializable{
 
         //	Write to file
         dataMtrx.printToFile("/Users/ahartens/Desktop/HpoannotatedTerms.csv");
-        //writeHpoAnnotatedGenesWithExpressionToFile(hpoGenesWithExpression);
-        //printhpoOrganizedGeneIndicesByHpoTermToTerminal();
-
 
 
         this.hpoAnnotatedGeneExpressionMngr = new AllenDataMngr();
@@ -259,6 +228,7 @@ public class HPOMngr implements Serializable{
 			{
 				ArrayList<double[]>expressionForTerm = 
 					new ArrayList<double[]>();
+				ArrayList<String> geneNamesForTerm = new ArrayList<String>();
 
 				//	For each gene assigned to term
 				//	1) get index of expression data for gene
@@ -270,13 +240,14 @@ public class HPOMngr implements Serializable{
 					String geneName = this.gtp_GeneList.get(geneIndex);
 					//	Check if gene has hpo annotation but no allen data
 					if(this.genesInHpoButNotInAllenNames.contains(geneName)){
-						log.info(geneName +" in hpo but not in allen");
+						//log.info(geneName +" in hpo but not in allen");
 					}
 					//	Have both allen + hpo data
 					else{
 						//	Index of expression in expression matrix
 						int geneIdxInMtrx = geneAnnots.indexOf(geneName);
 						expressionForTerm.add(m.getRowAtIndex(geneIdxInMtrx));
+						geneNamesForTerm.add(geneName);
 						n++;
 					}
 				}
@@ -285,31 +256,52 @@ public class HPOMngr implements Serializable{
 				//	2 rows of expression data
 				if (expressionForTerm.size() > 2) {
 					
-				
-					Matrix matrixForTerm = new Matrix(expressionForTerm);
-					matrixForTerm.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/"+this.ptg_PhenotypeList.get(i).replace("/","").replace(" ","_")+".csv");
+					calculateTscoreForMatrix(expressionForTerm,geneNamesForTerm,"ptg",i, tValues, tValueAnnots, tValueSizeN);
 
-					matrixForTerm.calcSummary();
-					matrixForTerm.calcColumnStdDevs();
-
-					double[] tScores = new double[matrixForTerm.getColumnSize()];
-					for(int j=0; j<matrixForTerm.getColumnSize(); j++){
-						double stdError = matrixForTerm.getColumnStdDev(j)/Math.sqrt(matrixForTerm.getRowSize());
-						tScores[j] = matrixForTerm.getColumnMean(j)/stdError;
-					}
-					tValues.add(tScores);
-					tValueAnnots.add(this.ptg_PhenotypeList.get(i));
-					tValueSizeN.add(n);
 				}
 			}
 		}
 		
 		this.tValMatrix = new Matrix(tValues);
-		this.tValMatrix.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/PTGAllTValues.csv");
+		writeTvalueMatrixToFile(this.tValMatrix, tValueAnnots,"/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/PTGAllTValues.csv");
 	}
 
+	private void calculateTscoreForMatrix(ArrayList<double[]> expressionForTerm, 
+		ArrayList<String> geneNames, 
+		String source, 
+		int i, 
+		ArrayList<double[]> tValues, 
+		ArrayList<String> tValueAnnots, 
+		ArrayList<Integer> tValueSizeN)
+	{
+		Matrix matrixForTerm = new Matrix(expressionForTerm);
+		//matrixForTerm.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/"+this.ptg_PhenotypeList.get(i).replace("/","").replace(" ","_")+".csv");
 
-		/**
+		matrixForTerm.calcSummary();
+		matrixForTerm.calcColumnStdDevs();
+
+		double[] tScores = new double[matrixForTerm.getColumnSize()];
+		for(int j=0; j<matrixForTerm.getColumnSize(); j++){
+			double stdError = matrixForTerm.getColumnStdDev(j)/Math.sqrt(matrixForTerm.getRowSize());
+			tScores[j] = matrixForTerm.getColumnMean(j)/stdError;
+		}
+		tValues.add(tScores);
+		tValueSizeN.add(matrixForTerm.getRowSize());
+		String fileName = null;
+		if (source.equals("ptg")) {
+			tValueAnnots.add(this.ptg_PhenotypeList.get(i));
+			fileName = "/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/"+this.ptg_PhenotypeList.get(i).replace("/","").replace(" ","_")+".csv";
+		}
+		else{
+			tValueAnnots.add(this.gtp_PhenotypeList.get(i));
+
+			fileName = "/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/gtp/"+this.gtp_PhenotypeList.get(i).replace("/","").replace(" ","_")+".csv";
+		}
+		writeTermMatrixWithAnnotationsToFile(matrixForTerm,geneNames,fileName,tScores);
+
+	}
+	
+	/**
 	*	Does unpaired t test on all genes annotated to a term. Uses phenotype to
 	*	Gene parsed data so ALL GENES annotated to a term (including all its
 	*	children) 
@@ -351,7 +343,7 @@ public class HPOMngr implements Serializable{
 			{
 				ArrayList<double[]>expressionForTerm = 
 					new ArrayList<double[]>();
-
+				ArrayList<String> geneNamesForTerm = new ArrayList<String>();
 				//	For each gene assigned to term
 				//	1) get index of expression data for gene
 				//	2) add expression to 
@@ -362,13 +354,15 @@ public class HPOMngr implements Serializable{
 					String geneName = this.gtp_GeneList.get(geneIndex);
 					//	Check if gene has hpo annotation but no allen data
 					if(this.genesInHpoButNotInAllenNames.contains(geneName)){
-						log.info(geneName +" in hpo but not in allen");
+						//log.info(geneName +" in hpo but not in allen");
 					}
 					//	Have both allen + hpo data
 					else{
 						//	Index of expression in expression matrix
 						int geneIdxInMtrx = geneAnnots.indexOf(geneName);
 						expressionForTerm.add(m.getRowAtIndex(geneIdxInMtrx));
+						geneNamesForTerm.add(geneName);
+
 						n++;
 					}
 				}
@@ -376,28 +370,14 @@ public class HPOMngr implements Serializable{
 				//	allen brain data and therefore some terms may have less than
 				//	2 rows of expression data
 				if (expressionForTerm.size() > 2) {
-					
-				
-					Matrix matrixForTerm = new Matrix(expressionForTerm);
-					matrixForTerm.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/gtp/"+this.gtp_PhenotypeList.get(i).replace("/","").replace(" ","_")+".csv");
-
-					matrixForTerm.calcSummary();
-					matrixForTerm.calcColumnStdDevs();
-
-					double[] tScores = new double[matrixForTerm.getColumnSize()];
-					for(int j=0; j<matrixForTerm.getColumnSize(); j++){
-						double stdError = matrixForTerm.getColumnStdDev(j)/Math.sqrt(matrixForTerm.getRowSize());
-						tScores[j] = matrixForTerm.getColumnMean(j)/stdError;
-					}
-					tValues.add(tScores);
-					tValueAnnots.add(this.gtp_PhenotypeList.get(i));
-					tValueSizeN.add(n);
+					calculateTscoreForMatrix(expressionForTerm,geneNamesForTerm,"gtp",i, tValues,tValueAnnots,tValueSizeN);
 				}
+
 			}
 		}
 		
 		this.tValMatrix = new Matrix(tValues);
-		this.tValMatrix.printToFile("/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/GTPAllTValues.csv");
+		writeTvalueMatrixToFile(this.tValMatrix, tValueAnnots,"/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/GTPAllTValues.csv");
 	}
 
 
@@ -605,7 +585,64 @@ public class HPOMngr implements Serializable{
 	}
 
 
+	/**
+	*	Print list of genes for which annotation and gene expression exists
+	*/
+	public void writeTermMatrixWithAnnotationsToFile(Matrix m, ArrayList<String> genes, String name, double[] tscores)
+	{
+		FileWriter writer = new FileWriter();
+        writer.createFileWithName(name);
+        writer.writeString("tscores :");
+        writer.writeDelimit();
+        int i;
+        for(i=0; i<tscores.length-2; i++){
+        	writer.writeDouble(tscores[i]);
+        	writer.writeDelimit();
+        }
+        writer.writeDouble(tscores[i+1]);
+        writer.writeNextLine();
+        writer.writeNextLine();
 
+        for(i=0; i<m.getRowSize(); i++)
+        {
+        	writer.writeString(genes.get(i));
+        	writer.writeDelimit();
+        	int j;
+        	for(j = 0; j<m.getColumnSize()-2; j++){
+        		writer.writeDouble(m.getValueAtIndex(i,j));
+        		writer.writeDelimit();
+        	}
+        	writer.writeDouble(m.getValueAtIndex(i,j+1));
+
+        	writer.writeNextLine();
+        }
+
+
+        writer.closeFile();
+	}
+
+	/**
+	*	Print list of genes for which annotation and gene expression exists
+	*/
+	public void writeTvalueMatrixToFile(Matrix m, ArrayList<String> phenotypes, String name)
+	{
+		FileWriter writer = new FileWriter();
+        writer.createFileWithName(name);
+
+        for(int i=0; i<m.getRowSize(); i++)
+        {
+        	writer.writeString(phenotypes.get(i));
+        	writer.writeDelimit();
+        	for(int j = 0; j<m.getColumnSize(); j++){
+        		writer.writeDouble(m.getValueAtIndex(i,j));
+        		writer.writeDelimit();
+        	}
+        	writer.writeNextLine();
+        }
+
+
+        writer.closeFile();
+	}
 
 
 
@@ -635,9 +672,9 @@ public class HPOMngr implements Serializable{
         FileWriter writer = new FileWriter();
         writer.createFileWithName("/Users/ahartens/Desktop/HpoannotatedTermsGeneNames.txt");
 
-        for(int i=0; i<geneOrganizedNames.size(); i++)
+        for(int i=0; i<this.gtp_GeneList.size(); i++)
         {
-            writer.writeString(geneOrganizedNames.get(i));
+            writer.writeString(this.gtp_GeneList.get(i));
             writer.writeNextLine();
         }
         writer.closeFile();
@@ -649,13 +686,13 @@ public class HPOMngr implements Serializable{
 	*	followed by gene name 
 	*/
 	public void printhpoOrganizedGeneIndicesByHpoTermToTerminal(){
-		for (int i = 0; i<this.hpoOrganizedGeneIndices.size() ; i++ ) {
-        	ArrayList<Integer> row = this.hpoOrganizedGeneIndices.get(i);
+		for (int i = 0; i<this.ptg_GeneIndicesForPL.size() ; i++ ) {
+        	ArrayList<Integer> row = this.ptg_GeneIndicesForPL.get(i);
 
         	for (int j=0; j<row.size() ; j++ ) {
         		int ind = row.get(j);
-        		System.out.println(this.hpoOrganizedNames.get(i)+" : "+ind+" : "
-        			+this.geneOrganizedNames.get(ind));
+        		System.out.println(this.ptg_PhenotypeList.get(i)+" : "+ind+" : "
+        			+this.gtp_GeneList.get(ind));
         	}
         }
 	}
