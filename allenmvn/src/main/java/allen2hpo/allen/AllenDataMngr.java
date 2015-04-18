@@ -276,15 +276,16 @@ public class AllenDataMngr implements Serializable{
 	*	assignments.
 	*	@param int [][] of arrays of indices of clustered genes
 	*/
-	public String[][] getGeneClusters(int[][] ci){
+	public String[][] getGeneClusters(ArrayList<ArrayList<Integer>> ci){
 		///ci = cluster indicies
 		///gc = gene clusters
-		String[][] gc = new String[ci.length][];
-		for(int i=0;i<ci.length;i++){
-			String[] c = new String[ci[i].length];
+		String[][] gc = new String[ci.size()][];
+		for(int i=0;i<ci.size();i++){
+			ArrayList<Integer> cluster = ci.get(i);
+			String[] c = new String[cluster.size()];
         	gc[i] = c;
-			for(int j=0; j<ci[i].length; j++){
-				gc[i][j] = this.geneNames.get(ci[i][j]);
+			for(int j=0; j<cluster.size(); j++){
+				gc[i][j] = this.geneNames.get(cluster.get(j));
 			}
 		}
 		return gc;

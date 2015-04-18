@@ -2,6 +2,7 @@ package allen2hpo.clustering.kmeans;
 
 import allen2hpo.matrix.Matrix;
 import java.util.Random;
+import java.util.ArrayList;
 
 import allen2hpo.clustering.Clusterable;
 import allen2hpo.clustering.kmeans.calck.*;
@@ -262,12 +263,12 @@ public class Kmeans implements Clusterable{
     /**
     *   Clusterable interface method
     */
-    public int[][] getClusterIndices(){
+    public ArrayList<ArrayList<Integer>> getClusterIndices(){
         
         /*
         *   Initialize a two dimensional array with k subarrays/rows
         */
-        int [][] clusterIndices = new int[this.k][];
+        ArrayList<ArrayList<Integer>> clusterIndices = new ArrayList<ArrayList<Integer>>();
 
         /*
         *   Initialize the subarrays/columns with cluster sizes (which was 
@@ -275,16 +276,11 @@ public class Kmeans implements Clusterable{
         */
         for (int i = 0;i<this.k;i++)
         {
-            int[] ci = new int[this.cs[i]];
-            clusterIndices[i] = ci;
+            ArrayList<Integer> list = new ArrayList<Integer>();
+            clusterIndices.add(list);
         }
 
-        /*
-        *   Initialize array to hold counters so know where you are currently 
-        *   incrementing (current cluster count)
-        */
-        int [] cc = new int[this.k];
-
+    
         /*
         *   Iterate through cluster indices (holds index of cluster to which 
         *   each row of expression matrix is assigned to)
@@ -298,8 +294,8 @@ public class Kmeans implements Clusterable{
         */
         for (int i=0; i<this.ci.length; i++)
         {
-            clusterIndices[this.ci[i]][cc[this.ci[i]]] = i;
-            cc[this.ci[i]] ++;
+            ArrayList<Integer> list = clusterIndices.get(this.ci[i]);
+            list.add(i);
         }
 
         return clusterIndices;

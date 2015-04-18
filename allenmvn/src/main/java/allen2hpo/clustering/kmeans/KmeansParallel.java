@@ -18,6 +18,8 @@ import allen2hpo.clustering.kmeans.initclust.*;
 import allen2hpo.clustering.kmeans.KmeansStepOneReturnObj;
 
 import allen2hpo.clustering.kmeans.KmeansStepOne;
+import allen2hpo.clustering.kmeans.KmeansStepTwo;
+
 import allen2hpo.matrix.Matrix;
 
 //import org.apache.log4j.Logger;
@@ -103,6 +105,7 @@ public class KmeansParallel implements Clusterable{
         this(mat,1,dc,ic);
     }
 
+
     /**
     *   Exhaustive constructor method that, in addition to setting expression 
     *   data and k value, allows for customization of distance calculation used 
@@ -116,7 +119,6 @@ public class KmeansParallel implements Clusterable{
     *   cluster prototypes 
     */
     public KmeansParallel(Matrix mat, int kval, DistComputable dc,InitClusterable cp){
-        System.out.println("GOT THIS FAR");
         if (mat == null)
             throw new IllegalArgumentException("Data not initialized");
         if (dc == null)
@@ -156,11 +158,16 @@ public class KmeansParallel implements Clusterable{
         this.ci = new int[mat.getRowSize()];
 
 
+        if (this.m.getRowSize() > 3000) {
+            this.numberThreads = 2000;
+   
+        }
+        else{
+            this.numberThreads = 10;
+        }
         //  Set number of threads to be made
-        this.numberThreads = 1;
         //  Calculate how many rows each thread should handle
         this.linesPerThread = (int)Math.ceil(this.m.getRowSize()/(double)this.numberThreads);
-        System.out.println("number in matrix : "+this.m.getRowSize()+" so line length : "+linesPerThread);
 
         this.perThreadClusterAssignments = new ArrayList<int[]>();
         //  Init cluster assignment array for each thread. During each iteration
@@ -258,6 +265,34 @@ public class KmeansParallel implements Clusterable{
         /*
         *   Initialize each matrix object in clusters array with correct size
         */
+
+        for (int i = 0;i<this.k;i++)
+        {
+            ArrayList<Integer> ca = this.clusterAssignments.get(i);
+            ArrayList<double[]> clusterExpression = new ArrayList<double[]>();
+
+            for (int j = 0; j<ca.size(); j++) {
+                clusterExpression.add(this.m.getRowAtIndex(ca.get(j)));
+                
+            }
+            Matrix cm = new Matrix(clusterExpression);
+            clusters[i] = cm;
+        }
+
+        return clusters;
+    }
+
+
+    public Matrix[] getClustersold(){
+
+        /*
+        *   Initialize array with length k (one matrix per cluster)
+        */
+        Matrix [] clusters = new Matrix[this.k];
+
+        /*
+        *   Initialize each matrix object in clusters array with correct size
+        */
         for (int i = 0;i<this.k;i++)
         {
             double[][] ca = new double[this.cs[i]][this.m.getColumnSize()];
@@ -298,50 +333,12 @@ public class KmeansParallel implements Clusterable{
         return clusters;
     }
 
+
     /**
     *   Clusterable interface method
     */
-    public int[][] getClusterIndices(){
-        
-        /*
-        *   Initialize a two dimensional array with k subarrays/rows
-        */
-        int [][] clusterIndices = new int[this.k][];
-
-        /*
-        *   Initialize the subarrays/columns with cluster sizes (which was 
-        *   counted during cluster assignment)
-        */
-        for (int i = 0;i<this.k;i++)
-        {
-            int[] ci = new int[this.cs[i]];
-            clusterIndices[i] = ci;
-        }
-
-        /*
-        *   Initialize array to hold counters so know where you are currently 
-        *   incrementing (current cluster count)
-        */
-        int [] cc = new int[this.k];
-
-        /*
-        *   Iterate through cluster indices (holds index of cluster to which 
-        *   each row of expression matrix is assigned to)
-        *   Row index determined by cluster index (ith value in clusterIndices
-        *   (ci) array)
-        *   Column index determined by counter, want next 'empty'/unassigned 
-        *   field, namely the count of values which have been added until this 
-        *   point
-        *   Value is i, the index of the data point to which the current cluster
-        *   assignment corresponds to
-        */
-        for (int i=0; i<this.ci.length; i++)
-        {
-            clusterIndices[this.ci[i]][cc[this.ci[i]]] = i;
-            cc[this.ci[i]] ++;
-        }
-
-        return clusterIndices;
+    public ArrayList<ArrayList<Integer>> getClusterIndices(){
+        return this.clusterAssignments;
     }
 
     /**
@@ -397,7 +394,6 @@ public class KmeansParallel implements Clusterable{
 
             //   Step 2 : recalculate cluster center/prototype
             calcClusterMean();
-
             i++;
         }
 
@@ -415,15 +411,28 @@ public class KmeansParallel implements Clusterable{
     *   @return int 0 if clustering should countinue, 1 if clustering should end
     *   (less than 1% of data points change their cluster assignment) 
     */
-    private int assignPointsToCluster(){
+    private synchronized int assignPointsToCluster(){
+
+        //  Init all values that are calculated during cluster assignment step :
+        
+        //  Cluster assignments array : one array per cluster, filled with 
+        //  all indices corresponding to it
         this.clusterAssignments = new ArrayList<ArrayList<Integer>>();
         for(int i = 0; i<this.k; i++){
             ArrayList<Integer> empty = new ArrayList<Integer>();
             this.clusterAssignments.add(empty);
         }
+        this.cs = new int[this.k];
+        this.sses = new double[this.k];
+        int countUnmoved = 0;
+        
+
+        //  Start threads
+
         //  Init threads
         ExecutorService executor = Executors.newFixedThreadPool(numberThreads);
-        List<Future<KmeansStepOneReturnObj>> list = new ArrayList<Future<KmeansStepOneReturnObj>>();
+        List<Future<KmeansStepOneReturnObj>> list = 
+            new ArrayList<Future<KmeansStepOneReturnObj>>();
 
         for (int i=0; i<this.numberThreads; i++){
             //  Calculate start and end indices for thread
@@ -432,31 +441,33 @@ public class KmeansParallel implements Clusterable{
 
             //  Init thread with data
             Callable<KmeansStepOneReturnObj> worker = new KmeansStepOne(start,
-                                                                        end,
-                                                                        this.k,
-                                                                        this.m, 
-                                                                        this.cp, 
-                                                                        this.distCalc,
-                                                                        this.perThreadClusterAssignments.get(i));
+                                    end,
+                                    this.k,
+                                    this.m, 
+                                    this.cp, 
+                                    this.distCalc,
+                                    this.perThreadClusterAssignments.get(i));
             //  Start thread
             Future<KmeansStepOneReturnObj> submit = executor.submit(worker);
 
             //  Save thread to list
             list.add(submit);
         }
-        
-        this.cs = new int[this.k];
-        this.sses = new double[this.k];
-        int countUnmoved = 0;
+    
 
         //  Retrieve results
-        for (Future<KmeansStepOneReturnObj> future : list){
+
+        for (Future<KmeansStepOneReturnObj> future : list)
+        {
             try{
                 KmeansStepOneReturnObj results = future.get();
                 
-                //  Save this round of cluster assignments at proper index for next iteration
-                int[] resultClusterAssignments = results.getClusterAssignments();
-                this.perThreadClusterAssignments.set(list.indexOf(future),resultClusterAssignments);
+                //  Save this round of cluster assignments at proper index 
+                //  for next iteration
+                int[] resultClusterAssignments = 
+                    results.getClusterAssignments();
+                this.perThreadClusterAssignments.set(list.indexOf(future),
+                    resultClusterAssignments);
 
                 
                 //  increment count unmoved
@@ -465,11 +476,15 @@ public class KmeansParallel implements Clusterable{
                 //  Merge results from threads
                 int[] resultCS = results.getClusterSizeArray();
                 double[] resultSSE = results.getSumOfSquareErrorsArray();
-                ArrayList<ArrayList<Integer>> resultClusterAssignment = results.getThreadClusterAssignments();
-                for(int i = 0; i<this.k; i++){
+                ArrayList<ArrayList<Integer>> resultClusterAssignment = 
+                    results.getThreadClusterAssignments();
+                
+                for(int i = 0; i<this.k; i++)
+                {
                     this.cs[i] += resultCS[i];
                     this.sses[i] += resultSSE[i];
-                    ArrayList thisClusterAssignments = this.clusterAssignments.get(i);
+                    ArrayList thisClusterAssignments = 
+                        this.clusterAssignments.get(i);
                     thisClusterAssignments.addAll(resultClusterAssignment.get(i));
                 }
             }
@@ -505,7 +520,7 @@ public class KmeansParallel implements Clusterable{
     *   <br>Calculates new mean of cluster after a reassignment step and saves 
     *   result in this.cp array (means are new cluster prototypes).
     */
-    public void calcClusterMean(){
+    public synchronized void calcClusterMeanOld(){
         
         //   Init array where sum of each cluster is stored
         double[][] clusterSums = new double[this.k][this.m.getColumnSize()];
@@ -540,6 +555,44 @@ public class KmeansParallel implements Clusterable{
         }
     }
 
+    public void calcClusterMean(){
+
+        ExecutorService executor = Executors.newFixedThreadPool(numberThreads);
+        List<Future<double[]>> list = 
+            new ArrayList<Future<double[]>>();
+
+        for (int i=0; i<this.k; i++){
+        
+            //  Init thread with data
+            Callable<double[]> worker = new KmeansStepTwo(
+                                    this.m, 
+                                    this.clusterAssignments.get(i));
+            //  Start thread
+            Future<double[]> submit = executor.submit(worker);
+
+            //  Save thread to list
+            list.add(submit);
+        }
+    
+
+        //  Retrieve results
+        for (Future<double[]> future : list)
+        {
+            try{
+                double[] prototype = future.get();
+                
+                this.cp[list.indexOf(future)] = prototype;
+            }
+            catch (InterruptedException e){
+                e.printStackTrace();
+            }
+            catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        //  Shut down concurrency 
+        executor.shutdown();
+    }
     /**
     *   Checks for a cluster size of zero. If found, finds the cluster with the
     *   largest sse (calculated during cluster assignment) and assigns a random
@@ -571,7 +624,6 @@ public class KmeansParallel implements Clusterable{
                 //   Pick a random row from cluster with largest SSE
                 Random rand = new Random();
                 int idxRand = (int)(this.cs[idxMaxSSE] * rand.nextDouble());
-                System.out.println("rand index selected : "+idxRand+" for cluster "+idxMaxSSE);
                 //   Set empty cluster cluster prototype to that point
                 for (int j=0; j<this.cp[0].length; j++)
                 {

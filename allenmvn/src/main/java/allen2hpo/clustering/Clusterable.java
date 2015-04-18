@@ -1,6 +1,6 @@
 package allen2hpo.clustering;
 
-
+import java.util.ArrayList;
 /**
 *	<p>
 *	Interface that clustering algorithms must implement in order to be 
@@ -29,7 +29,8 @@ public interface Clusterable{
 	*	</ol>
 	*	@return int[][]
 	*/
-	public int[][] getClusterIndices();
+	public ArrayList<ArrayList<Integer>> getClusterIndices();
+
 
 	/**
 	*	Returns the centroids of the clusters produced.

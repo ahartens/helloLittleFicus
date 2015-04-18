@@ -213,11 +213,10 @@ public class Allen2HPO {
         
         AllenDataMngr brainDataMngr = getAllenDataFromDirectory(dir,serializedDataFound);
         
-        //clusterAllenBrainData(brainDataMngr,dir);
-        ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
+        clusterAllenBrainData(brainDataMngr,dir);
+       // ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
         //clusteringMngr.writePopulationGenesToFile("/Users/ahartens/Desktop/population.txt");
         
-        clusteringMngr.doParallelKmeansClustering();
         //doHpoTermAnalysis(brainDataMngr,dir);
        // brainDataMngr.calculateDistanceMatrixForTissueLocations();
 
@@ -301,7 +300,7 @@ public class Allen2HPO {
         ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
 
         //  Perform Kmeans clustering using the gap statistic to calculate k
-        boolean success = clusteringMngr.doKmeansClusteringWithGapStat();
+        boolean success = clusteringMngr.doParallelKmeansClustering();
 
         if(success)
         {

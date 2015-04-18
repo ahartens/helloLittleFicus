@@ -10,6 +10,7 @@ import allen2hpo.clustering.kmeans.calck.GapStat;
 import allen2hpo.clustering.kmeans.initclust.*;
 import allen2hpo.clustering.kmeans.distance.*;
 import allen2hpo.clustering.kmeans.KmeansParallel;
+import allen2hpo.clustering.kmeans.calck.GapStatParallel;
 
 import org.apache.log4j.Logger;
 
@@ -51,7 +52,8 @@ public class ClusteringMngr{
 
     /** Each array corresponds to a cluster, each int in array corresponds to 
     *   (row) index of data point in original expression matrix */
-    private int[][] clusterIndices;
+    private ArrayList<ArrayList<Integer>> clusterIndices;
+
 
     /** Gene names organized into clusters. Parallel to cluster Indices, 
     *   AllenDataMngr takes indices and returns corresponding names */
@@ -148,10 +150,28 @@ public class ClusteringMngr{
 
         DistComputable distCalc = new DistEuclidean();
         InitClusterable initClust = new InitClustMostDistant();
-       
-     
-        this.clusteringObject = 
-            new KmeansParallel(this.allenData.getExpression(),5,distCalc,
+        /*
+        *   Do gapstat analysis on expression data 
+        */
+        GapStatParallel gap = 
+            new GapStatParallel(this.allenData.getExpression(),distCalc,initClust);
+        
+        /*
+        *   Check that optimal number of clusters was found
+        */
+        if (gap.getK() != 0) {
+            
+            log.info("GapStat successful, beginning Kmeans clustering");
+            /* 
+            *   Init kmeans clustering object
+            *   Use k value calculated by gap statistic
+            *   Do not specify proximity measure (Uses default proximity measure, 
+            *   euclidean distance)
+            *   Do not specify cluster initialization method (Uses default, random 
+            *   initialization)
+            */
+            this.clusteringObject = 
+                new KmeansParallel(this.allenData.getExpression(),gap.getK(),distCalc,
                     initClust);
 
 
@@ -161,8 +181,21 @@ public class ClusteringMngr{
             clusteringObject.doClustering();
 
 
-           
-         return false;
+            /*
+            *   Retrieve results of clustering and store
+            */
+            this.prototypes = clusteringObject.getClusterPrototypes();
+            this.clusterIndices = clusteringObject.getClusterIndices();
+
+            /*
+            *   Use AllenBrainMngr to get gene names organized into clusters
+            */
+            this.clusteredGeneNames = this.allenData.getGeneClusters
+                (clusteringObject.getClusterIndices());
+
+            return true;
+        }
+        return false;
        
     }
 

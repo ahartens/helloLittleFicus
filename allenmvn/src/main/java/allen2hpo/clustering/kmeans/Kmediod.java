@@ -271,23 +271,14 @@ public class Kmediod implements Clusterable{
     }
 
     /**
-    *   Two dimensional array is returned containing (row) indices of data 
-    *   points organized by cluster assignment.
-    *   <br>Imagined as a table :
-    *   <ol>
-    *   <li>There are as many rows as there are clusters. Each row of table is 
-    *   an array. (eg. in kmeans there are k rows)</li>
-    *   <li>Each column of table is a (row) index that points to the location of
-    *    a data point in microarray expression data.</li>
-    *   </ol>
-    *   @return int[][]
+    *   Clusterable interface method
     */
-    public int[][] getClusterIndices(){
+    public ArrayList<ArrayList<Integer>> getClusterIndices(){
         
         /*
         *   Initialize a two dimensional array with k subarrays/rows
         */
-        int [][] clusterIndices = new int[this.k][];
+        ArrayList<ArrayList<Integer>> clusterIndices = new ArrayList<ArrayList<Integer>>();
 
         /*
         *   Initialize the subarrays/columns with cluster sizes (which was 
@@ -295,16 +286,11 @@ public class Kmediod implements Clusterable{
         */
         for (int i = 0;i<this.k;i++)
         {
-            int[] ci = new int[this.cs[i]];
-            clusterIndices[i] = ci;
+            ArrayList<Integer> list = new ArrayList<Integer>();
+            clusterIndices.add(list);
         }
 
-        /*
-        *   Initialize array to hold counters so know where you are currently 
-        *   incrementing (current cluster count)
-        */
-        int [] cc = new int[this.k];
-
+    
         /*
         *   Iterate through cluster indices (holds index of cluster to which 
         *   each row of expression matrix is assigned to)
@@ -318,8 +304,8 @@ public class Kmediod implements Clusterable{
         */
         for (int i=0; i<this.ci.length; i++)
         {
-            clusterIndices[this.ci[i]][cc[this.ci[i]]] = i;
-            cc[this.ci[i]] ++;
+            ArrayList<Integer> list = clusterIndices.get(this.ci[i]);
+            list.add(i);
         }
 
         return clusterIndices;
