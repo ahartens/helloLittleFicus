@@ -22,7 +22,7 @@ import allen2hpo.clustering.kmeans.KmeansStepTwo;
 
 import allen2hpo.matrix.Matrix;
 
-//import org.apache.log4j.Logger;
+import org.apache.log4j.Logger;
 
 
 /**
@@ -87,6 +87,11 @@ public class KmeansParallel implements Clusterable{
     private int numberThreads;
 
     private int linesPerThread;
+
+    /** Logger object to output info/warnings */
+    static Logger log = Logger.getLogger(KmeansParallel.class.getName());
+
+
 
     //__________________________________________________________________________
     //
@@ -159,7 +164,7 @@ public class KmeansParallel implements Clusterable{
 
 
         if (this.m.getRowSize() > 3000) {
-            this.numberThreads = 2000;
+            this.numberThreads = 260;
    
         }
         else{
@@ -229,6 +234,14 @@ public class KmeansParallel implements Clusterable{
     */
     public int getK(){
         return this.k;
+    }
+
+    public int getThreadCount(){
+        return this.numberThreads;
+    }
+
+    public int getRowsPerThread(){
+        return this.linesPerThread;
     }
 
     /** 
@@ -396,7 +409,7 @@ public class KmeansParallel implements Clusterable{
             calcClusterMean();
             i++;
         }
-
+        log.info("finished max iterations");
     }
 
     /**
@@ -520,41 +533,6 @@ public class KmeansParallel implements Clusterable{
     *   <br>Calculates new mean of cluster after a reassignment step and saves 
     *   result in this.cp array (means are new cluster prototypes).
     */
-    public synchronized void calcClusterMeanOld(){
-        
-        //   Init array where sum of each cluster is stored
-        double[][] clusterSums = new double[this.k][this.m.getColumnSize()];
-
-        //   Iterate through each row of expression values (genes)
-        //   Add (each dimension of) expression value to cluster sum (at index of
-        //   cluster to which it belongs)
-        for (int i = 0; i<this.clusterAssignments.size(); i++) 
-        {
-            //  
-            ArrayList<Integer> cluster = this.clusterAssignments.get(i);
-            
-            //  For each data point assigned to cluster i
-            for (int z = 0; z<cluster.size(); z++)
-            {
-                //  Go through each column and calculate average
-                for (int j = 0; j<this.m.getColumnSize();j++)
-                {
-
-                    clusterSums[i][j] += this.m.getValueAtIndex(cluster.get(z),j);
-                }
-            }
-        }
-
-        //   Find mean of every dimension
-        for (int i=0; i<this.k; i++) 
-        {
-            for (int j=0; j<this.m.getColumnSize(); j++) 
-            {
-                this.cp[i][j] = clusterSums[i][j]/this.cs[i];
-            }
-        }
-    }
-
     public void calcClusterMean(){
 
         ExecutorService executor = Executors.newFixedThreadPool(numberThreads);
