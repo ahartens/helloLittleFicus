@@ -36,6 +36,11 @@ public class KmeansStepOne implements Callable<KmeansStepOneReturnObj>{
         //   cluster will be stored.
         double[] allDists = new double[this.k];
 
+        ArrayList<ArrayList<Integer>> threadClusterAssignments = new ArrayList<ArrayList<Integer>>();
+        for (int i = 0; i<this.k; i++){
+        	ArrayList<Integer> clusterAssignments = new ArrayList<Integer>();
+        	threadClusterAssignments.add(clusterAssignments);
+        }
         
         //   Reinit arrays to store size of clusters (cs) sum of squared error
         //  (sse)
@@ -86,7 +91,8 @@ public class KmeansStepOne implements Callable<KmeansStepOneReturnObj>{
             {
                 ca[count] = indexOfMinDist;
             }
-
+            ArrayList<Integer> clusterAssignmentList = threadClusterAssignments.get(indexOfMinDist);
+            clusterAssignmentList.add(i);
             //   Increment cluster size variable for found cluster
             cs[indexOfMinDist]+=1;
 
@@ -101,7 +107,7 @@ public class KmeansStepOne implements Callable<KmeansStepOneReturnObj>{
         results.setSumOfSquareErrorsArray(sses);
         results.setCountUnmoved(countUnmoved);
         results.setClusterAssignments(ca);
-
+        results.setThreadClusterAssignments(threadClusterAssignments);
 
     	return results;
 

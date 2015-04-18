@@ -80,6 +80,7 @@ public class KmeansParallel implements Clusterable{
 
     private ArrayList<int[]> perThreadClusterAssignments = null;
 
+    private ArrayList<ArrayList<Integer>> clusterAssignments = null;
 
     private int numberThreads;
 
@@ -156,9 +157,9 @@ public class KmeansParallel implements Clusterable{
 
 
         //  Set number of threads to be made
-        this.numberThreads = 2;
+        this.numberThreads = 1;
         //  Calculate how many rows each thread should handle
-        this.linesPerThread = this.m.getRowSize()/this.numberThreads;
+        this.linesPerThread = (int)Math.ceil(this.m.getRowSize()/(double)this.numberThreads);
         System.out.println("number in matrix : "+this.m.getRowSize()+" so line length : "+linesPerThread);
 
         this.perThreadClusterAssignments = new ArrayList<int[]>();
@@ -380,23 +381,46 @@ public class KmeansParallel implements Clusterable{
         //   intialization method.
         this.cpInit.initClusters(this.k,this.m,this.distCalc);
         this.cp = this.cpInit.getClusterPrototypes();
-    
+        
+     
+        
         int maxRep = 100;
         int finishClustering = 0;
-       // int i = 0;
+        int i = 0;
 
-        //  Make data
-        /*int rowNumber = this.m.getRowSize();
-        ArrayList<double[]> data = new ArrayList<double[]>();
-        for (int i = 0; i<rowNumber; i++){
-            double[] line = new double[1000];
-            for(int j = 0; j<line.length; j++){
-                line[j] = i;
-            }
-            data.add(line);
+        //   Iterate cluster assignments until less than 1% of points move during
+        //   cluster assignment, or maximum repetition number is reached
+        while(finishClustering == 0 && i< maxRep)
+        {
+            //   Step 1 : assign data points to nearest cluster
+            finishClustering = assignPointsToCluster();
+
+            //   Step 2 : recalculate cluster center/prototype
+            calcClusterMean();
+
+            i++;
         }
-        Matrix allData = new Matrix(data);*/
 
+    }
+
+    /**
+    *	<b>Step 1</b> of kmeans iterative process. 
+    *   <br>Goes through each row of expression data and assigns it to the 
+    *   nearest cluster.
+    *   <br>After all points are assigned, checks for empty clusters and, if 
+    *   found, sets empty cluster prototype with random point from most 
+    *   dispersed cluster.
+    *   <br>Specifies if clustering should end or continue by returning 1 if 
+    *   clustering can end.
+    *   @return int 0 if clustering should countinue, 1 if clustering should end
+    *   (less than 1% of data points change their cluster assignment) 
+    */
+    private int assignPointsToCluster(){
+        this.clusterAssignments = new ArrayList<ArrayList<Integer>>();
+        for(int i = 0; i<this.k; i++){
+            ArrayList<Integer> empty = new ArrayList<Integer>();
+            this.clusterAssignments.add(empty);
+        }
         //  Init threads
         ExecutorService executor = Executors.newFixedThreadPool(numberThreads);
         List<Future<KmeansStepOneReturnObj>> list = new ArrayList<Future<KmeansStepOneReturnObj>>();
@@ -404,7 +428,7 @@ public class KmeansParallel implements Clusterable{
         for (int i=0; i<this.numberThreads; i++){
             //  Calculate start and end indices for thread
             int start = i*this.linesPerThread;
-            int end = start+this.linesPerThread;
+            int end = Math.min(this.m.getRowSize(),start+this.linesPerThread);
 
             //  Init thread with data
             Callable<KmeansStepOneReturnObj> worker = new KmeansStepOne(start,
@@ -421,18 +445,33 @@ public class KmeansParallel implements Clusterable{
             list.add(submit);
         }
         
+        this.cs = new int[this.k];
+        this.sses = new double[this.k];
+        int countUnmoved = 0;
 
         //  Retrieve results
         for (Future<KmeansStepOneReturnObj> future : list){
             try{
                 KmeansStepOneReturnObj results = future.get();
-                int[] clusterAssignments = results.getClusterAssignments();
-                System.out.println("array");
+                
+                //  Save this round of cluster assignments at proper index for next iteration
+                int[] resultClusterAssignments = results.getClusterAssignments();
+                this.perThreadClusterAssignments.set(list.indexOf(future),resultClusterAssignments);
 
-                for(int i = 0; i<clusterAssignments.length; i++){
-                    System.out.printf("\t %d",clusterAssignments[i]);
+                
+                //  increment count unmoved
+                countUnmoved += results.getCountUnmoved();
+                
+                //  Merge results from threads
+                int[] resultCS = results.getClusterSizeArray();
+                double[] resultSSE = results.getSumOfSquareErrorsArray();
+                ArrayList<ArrayList<Integer>> resultClusterAssignment = results.getThreadClusterAssignments();
+                for(int i = 0; i<this.k; i++){
+                    this.cs[i] += resultCS[i];
+                    this.sses[i] += resultSSE[i];
+                    ArrayList thisClusterAssignments = this.clusterAssignments.get(i);
+                    thisClusterAssignments.addAll(resultClusterAssignment.get(i));
                 }
-                System.out.printf("\n\n");
             }
             catch (InterruptedException e){
                 e.printStackTrace();
@@ -445,118 +484,17 @@ public class KmeansParallel implements Clusterable{
         //  Shut down concurrency 
         executor.shutdown();
         
-        System.out.println("Finished all threads");
-    }
-
-    /**
-    *	<b>Step 1</b> of kmeans iterative process. 
-    *   <br>Goes through each row of expression data and assigns it to the 
-    *   nearest cluster.
-    *   <br>After all points are assigned, checks for empty clusters and, if 
-    *   found, sets empty cluster prototype with random point from most 
-    *   dispersed cluster.
-    *   <br>Specifies if clustering should end or continue by returning 1 if 
-    *   clustering can end.
-    *   @return int 0 if clustering should countinue, 1 if clustering should end
-    *   (less than 1% of data points change their cluster assignment) 
-    */
-    private int assignPointsToCluster(){
-
-        /*
-        *   Init array where the calculated distances of one row to every 
-        *   cluster will be stored.
-        */
-        double[] allDists = new double[this.k];
-
-        /*
-        *   Reinit arrays to store size of clusters (cs) sum of squared error
-        *   (sse)
-        */
-        this.cs = new int[this.k];
-        this.sses = new double[this.k];
-
-        /*
-        *   Init counter of points which do not change cluster assignment
-        */
-        int countUnmoved = 0;
-
-        /*
-        *   Place each row(gene) in the nearest cluster
-        */
-        for (int i=0; i<this.m.getRowSize(); i++) 
-        {
-
-            /*
-            *   For each cluster prototype, calculate distance to current row 
-            */
-            for (int j=0; j<this.k; j++) 
-            {
-                double[] p1 = m.getRowAtIndex(i);   // point to be clustered
-                double[] p2 = this.cp[j];           // cluster prototype
-
-                /*
-                *   Calculate distance and store in allDistances array 
-                */
-                allDists[j] = this.distCalc.calculateProximity(p1,p2);
-            }
-
-            /*
-            *   Find index corresponding to minimum distance (this is the 
-            *   cluster assignment) and store in cluster indices array (ci) at 
-            *   index i (current row in expression data)
-            */
-            int indexOfMinDist = 0;
-            double minDist = allDists[0];
-
-            for (int j = 1; j<this.k; j++) 
-            {
-                if (allDists[j] < minDist) 
-                {
-                    minDist = allDists[j];
-                    indexOfMinDist = j;
-                }
-            }
-
-            /*
-            *   Check if just found cluster assignment has changed from previous
-            *   iteration through all data points. I
-            */
-            if(this.ci[i] == indexOfMinDist)
-            {
-                countUnmoved ++;
-            }
-            else
-            {
-                this.ci[i] = indexOfMinDist;
-            }
-
-            /*
-            *   Increment cluster size variable for found cluster
-            */
-            this.cs[indexOfMinDist]+=1;
-
-            /*
-            *   Add squared error (distance squared) to sse for found cluster 
-            */
-            this.sses[indexOfMinDist] += Math.pow(minDist,2);
-        }
-
-        /*
-        *   Check for empty cluster. If found then assign empty cluster a data
-        *   point and continue clustering
-        */
+        //   Check for empty cluster. If found then assign empty cluster a data
+        //   point and continue clustering
+    
         boolean emptyClusterFound = checkForEmptyClusterAndReassign();
-        if (emptyClusterFound) 
-        {
+        if (emptyClusterFound) {
             return 0;
         }
 
-        /*
-        *   If less than 1% of data points change cluster assignment, end 
-        *   clustering
-        */
-        if (countUnmoved > .99*this.ci.length)
-        {
+        //   If less than 1% of data points change cluster assignment, end 
+        //   clustering
+        if (countUnmoved > .99*this.m.getRowSize()){
             return 1;
         }
         return 0;
@@ -567,28 +505,32 @@ public class KmeansParallel implements Clusterable{
     *   <br>Calculates new mean of cluster after a reassignment step and saves 
     *   result in this.cp array (means are new cluster prototypes).
     */
-    public synchronized void calcClusterMean(){
-        /*
-        *   Init array where sum of each cluster is stored
-        */
+    public void calcClusterMean(){
+        
+        //   Init array where sum of each cluster is stored
         double[][] clusterSums = new double[this.k][this.m.getColumnSize()];
 
-        /*
-        *   Iterate through each row of expression values (genes)
-        *   Add (each dimension of) expression value to cluster sum (at index of
-        *   cluster to which it belongs)
-        */
-        for (int i = 0; i<this.m.getRowSize(); i++) 
+        //   Iterate through each row of expression values (genes)
+        //   Add (each dimension of) expression value to cluster sum (at index of
+        //   cluster to which it belongs)
+        for (int i = 0; i<this.clusterAssignments.size(); i++) 
         {
-            for (int j = 0; j<this.m.getColumnSize();j++)
+            //  
+            ArrayList<Integer> cluster = this.clusterAssignments.get(i);
+            
+            //  For each data point assigned to cluster i
+            for (int z = 0; z<cluster.size(); z++)
             {
-                clusterSums[this.ci[i]][j] += this.m.getValueAtIndex(i,j);
+                //  Go through each column and calculate average
+                for (int j = 0; j<this.m.getColumnSize();j++)
+                {
+
+                    clusterSums[i][j] += this.m.getValueAtIndex(cluster.get(z),j);
+                }
             }
         }
 
-        /*
-        *   Find mean of every dimension
-        */
+        //   Find mean of every dimension
         for (int i=0; i<this.k; i++) 
         {
             for (int j=0; j<this.m.getColumnSize(); j++) 
@@ -604,24 +546,19 @@ public class KmeansParallel implements Clusterable{
     *   point from largest sse cluster to empty cluster prototype
     */
     private boolean checkForEmptyClusterAndReassign(){
-        /*
-        *   Iterate through each cluster size integer
-        */
-        for (int i=0; i<this.cs.length; i++)
+    
+        //   Iterate through each cluster size integer
+        for (int i=0; i<this.clusterAssignments.size(); i++)
         {
-            /*
-            *   If a cluster is empty, reinitialize the cluster prototype with a
-            *   point belonging to the cluster witht he highest SSE (the cluster
-            *   with the largest scatter)
-            */
-            if (this.cs[i] == 0 )
+            ArrayList<Integer> currentCluster = this.clusterAssignments.get(i);
+            //   If a cluster is empty, reinitialize the cluster prototype with a
+            //   point belonging to the cluster witht he highest SSE (the cluster
+            //   with the largest scatter)
+            if (currentCluster.size() == 0 )
             {
-                /*
-                *   Find cluster with the largest sse
-                */
+                //   Find cluster with the largest sse
                 int idxMaxSSE = 0;
                 double maxSSE = this.sses[0];
-
 
                 for (int j=1; j<this.sses.length; j++)
                 {
@@ -631,15 +568,11 @@ public class KmeansParallel implements Clusterable{
                     }
                 }
 
-                /*
-                *   Pick a random row from cluster with largest SSE
-                */
+                //   Pick a random row from cluster with largest SSE
                 Random rand = new Random();
                 int idxRand = (int)(this.cs[idxMaxSSE] * rand.nextDouble());
-
-                /*
-                *   Set empty cluster cluster prototype to that point
-                */
+                System.out.println("rand index selected : "+idxRand+" for cluster "+idxMaxSSE);
+                //   Set empty cluster cluster prototype to that point
                 for (int j=0; j<this.cp[0].length; j++)
                 {
                     this.cp[i][j] = this.cp[idxMaxSSE][j];
