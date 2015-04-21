@@ -31,34 +31,26 @@ public class KmeansTest{
     /**
     *   Check clustering of big matrix using gap stat
     */
-    @Test
+   /* @Test
     public void testClustering(){
 
         DistComputable dc = new DistEuclidean();
         InitClusterable ic = new InitClustMostDistant();
 
-        /*
-        *   Do gap stat to find k. should return 3
-        */
+        //   Do gap stat to find k. should return 3
         GapStat gap = new GapStat(bigMatrix,dc,ic);
         Assert.assertEquals(3,gap.getK());
 
-        /*
-        *   Do kmeans clustering with k found by gap stat and get resulting clusters
-        */
+        //   Do kmeans clustering with k found by gap stat and get resulting clusters
         Kmeans km = new Kmeans(bigMatrix,gap.getK(),dc,ic);
         km.doClustering();
         double[][] clusterPrototypes = km.getClusterPrototypes();
 
 
-        /*
-        *   Best cluster centroids
-        */
+        //   Best cluster centroids
         double[][] actualClusters = {{41.1,41.7},{11.9,37.8},{33.7,17.6}};
 
-        /*
-        *   Check that actual and calculated clusters equal
-        */
+        //   Check that actual and calculated clusters equal
         for(int i = 0;i<clusterPrototypes.length; i++)
         {
             for(int j =0; j<clusterPrototypes[0].length;j++)
@@ -71,7 +63,7 @@ public class KmeansTest{
     /*
     *   Check kmeans clustering of small matrix.
     */
-    @Test 
+   /* @Test 
     public void testSimpleClustering() {
         Kmeans km = new Kmeans(m,2,new DistEuclidean(),new InitClustBasic());
         km.doClustering();
@@ -98,7 +90,7 @@ public class KmeansTest{
     /*
     *   Check that cluster initialization works
     */
-    @Test
+  /*  @Test
     public void testInitClusters(){
         Kmeans km = new Kmeans(m,1,new DistEuclidean(),new InitClustBasic());
         int k = km.getK();
@@ -110,5 +102,5 @@ public class KmeansTest{
         Kmeans km = new Kmeans(m,42,new DistEuclidean(),new InitClustBasic());
         int k = km.getK();
         Assert.assertEquals(42,k);
-    }
+    }*/
 }

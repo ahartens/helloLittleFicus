@@ -51,6 +51,8 @@ public class GapStatParallel implements GetKable{
 	*	actual dispersion */
 	int kfinal = 0;
 
+	int firstK = 0;
+
 	/**	object performing kmeans or actual data. random distributions init their
 	*	own kmeans object */
 	KmeansParallel kmeans;
@@ -96,7 +98,8 @@ public class GapStatParallel implements GetKable{
 	*	@param DistComputable distance calculation
 	*	@param InitClusterable cluster initialization object
 	*/
-	public GapStatParallel(Matrix m, DistComputable dc, InitClusterable cp)
+	public GapStatParallel(Matrix m, DistComputable dc, InitClusterable cp, 
+		int firstk)
 	{
 		/*
 		*	Set distance calculation object
@@ -105,9 +108,10 @@ public class GapStatParallel implements GetKable{
 
 		this.cpInit = cp;
 
+		this.firstK = firstk;
 
 		/*	Number of iterations, thus testing K values 2-k+2 */
-		int k = 40;
+		int k = 25;
 		
 		/*	Number of uniform random distributions created for each k for 
 		*	which dispersion is calculated */
@@ -122,15 +126,6 @@ public class GapStatParallel implements GetKable{
 
 		boolean optimalKFound = newStepOneTwo(k,b,m);
 
-		/*
-		OLD IMPLEMENTATION 12.5.15
-		Calculated gap for every k < cap_k then compared them
-		while(this.kfinal == 0){
-			System.out.println("First round of gap stat");
-			double[] gap_k = stepOneTwo(k,b,m);
-			double[] s_k = stepThree(k,b);
-			this.kfinal = stepFour(gap_k,s_k,b);
-		}*/
 	}
 
 
@@ -175,6 +170,9 @@ public class GapStatParallel implements GetKable{
 	private boolean newStepOneTwo(int cap_k, int cap_b, Matrix m)
 	{
 
+		FileWriter writer = new FileWriter();
+        writer.createFileWithName("/Users/ahartens/Desktop/GapStatValues.csv");
+
 		/* Init random expression data generator with actual data */
 		UniformRandomMatrixGenerator generator = 
 			new UniformRandomMatrixGenerator(m);
@@ -189,19 +187,18 @@ public class GapStatParallel implements GetKable{
 		/*	Calculated dispersion for randomly generated data */
 		this.wkb_star = new double[cap_k][cap_b];
 
-		int firstK = 5;
 
 		/*	For each k value perform kmeans and calculate gap */
 		for (int k = 0; k<cap_k; k++)
 		{
-			int kCurrent = k + firstK;
+			int kCurrent = k + this.firstK;
 			log.info("Begin gap stat parallel for k = "+kCurrent);
 
 			/*	Calculate actual log(Wk) for given k value.
 			*	Start with k = 2 */
 			log.info("Begin calculating mean dispersion of real data (wk)");
 
-			wk[k] = calcMeanDispersion(k+firstK, null, Data.REAL);
+			wk[k] = calcMeanDispersion(k+this.firstK, null, Data.REAL);
 			log.info("Finished calculating mean dispersion of real data (wk)");
 
 			/*	Reset sum of gaps */
@@ -221,7 +218,7 @@ public class GapStatParallel implements GetKable{
 				*	Start with k = 2 */
 
 				wkb_star[k][b] = 
-					calcMeanDispersion(k+firstK,generator.generateUniformRand(),
+					calcMeanDispersion(k+this.firstK,generator.generateUniformRand(),
 						Data.RANDOM);
 
 				/*	Calculate gap and add to sum */
@@ -247,20 +244,34 @@ public class GapStatParallel implements GetKable{
 				boolean optimalKFound = newStepFour(gap[k-1],gap[k],s_k);
 
 				log.info(String.format("k : %d gk: %f  >=  %f   gk+1: %f    s:%f\n",
-					k+firstK-1,gap[k-1],gap[k] - s_k,gap[k],s_k));
-
+					k+this.firstK-1,gap[k-1],gap[k] - s_k,gap[k],s_k));
+				writer.writeInt(k+this.firstK-1);
+                writer.writeDelimit();
+                
+                writer.writeDouble(gap[k-1]);
+                writer.writeDelimit();
+                
+                writer.writeDouble(gap[k]);
+                writer.writeDelimit();
+                
+                writer.writeDouble(gap[k] - s_k);
+                writer.writeDelimit();
+                
+                writer.writeDouble(s_k);
+                writer.writeNextLine();
 				if (optimalKFound) 
 				{
 					/*
 					*	Started clustering with with firstk. singleStepThree 
 					*	calculates s for previous k
 					*/
-					this.kfinal = k+firstK-1;
+					this.kfinal = k+this.firstK-1;
 
-					return true;
+					//return true;
 				}
 			}
 		}
+		writer.closeFile();
 
 		return false;
 	}
@@ -423,8 +434,6 @@ public class GapStatParallel implements GetKable{
 	            list.add(submit);
 	        }
 	    
-	        log.info("threads calculating dispersion : "+list.size());
-
 	        //  Retrieve results
 	        for (Future<Double> future : list)
 	        {
@@ -440,7 +449,6 @@ public class GapStatParallel implements GetKable{
 	        }
 	        //  Shut down concurrency 
 	        executor.shutdown();
-	        log.info("finished calculating dispersion");
 
 	        wk += (1.0/(currentData.getRowSize()))*sumOfPairwiseForClust;
 	    }

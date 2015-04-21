@@ -8,7 +8,7 @@ import org.junit.Assert;
 import allen2hpo.matrix.Matrix;
 import allen2hpo.clustering.kmeans.initclust.*;
 import allen2hpo.clustering.kmeans.distance.*;
-import allen2hpo.clustering.kmeans.calck.GapStat;
+import allen2hpo.clustering.kmeans.calck.GapStatParallel;
 public class KmeansParallelTest{
 
 
@@ -39,12 +39,16 @@ public class KmeansParallelTest{
 
         
         //   Do gap stat to find k. should return 3
-        
+         /*
+        *   Do gap stat to find k. should return 3
+        */
+        GapStatParallel gap = new GapStatParallel(bigMatrix,dc,ic,2);
+        Assert.assertEquals(3,gap.getK());
 
         
         //   Do kmeans clustering with k found by gap stat and get resulting clusters
         
-        KmeansParallel km = new KmeansParallel(bigMatrix,3,dc,ic);
+        KmeansParallel km = new KmeansParallel(bigMatrix,gap.getK(),dc,ic);
         km.doClustering();
         double[][] clusterPrototypes = km.getClusterPrototypes();
 

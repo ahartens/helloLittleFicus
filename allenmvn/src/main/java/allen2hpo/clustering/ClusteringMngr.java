@@ -154,7 +154,7 @@ public class ClusteringMngr{
         *   Do gapstat analysis on expression data 
         */
         GapStatParallel gap = 
-            new GapStatParallel(this.allenData.getExpression(),distCalc,initClust);
+            new GapStatParallel(this.allenData.getExpression(),distCalc,initClust, 3);
         
         /*
         *   Check that optimal number of clusters was found
