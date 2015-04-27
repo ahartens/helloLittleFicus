@@ -51,6 +51,8 @@ public class GapStatParallel implements GetKable{
 	*	actual dispersion */
 	int kfinal = 0;
 
+	/**	set in constructor method: first k at which gap stat should begin 
+	*	calculations */
 	int firstK = 0;
 
 	/**	object performing kmeans or actual data. random distributions init their
@@ -98,26 +100,26 @@ public class GapStatParallel implements GetKable{
 	*	@param DistComputable distance calculation
 	*	@param InitClusterable cluster initialization object
 	*/
-	public GapStatParallel(Matrix m, DistComputable dc, InitClusterable cp, 
-		int firstk)
+	public GapStatParallel(Matrix m, 
+							DistComputable dc, 
+							InitClusterable cp, 
+							int firstk)
 	{
-		/*
-		*	Set distance calculation object
-		*/
+		//	Set distance calculation object
 		this.distCalc = dc;
 
 		this.cpInit = cp;
 
 		this.firstK = firstk;
 
-		/*	Number of iterations, thus testing K values 2-k+2 */
+		//	Number of iterations, thus testing K values 2-k+2
 		int k = 25;
 		
-		/*	Number of uniform random distributions created for each k for 
-		*	which dispersion is calculated */
+		//	Number of uniform random distributions created for each k for 
+		//	which dispersion is calculated 
 		int b = 5;
 
-		//Init kmeans object that will perform kmeans on actual data
+		//	Init kmeans object that will perform kmeans on actual data
 		this.kmeans = new KmeansParallel(m,dc,cp);
 
 
@@ -167,76 +169,72 @@ public class GapStatParallel implements GetKable{
 	*	greater than current gap)
 	*	distributions to be created
 	*/
-	private boolean newStepOneTwo(int cap_k, int cap_b, Matrix m)
+	private boolean newStepOneTwo(int cap_k, 
+									int cap_b, 
+									Matrix m)
 	{
 
 		FileWriter writer = new FileWriter();
         writer.createFileWithName("/Users/ahartens/Desktop/GapStatValues.csv");
 
-		/* Init random expression data generator with actual data */
+		//	Init random expression data generator with actual data
 		UniformRandomMatrixGenerator generator = 
 			new UniformRandomMatrixGenerator(m);
 
-		/*	Init array that will hold calculated gap value for given k value 
-		*	(capital K long) */
+		//	Init array that will hold calculated gap value for given k value 
+		//	(capital K long)
 		double[] gap = new double[cap_k];
 
-		/*	Calculated dispersion for actual Data */
+		//	Calculated dispersion for actual Data
 		this.wk = new double[cap_k];
 
-		/*	Calculated dispersion for randomly generated data */
+		//	Calculated dispersion for randomly generated data
 		this.wkb_star = new double[cap_k][cap_b];
 
 
-		/*	For each k value perform kmeans and calculate gap */
+		//	For each k value perform kmeans and calculate gap 
 		for (int k = 0; k<cap_k; k++)
 		{
 			int kCurrent = k + this.firstK;
 			log.info("Begin gap stat parallel for k = "+kCurrent);
 
-			/*	Calculate actual log(Wk) for given k value.
-			*	Start with k = 2 */
+			//	Calculate actual log(Wk) for given k value.
+			//	Start with k = 2
 			log.info("Begin calculating mean dispersion of real data (wk)");
 
 			wk[k] = calcMeanDispersion(k+this.firstK, null, Data.REAL);
 			log.info("Finished calculating mean dispersion of real data (wk)");
 
-			/*	Reset sum of gaps */
+			//	Reset sum of gaps 
 			double gapSum_k = 0;
 
-			/*	
-			*	Calculate log(Wkb_star) for given k for B uniform random 
-			*	matrices. 
-			*/
+			//	Calculate log(Wkb_star) for given k for B uniform random 
+			//	matrices. 
 			log.info("Begin calculating mean dispersion of randomized data (wkb_*)");
 
 			for (int b = 0; b<cap_b; b++)
 			{
 				log.info("current b : "+b);
 
-				/*	Create random uniform matrix and calculate dispersion
-				*	Start with k = 2 */
+				//	Create random uniform matrix and calculate dispersion
+				//	Start with k = startk
 
 				wkb_star[k][b] = 
 					calcMeanDispersion(k+this.firstK,generator.generateUniformRand(),
 						Data.RANDOM);
 
-				/*	Calculate gap and add to sum */
+				//	Calculate gap and add to sum
 				gapSum_k += wkb_star[k][b] - wk[k];
 			}
 			log.info("Finished calculating mean dispersion of randomized data (wkb_*)");
 
 			
-			/*	
-			*	Calculate actual gap by dividing by capital B (number of random 
-			*	distributions created) 
-			*/
+			//	Calculate actual gap by dividing by capital B (number of random 
+			//	distributions created) 
 			gap[k] = gapSum_k/cap_b;
 
-			/*
-			*	If not first value k checked, calculate gap between current 
-			*	clustering and previous clustering
-			*/
+			//	If not first value k checked, calculate gap between current 
+			//	clustering and previous clustering
 			if (k>0) 
 			{
 				double s_k = newStepThree(cap_b,wkb_star[k]);
@@ -245,29 +243,17 @@ public class GapStatParallel implements GetKable{
 
 				log.info(String.format("k : %d gk: %f  >=  %f   gk+1: %f    s:%f\n",
 					k+this.firstK-1,gap[k-1],gap[k] - s_k,gap[k],s_k));
-				writer.writeInt(k+this.firstK-1);
-                writer.writeDelimit();
-                
-                writer.writeDouble(gap[k-1]);
-                writer.writeDelimit();
-                
-                writer.writeDouble(gap[k]);
-                writer.writeDelimit();
-                
-                writer.writeDouble(gap[k] - s_k);
-                writer.writeDelimit();
-                
-                writer.writeDouble(s_k);
-                writer.writeNextLine();
+				
+				//printGapToFile(writer, gap, s_k, k);
+				
 				if (optimalKFound) 
 				{
-					/*
-					*	Started clustering with with firstk. singleStepThree 
-					*	calculates s for previous k
-					*/
+					
+					//	Started clustering with with firstk. singleStepThree 
+					//	calculates s for previous k
 					this.kfinal = k+this.firstK-1;
 
-					//return true;
+					return true;
 				}
 			}
 		}
@@ -278,20 +264,16 @@ public class GapStatParallel implements GetKable{
 	
 	private double newStepThree( int cap_b, double[] wkb_star1)
 	{
-		/*
-		*	PART ONE
-		*	Calculate l_bar for each value k
-		*/
+		//	PART ONE
+		//	Calculate l_bar for each value k
 		double lbar_k = 0;
 		for (int b = 0; b < wkb_star1.length; b++){
 			lbar_k += wkb_star1[b];
 		}
 		lbar_k /= cap_b;
 
-		/*
-		*	PART TWO
-		*	Calculate standard deviation for each value k, using l_bar
-		*/
+		//	PART TWO
+		//	Calculate standard deviation for each value k, using l_bar
 		double sd_k = 0;
 		double s_k = 0;
 
@@ -315,6 +297,26 @@ public class GapStatParallel implements GetKable{
 		return false;
 	}
 
+	private void printGapToFile(FileWriter writer, 
+								double[] gap,
+								double s_k, 
+								int k){
+		writer.writeInt(k+this.firstK-1);
+        writer.writeDelimit();
+        
+        writer.writeDouble(gap[k-1]);
+        writer.writeDelimit();
+        
+        writer.writeDouble(gap[k]);
+        writer.writeDelimit();
+        
+        writer.writeDouble(gap[k] - s_k);
+        writer.writeDelimit();
+        
+        writer.writeDouble(s_k);
+        writer.writeNextLine();
+	}
+
 
 
 	//__________________________________________________________________________
@@ -330,7 +332,9 @@ public class GapStatParallel implements GetKable{
 	*	@param Matrix m data matrix (either real or randomly generated)
 	*	@param Data enum specifying if data is real or randomly generated
 	*/
-	private double calcMeanDispersion(int k, Matrix m, Data realOrRandom){
+	private double calcMeanDispersion(int k, 
+										Matrix m, 
+										Data realOrRandom){
 
 		this.repeat = 1;
 		double sumW = 0;
@@ -355,50 +359,10 @@ public class GapStatParallel implements GetKable{
 	}
 
 	/**
-	*
+	*	Receives expression data organized into k clusters. Calculates dispersion
+	*	For each cluster (uses paralleism to calculate pairwise distance)
 	*/
-	/*double calcDispersionFromClusteredValues(Matrix[] clusters, int k){
-		double wk = 0;
-
-        ExecutorService executor = Executors.newFixedThreadPool(clusters.length);
-        ArrayList<Future<Double>> list = 
-            new ArrayList<Future<Double>>();
-
-        for (int i=0; i<clusters.length; i++){
-            //  Init thread with data
-            Callable<Double> worker = new GapStatCalcDispersion(
-                                    clusters[i], 
-                                    distCalc);
-            //  Start thread
-            Future<Double> submit = executor.submit(worker);
-
-            //  Save thread to list
-            list.add(submit);
-        }
-    
-        log.info("threads calculating dispersion : "+list.size());
-
-        //  Retrieve results
-        for (Future<Double> future : list)
-        {
-            try{
-                wk += future.get();
-                log.info("Thread finished adding : "+wk);
-            }
-            catch (InterruptedException e){
-                e.printStackTrace();
-            }
-            catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        }
-        //  Shut down concurrency 
-        executor.shutdown();
-
-		return Math.log(wk);
-	}*/
-
-	double calcDispersionFromClusteredValues(Matrix[] clusters, int k){
+	private double calcDispersionFromClusteredValues(Matrix[] clusters, int k){
 		double wk = 0;
 		int threadCount, sumOfPairwiseForClust;
 		int linesPerThread = 70;
@@ -454,138 +418,4 @@ public class GapStatParallel implements GetKable{
 	    }
 		return Math.log(wk);
 	}
-
-
-
-
-	//__________________________________________________________________________
-    //
-    //  OLD 12.5.15 GapStat Lifecycle Implementation                                 
-    //__________________________________________________________________________
-
-
-	/**
-	*	Step one of gap stat, returns an array capital K, with a gap value 
-	*	corresponding index + 1
-	*	@param first int is capital K, the number of k values to be tested
-	*	@param second int is capital B, the number of random uniform 
-	*	distributions to be created
-	*/
-	private double[] stepOneTwo(int cap_k, int cap_b, Matrix m)
-	{
-
-		/* Init random expression data generator with actual data */
-		UniformRandomMatrixGenerator generator = 
-			new UniformRandomMatrixGenerator(m);
-
-		/*	Init array that will hold calculated gap value for given k value 
-		*	(capital K long) */
-		double[] gap = new double[cap_k];
-
-		/*	Calculated dispersion for actual Data */
-		this.wk = new double[cap_k];
-
-		/*	Calculated dispersion for randomly generated data */
-		this.wkb_star = new double[cap_k][cap_b];
-
-
-		/*	For each k value perform kmeans and calculate gap */
-		for (int k = 0; k<cap_k; k++)
-		{
-
-			/*	Calculate actual log(Wk) for given k value.
-			*	Start with k = 2 */
-			wk[k] = calcMeanDispersion(k+2, null, Data.REAL);
-
-			/*	Reset sum of gaps */
-			double gapSum_k = 0;
-
-			/*	
-			*	Calculate log(Wkb_star) for given k for B uniform random 
-			*	matrices. 
-			*/
-			for (int b = 0; b<cap_b; b++)
-			{
-				/*	Create random uniform matrix and calculate dispersion
-				*	Start with k = 2 */
-
-				wkb_star[k][b] = 
-					calcMeanDispersion(k+2,generator.generateUniformRand(),
-						Data.RANDOM);
-
-				/*	Calculate gap and add to sum */
-				gapSum_k += wkb_star[k][b] - wk[k];
-			}
-			
-			/*	
-			*	Calculate actual gap by dividing by capital B (number of random 
-			*	distributions created) 
-			*/
-			gap[k] = gapSum_k/cap_b;
-
-		}
-
-		return gap;
-	}
-
-	/**
-	*
-	*/
-	private double[] stepThree( int cap_k, int cap_b)
-	{
-		/*
-		*	PART ONE
-		*	Calculate l_bar for each value k
-		*/
-		double[] lbar_k = new double[cap_k];
-
-		for (int k = 0; k<cap_k; k++)
-		{
-			for (int b = 0; b<cap_b; b++)
-			{
-				lbar_k[k] += this.wkb_star[k][b];
-			}
-			lbar_k[k] /= cap_b;
-		}
-
-		/*
-		*	PART TWO
-		*	Calculate standard deviation for each value k, using l_bar
-		*/
-		double[] sd_k = new double[cap_k];
-		double[] s_k = new double[cap_k];
-
-		for (int k = 0; k<cap_k; k++)
-		{
-			for (int b = 0; b<cap_b; b++)
-			{
-				sd_k[k] += Math.pow(this.wkb_star[k][b] - lbar_k[k],2);
-			}
-			
-			sd_k[k] = Math.sqrt(sd_k[k]/cap_b);
-			s_k[k] = Math.sqrt(1+(1/cap_b))*sd_k[k];
-		}
-		return s_k;
-	}
-
-	/**
-	*	11.3.2015 changed this to not look at k = 1 (first element in gap array)
-	*	because was often greater. is this reasonable???
-	*/
-	private int stepFour(double[] gap, double[] s, int cap_k){
-		System.out.println("step four");
-		for(int k = 0; k< cap_k - 1; k++){
-			/*System.out.printf("gk: %f  >=  %f   gk+1: %f    s:%f\n",
-			gap[k],gap[k+1] - s[k+1],gap[k+1],s[k+1]);*/
-
-			if ( gap[k] >= gap[k+1] - s[k+1] ){
-				
-				/*	started with k = 2 so at position zero are values 
-				*	corresponding to a k = 2 */
-				return k+2;
-			}
-		}
-		return 0;
-	}
-
 }

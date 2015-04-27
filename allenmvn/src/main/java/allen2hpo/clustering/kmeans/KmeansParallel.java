@@ -133,33 +133,23 @@ public class KmeansParallel implements Clusterable{
             throw new 
         IllegalArgumentException("cluster init object not initialized");
 
-
-        /* 
-        *   Set data matrix private variable 
-        */
+ 
+        //   Set data matrix private variable 
         this.m = mat;
 
-        /*
-        *   Set K value 
-        */
+        //   Set K value 
         setK(kval);
-
-        /* 
-        *   Set distance calculation object 
-        */
+ 
+        //   Set distance calculation object 
         this.distCalc = dc;
-
-        /* 
-        *   Initialize cluster prototype start values using InitClusterable 
-        *   object
-        */
+ 
+        //   Initialize cluster prototype start values using InitClusterable 
+        //   object
         this.cpInit = cp;
-
-        /* 
-        *   Initialize cluster index array. While iterative clustering, the 
-        *   cluster to
-        *   which a data point belongs to will be stored here. 
-        */
+ 
+        //   Initialize cluster index array. While iterative clustering, the 
+        //   cluster to
+        //   which a data point belongs to will be stored here. 
         this.ci = new int[mat.getRowSize()];
 
 
@@ -197,7 +187,6 @@ public class KmeansParallel implements Clusterable{
     //  Setters                                   
     //__________________________________________________________________________
 
-
     /**
     *   Called by constructor method or can be called externally if wish to 
     *   change k.
@@ -207,16 +196,12 @@ public class KmeansParallel implements Clusterable{
     *   into.
     */
     public void setK(int kval){
-        
-        /* 
-        *   Set K value 
-        */
+         
+        //   Set K value 
         this.k = kval;
-        
-        /* 
-        *   Init cluster size array. Stores number of points assigned to each 
-        *   cluster in step 1. 
-        */
+         
+        //   Init cluster size array. Stores number of points assigned to each 
+        //   cluster in step 1. 
         this.cs = new int[kval];
 
     }
@@ -270,15 +255,10 @@ public class KmeansParallel implements Clusterable{
     */
     public Matrix[] getClusters(){
 
-        /*
-        *   Initialize array with length k (one matrix per cluster)
-        */
+        //   Initialize array with length k (one matrix per cluster)
         Matrix [] clusters = new Matrix[this.k];
 
-        /*
-        *   Initialize each matrix object in clusters array with correct size
-        */
-
+        //   Initialize each matrix object in clusters array with correct size
         for (int i = 0;i<this.k;i++)
         {
             ArrayList<Integer> ca = this.clusterAssignments.get(i);
@@ -298,14 +278,10 @@ public class KmeansParallel implements Clusterable{
 
     public Matrix[] getClustersold(){
 
-        /*
-        *   Initialize array with length k (one matrix per cluster)
-        */
+        //   Initialize array with length k (one matrix per cluster)
         Matrix [] clusters = new Matrix[this.k];
 
-        /*
-        *   Initialize each matrix object in clusters array with correct size
-        */
+        //   Initialize each matrix object in clusters array with correct size
         for (int i = 0;i<this.k;i++)
         {
             double[][] ca = new double[this.cs[i]][this.m.getColumnSize()];
@@ -313,29 +289,25 @@ public class KmeansParallel implements Clusterable{
             clusters[i] = cm;
         }
 
-        /*
-        *   Initialize array holding counter for each cluster (incremented as 
-        *   add row to matrix)
-        */
+        //   Initialize array holding counter for each cluster (incremented as 
+        //   add row to matrix)
         int [] inClustCount = new int[this.k];
 
 
-        /*
-        *   Iterate through each row in the expression data matrix.
-        *   Place the row into the cluster it belongs to
-        */
+        //   Iterate through each row in the expression data matrix.
+        //   Place the row into the cluster it belongs to
         for (int i=0;i<this.m.getRowSize();i++)
         {
             for(int j=0; j<this.m.getColumnSize(); j++)
             {
-                /*
-                *   in ci is stored index of cluster to which current row 
-                *   (of expression values/single gene) belongs to
-                *   that index corresponds to :
-                *       1. index in clusters Matrix
-                *       2. index in inClustCount (counter for iteration)
-                *   set value of each 'column' in row in Matrix
-                */
+    
+                //   in ci is stored index of cluster to which current row 
+                //   (of expression values/single gene) belongs to
+                //   that index corresponds to :
+                //       1. index in clusters Matrix
+                //       2. index in inClustCount (counter for iteration)
+                //   set value of each 'column' in row in Matrix
+    
                 clusters[this.ci[i]].setValueAtIndex(inClustCount[this.ci[i]],j,
                     this.m.getValueAtIndex(i,j));
             }

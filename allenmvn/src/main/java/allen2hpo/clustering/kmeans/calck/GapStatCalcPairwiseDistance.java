@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import allen2hpo.matrix.Matrix;
 import allen2hpo.clustering.kmeans.distance.*;
 
+/**
+*	Future object created by gap stat in order to calculated pairwise distance 
+*	of given matrix.
+*/
 public class GapStatCalcPairwiseDistance implements Callable<Double>{
 
 	private final Matrix m;
@@ -14,7 +18,10 @@ public class GapStatCalcPairwiseDistance implements Callable<Double>{
 	private final int start;
 	private final int end;
 
-	GapStatCalcPairwiseDistance(Matrix data, DistComputable distCalc,int start,int end){
+	GapStatCalcPairwiseDistance(Matrix data, 
+								DistComputable distCalc,
+								int start,
+								int end){
 		this.m = data;
 		this.distCalc = distCalc;
 		this.start = start;

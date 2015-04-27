@@ -293,10 +293,13 @@ public class Allen2HPO {
         return brainDataMngr;
     }
 
+    /**
+    *   Given expression data packaged in an allenDataMngr object, performs
+    *   cluster analysis and prints out results to file
+    */
     private void clusterAllenBrainData(AllenDataMngr brainDataMngr, File dir){
-        /*
-        *   Cluster Data
-        */
+        
+        //   Cluster Data
         ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
 
         //  Perform Kmeans clustering using the gap statistic to calculate k
@@ -305,30 +308,24 @@ public class Allen2HPO {
         if(success)
         {
             //  Print output to terminal
-
             //clusteringMngr.printClusterGenesInTerminal();
 
 
             //  Create a directory called clustering for output
-
             File outputDirectory = createOutputDirectory(dir);
             if (outputDirectory != null)
             {
                 //  Create string for outputDirectory path 
-                
                 String outputDirString = outputDirectory.getAbsolutePath()
                     +dir.separator;
                 
                 //  Write population file (all genes clustered one gene per line)
-    
                 clusteringMngr.writePopulationGenesToFile(outputDirString);
 
                 //  Write one cluster per file, one gene per line
-    
                 clusteringMngr.writeClusterGenesOneClusterPerFile(outputDirString);
 
                 //  Write Cluster Prototypes to file
-    
                 clusteringMngr.writeClusterPrototypesToFile(outputDirString);
             }
         }
