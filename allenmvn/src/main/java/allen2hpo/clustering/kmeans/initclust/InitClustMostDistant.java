@@ -21,7 +21,8 @@ public class InitClustMostDistant implements InitClusterable{
 	/**	Cluster prototypes initialized here */
 	private double[][] cp;
 
-
+	/** Indices of prototypes found in cp */
+	private int[] cpi;
 
 	//__________________________________________________________________________
     //
@@ -32,13 +33,14 @@ public class InitClustMostDistant implements InitClusterable{
 	{
 		/*	Init cluster prototypes array */
 		this.cp = new double[k][m.getColumnSize()];
+		this.cpi = new int[k];
 
 		/*	Store indices of rows already used as prototypes */
         ArrayList<Integer> indicesAlreadySelected = new ArrayList<Integer>();
 
         /*	Select first point in data matrix as initial cluster */
         this.cp[0] = m.getRowAtIndex(0);
-
+        this.cpi[0] = 0;
         /*	Mark that first point/index 0 has already been added to cp */
         indicesAlreadySelected.add(0);
 		
@@ -94,10 +96,13 @@ public class InitClustMostDistant implements InitClusterable{
 			/*	Add point furthest away to cluster prototypes array (+ index) */
 			indicesAlreadySelected.add(indexMaxDistFromCurrent);
 			this.cp[j] = m.getRowAtIndex(indexMaxDistFromCurrent);
-
+			this.cpi[j] = indexMaxDistFromCurrent;
 			/*	Mean all cluster points selected till now */
 			meanOfPreviousPoints = calculateMeanOfPreviousPoints(j+1);
 		}
+
+
+		
 	}
 
 	private double[] calculateMeanOfPreviousPoints(int fillCount){
@@ -136,6 +141,10 @@ public class InitClustMostDistant implements InitClusterable{
 	*/
 	public double[][] getClusterPrototypes(){
 		return this.cp;
+	}
+
+	public int[] getClusterPrototypeIndices(){
+		return this.cpi;
 	}
 
 }

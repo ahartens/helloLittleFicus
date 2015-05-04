@@ -43,6 +43,10 @@ public class Kmediod implements Clusterable{
     *    A k x n two dimensional array */
     private double[][] cp = null;
 
+    /** prototype index. centroid of each cluster is a point in the matrix.
+    index is stored here (corresponding datpoint stored in cp) */
+    private int[] cpi = null;
+    
     /**	cluster index. Stores the index of the cluster (0-(k-1)) to which 
     *   each data point in expression matrix belongs */
     private int[] ci = null;
@@ -358,10 +362,15 @@ public class Kmediod implements Clusterable{
 
         this.cpInit.initClusters(this.k,this.m,this.distCalc);
         this.cp = this.cpInit.getClusterPrototypes();
-    
+        this.cpi = this.cpInit.getClusterPrototypeIndices();
         int maxRep = 100;
         int finishClustering = 0;
         int i = 0;
+
+        for ( i =0; i<this.cp.length; i++){
+            System.out.printf("%f %f/t%d\n",this.cp[i][0],this.cp[i][1],this.cpi[i]);
+        }
+        System.out.printf("\n\n");
 
         /*
         *   Iterate cluster assignments until less than 1% of points move during
@@ -432,7 +441,7 @@ public class Kmediod implements Clusterable{
                 /*
                 *   Calculate distance and store in allDistances array 
                 */
-                allDists[j] = this.distanceMatrix.getValueAtIndex(i,j);
+                allDists[j] = this.distanceMatrix.getValueAtIndex(i,this.cpi[j]);
             }
 
             /*
@@ -551,6 +560,7 @@ public class Kmediod implements Clusterable{
                 }
 
                 this.cp[i] = this.m.getRowAtIndex(currentList.get(indexMinD));
+                this.cpi[i] = currentList.get(indexMinD);
             }
         }
     }

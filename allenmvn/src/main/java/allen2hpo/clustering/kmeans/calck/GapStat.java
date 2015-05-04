@@ -182,7 +182,7 @@ public class GapStat implements GetKable{
 		/*	Calculated dispersion for randomly generated data */
 		this.wkb_star = new double[cap_k][cap_b];
 
-		int firstK = 5;
+		int firstK = 2;
 
 		/*	For each k value perform kmeans and calculate gap */
 		for (int k = 0; k<cap_k; k++)

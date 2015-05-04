@@ -16,4 +16,6 @@ public interface InitClusterable {
 
 	public double[][] getClusterPrototypes();
 
+	public int[] getClusterPrototypeIndices();
+
 }

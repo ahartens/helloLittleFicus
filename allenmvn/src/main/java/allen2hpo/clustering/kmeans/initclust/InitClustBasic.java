@@ -40,6 +40,10 @@ public class InitClustBasic implements InitClusterable{
 		return this.cp;
 	} 
 
+	public int[] getClusterPrototypeIndices(){
+		return null;
+	}
+
 
 
 	//__________________________________________________________________________
