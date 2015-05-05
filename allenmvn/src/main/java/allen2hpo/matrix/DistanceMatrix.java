@@ -82,7 +82,7 @@ public class DistanceMatrix extends Matrix{
 
 				//Set value in similarity matrix
 				setValueAtIndex(i,j,dist);
-
+				setValueAtIndex(j,i,dist);
 				//Add to sum of pairwise distance
 				this.spw += dist;
 			}

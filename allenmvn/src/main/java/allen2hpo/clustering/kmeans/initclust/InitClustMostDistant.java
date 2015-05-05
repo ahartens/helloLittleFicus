@@ -4,7 +4,7 @@ import allen2hpo.matrix.Matrix;
 import allen2hpo.clustering.kmeans.distance.*;
 
 import java.util.ArrayList;
-
+import java.util.Random;
 /**
 *	Initializes cluster prototypes with k data points that are the farthest from
 *	Implements InitClusterable interface to return clusters
@@ -38,11 +38,15 @@ public class InitClustMostDistant implements InitClusterable{
 		/*	Store indices of rows already used as prototypes */
         ArrayList<Integer> indicesAlreadySelected = new ArrayList<Integer>();
 
+       	Random rand = new Random();
+       	int randVal = (int)(m.getRowSize() * rand.nextDouble());
+       	System.out.println("rand value is : "+randVal);
+
         /*	Select first point in data matrix as initial cluster */
-        this.cp[0] = m.getRowAtIndex(0);
-        this.cpi[0] = 0;
+        this.cp[0] = m.getRowAtIndex(randVal);
+        this.cpi[0] = randVal;
         /*	Mark that first point/index 0 has already been added to cp */
-        indicesAlreadySelected.add(0);
+        indicesAlreadySelected.add(randVal);
 		
         
         /*
@@ -50,7 +54,7 @@ public class InitClustMostDistant implements InitClusterable{
         *	Initialize with first row (first cluster prototype) here
         */
         double[] meanOfPreviousPoints = new double[m.getColumnSize()];
-        meanOfPreviousPoints = m.getRowAtIndex(0);
+        meanOfPreviousPoints = m.getRowAtIndex(randVal);
 
         /*
         *	Init variables for iteration
@@ -62,7 +66,7 @@ public class InitClustMostDistant implements InitClusterable{
 		/*
 		*	Until k 
 		*/
-		for(int j=0; j<k; j++)
+		for(int j=1; j<k; j++)
 		{
 
 			/*	Set all distance variables to 0 */
@@ -83,11 +87,10 @@ public class InitClustMostDistant implements InitClusterable{
 					/*	Calculate distance from mean of previous */
 					currentDist = distCalc.calculateProximity
 						(meanOfPreviousPoints,m.getRowAtIndex(i));
-
 					/*	Check if furthest away and set current max if it is */
 					if (currentDist > maxDist) 
 					{
-						indexMaxDistFromCurrent = j;
+						indexMaxDistFromCurrent = i;
 						maxDist = currentDist;
 					}
 				}

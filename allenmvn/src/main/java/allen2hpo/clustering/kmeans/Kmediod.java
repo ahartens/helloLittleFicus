@@ -368,7 +368,7 @@ public class Kmediod implements Clusterable{
         int i = 0;
 
         for ( i =0; i<this.cp.length; i++){
-            System.out.printf("%f %f/t%d\n",this.cp[i][0],this.cp[i][1],this.cpi[i]);
+            System.out.printf("%f %f    %d\n",this.cp[i][0],this.cp[i][1],this.cpi[i]);
         }
         System.out.printf("\n\n");
 
@@ -459,6 +459,7 @@ public class Kmediod implements Clusterable{
                     minDist = allDists[j];
                     clusterIndexOfMinDist = j;
                 }
+
             }
 
             /*
@@ -476,7 +477,9 @@ public class Kmediod implements Clusterable{
                 *   Store index of data point (i) currently viewing in 
                 *   array list corresponding to cluster assignment
                 */
-                List<Integer> currentCluster = this.ciorg.get(clusterIndexOfMinDist);
+            }
+            List<Integer> currentCluster = this.ciorg.get(clusterIndexOfMinDist);
+            if (!currentCluster.contains(i)) {
                 currentCluster.add(i);
             }
 
@@ -601,20 +604,70 @@ public class Kmediod implements Clusterable{
                 /*
                 *   Pick a random row from cluster with largest SSE
                 */
-                Random rand = new Random();
-                int idxRand = (int)(this.cs[idxMaxSSE] * rand.nextDouble());
+                /*Random rand = new Random();
+                ArrayList<Integer> pointsForMaxSSECluster = this.ciorg.get(idxMaxSSE);
+                int idxRand = (int)(pointsForMaxSSECluster.size() * rand.nextDouble());
 
+                System.out.println("setting new : size of points in " +idxMaxSSE+" : "+pointsForMaxSSECluster.size() + " :rand int + "+idxRand );
+                int indexOfNewCP = pointsForMaxSSECluster.get(idxRand);
+*/
+
+                int indexOfNewCP = findIndexOfMostDistantPointInCluster(idxMaxSSE);
                 /*
                 *   Set empty cluster cluster prototype to that point
                 */
                 for (int j=0; j<this.cp[0].length; j++)
                 {
-                    this.cp[i][j] = this.cp[idxMaxSSE][j];
+                    this.cp[i][j] = this.m.getValueAtIndex(indexOfNewCP,j);
                 }
 
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+    *   Given the index of a cluster, finds point furthest away from the cluster mean and 
+    *   returns its index (in all expression data)
+    *   Called by checkForEmptyClusterAndReassign.
+    */
+    int findIndexOfMostDistantPointInCluster(int indexOfClusterWithLargestSSE){
+        //  Get array of all points (an array of indices pointing to )
+        ArrayList<Integer> pointsInCluster = this.ciorg.get(indexOfClusterWithLargestSSE);
+
+        //  Calculate mean of all points in the cluster
+        double sum[] = new double[this.m.getColumnSize()];
+        for(int i = 0; i<pointsInCluster.size(); i++){
+            for(int j=0; j<this.m.getColumnSize(); j++){
+                sum[j] += this.m.getValueAtIndex(pointsInCluster.get(i),j);
+
+            }
+        }
+        for(int i=0; i<this.m.getColumnSize(); i++){
+            sum[i] /= pointsInCluster.size();
+        }
+
+        //  Find point furthest away from the mean
+        double maxDist = 0;
+        double currentDist = 0;
+        int indexMaxDistFromCurrent = 0;
+        
+        for(int i = 0; i<pointsInCluster.size(); i++){
+            /*  Set all distance variables to 0 */
+        
+            /*  Calculate distance from mean of previous */
+            currentDist = this.distCalc.calculateProximity
+                (sum,m.getRowAtIndex(pointsInCluster.get(i)));
+            /*  Check if furthest away and set current max if it is */
+            if (currentDist > maxDist) 
+            {
+                indexMaxDistFromCurrent = pointsInCluster.get(i);
+                maxDist = currentDist;
+            }
+            
+       }
+
+       return indexMaxDistFromCurrent;
     }
 }

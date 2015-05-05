@@ -60,11 +60,18 @@ public class KmeansParallelTest{
 
         
         //   Check that actual and calculated clusters equal
+        //   Kmeans clusters may be in different order than 'actualClusters' listed order
+        //  So check if first value is equal then compare row, otherwise skip row
         for(int i = 0;i<clusterPrototypes.length; i++)
         {
-            for(int j =0; j<clusterPrototypes[0].length;j++)
+            for(int j =0; j<actualClusters.length;j++)
             {
-                Assert.assertEquals(clusterPrototypes[i][j],actualClusters[i][j],.2);
+                if (Math.abs(clusterPrototypes[i][0]-actualClusters[j][0])<=.2) {
+                    for(int x =0; x<clusterPrototypes[0].length;x++)
+                    {
+                        Assert.assertEquals(clusterPrototypes[i][x],actualClusters[j][x],.2);
+                    }
+                }
             }
         }
     }
