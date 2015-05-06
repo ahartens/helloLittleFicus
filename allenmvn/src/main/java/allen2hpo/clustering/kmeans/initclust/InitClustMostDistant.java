@@ -31,63 +31,56 @@ public class InitClustMostDistant implements InitClusterable{
 	
 	public void initClusters(int k, Matrix m, DistComputable distCalc)
 	{
-		/*	Init cluster prototypes array */
+		//	Init cluster prototypes array 
 		this.cp = new double[k][m.getColumnSize()];
 		this.cpi = new int[k];
 
-		/*	Store indices of rows already used as prototypes */
+		//	Store indices of rows already used as prototypes
         ArrayList<Integer> indicesAlreadySelected = new ArrayList<Integer>();
 
        	Random rand = new Random();
        	int randVal = (int)(m.getRowSize() * rand.nextDouble());
        	System.out.println("rand value is : "+randVal);
 
-        /*	Select first point in data matrix as initial cluster */
+		//	Select first point in data matrix as initial cluster
         this.cp[0] = m.getRowAtIndex(randVal);
         this.cpi[0] = randVal;
-        /*	Mark that first point/index 0 has already been added to cp */
+		//	Mark that first point/index 0 has already been added to cp 
         indicesAlreadySelected.add(randVal);
 		
         
-        /*
-        *	Maximum distance will be calculated from mean of previous points
-        *	Initialize with first row (first cluster prototype) here
-        */
+		//	Maximum distance will be calculated from mean of previous points
+		//	Initialize with first row (first cluster prototype) here
         double[] meanOfPreviousPoints = new double[m.getColumnSize()];
         meanOfPreviousPoints = m.getRowAtIndex(randVal);
 
-        /*
-        *	Init variables for iteration
-        */
+		//	Init variables for iteration
 		double maxDist;
 		double currentDist;
 		int indexMaxDistFromCurrent;
 		int ksAdded = 0;
-		/*
-		*	Until k 
-		*/
+
+		//	Until k 
 		for(int j=1; j<k; j++)
 		{
 
-			/*	Set all distance variables to 0 */
+			//	Set all distance variables to 0
 			maxDist = 0;
 			currentDist = 0;
 			indexMaxDistFromCurrent = 0;
 
-			/*	
-			*	For each row in expression data calculate distance to the mean 
-			*	of previously selected cluster prototypes
-			*	The point furthest away from mean is the next point selected
-			*/
+			//	For each row in expression data calculate distance to the mean 
+			//	of previously selected cluster prototypes
+			//	The point furthest away from mean is the next point selected
 			for(int i=0; i<m.getRowSize(); i++)
 			{
-				/*	If row not already selected */
+				//	If row not already selected
 				if( !indicesAlreadySelected.contains(i))
 				{
-					/*	Calculate distance from mean of previous */
+					//	Calculate distance from mean of previous
 					currentDist = distCalc.calculateProximity
 						(meanOfPreviousPoints,m.getRowAtIndex(i));
-					/*	Check if furthest away and set current max if it is */
+					//	Check if furthest away and set current max if it is
 					if (currentDist > maxDist) 
 					{
 						indexMaxDistFromCurrent = i;
@@ -96,11 +89,11 @@ public class InitClustMostDistant implements InitClusterable{
 				}
 			}
 
-			/*	Add point furthest away to cluster prototypes array (+ index) */
+			//	Add point furthest away to cluster prototypes array (+ index)
 			indicesAlreadySelected.add(indexMaxDistFromCurrent);
 			this.cp[j] = m.getRowAtIndex(indexMaxDistFromCurrent);
 			this.cpi[j] = indexMaxDistFromCurrent;
-			/*	Mean all cluster points selected till now */
+			//	Mean all cluster points selected till now 
 			meanOfPreviousPoints = calculateMeanOfPreviousPoints(j+1);
 		}
 
@@ -109,9 +102,7 @@ public class InitClustMostDistant implements InitClusterable{
 	}
 
 	private double[] calculateMeanOfPreviousPoints(int fillCount){
-		/*
-		*	Init array to hold sum of all dimensions, and later the mean
-		*/
+		//	Init array to hold sum of all dimensions, and later the mean
 		double[] sum = new double[this.cp[0].length];
 
 		for(int i = 0; i<fillCount; i++)
@@ -122,13 +113,12 @@ public class InitClustMostDistant implements InitClusterable{
 			}
 		}
 
-		for(int i = 0; i<fillCount; i++)
+		
+		for(int i = 0; i<sum.length; i++)
 		{
-			for(int j = 0; j<this.cp[0].length; j++)
-			{
-				sum[j] /= fillCount;
-			}
+			sum[i] /= fillCount;
 		}
+		
 		return sum;
 	}
 
