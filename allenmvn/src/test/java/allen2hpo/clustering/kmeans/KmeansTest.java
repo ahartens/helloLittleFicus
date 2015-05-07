@@ -1,4 +1,4 @@
-package allen2hpo.clustering.kmeans;
+package allen2hpo.clustering.kmeans.algorithms;
 
 import org.junit.Test;
 import org.junit.AfterClass;
@@ -31,7 +31,7 @@ public class KmeansTest{
     /**
     *   Check clustering of big matrix using gap stat
     */
-   /* @Test
+    @Test
     public void testClustering(){
 
         DistComputable dc = new DistEuclidean();

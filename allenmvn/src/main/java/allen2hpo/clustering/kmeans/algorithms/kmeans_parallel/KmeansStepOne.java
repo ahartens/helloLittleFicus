@@ -1,10 +1,10 @@
-package allen2hpo.clustering.kmeans;
+package allen2hpo.clustering.kmeans.algorithms.kmeans_parallel;
 
 import java.util.concurrent.Callable;
 import java.util.List;
 import java.util.ArrayList;
 
-import allen2hpo.clustering.kmeans.KmeansStepOneReturnObj;
+import allen2hpo.clustering.kmeans.algorithms.kmeans_parallel.KmeansStepOneReturnObj;
 import allen2hpo.matrix.Matrix;
 import allen2hpo.clustering.kmeans.distance.*;
 

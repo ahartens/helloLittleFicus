@@ -1,4 +1,4 @@
-package allen2hpo.clustering.kmeans;
+package allen2hpo.clustering.kmeans.algorithms;
 
 import allen2hpo.matrix.Matrix;
 import java.util.Random;

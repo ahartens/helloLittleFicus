@@ -1,4 +1,4 @@
-package allen2hpo.clustering.kmeans;
+package allen2hpo.clustering.kmeans.algorithms;
 
 import allen2hpo.matrix.Matrix;
 import allen2hpo.matrix.DistanceMatrix;
@@ -10,6 +10,8 @@ import allen2hpo.clustering.Clusterable;
 import allen2hpo.clustering.kmeans.calck.*;
 import allen2hpo.clustering.kmeans.distance.*;
 import allen2hpo.clustering.kmeans.initclust.*;
+
+import allen2hpo.matrix.DistanceMatrix;
 
 //import org.apache.log4j.Logger;
 
@@ -117,38 +119,26 @@ public class Kmediod implements Clusterable{
             throw new 
         IllegalArgumentException("cluster init object not initialized");
 
-
-        /* 
-        *   Set data matrix private variable 
-        */
+ 
+        //   Set data matrix private variable 
         this.m = mat;
 
-        /*
-        *   Set K value 
-        */
+        //   Set K value 
         setK(kval);
-
-        /* 
-        *   Set distance calculation object 
-        */
+ 
+        //   Set distance calculation object 
         this.distCalc = dc;
-
-        /* 
-        *   Initialize cluster prototype start values using InitClusterable 
-        *   object
-        */
+ 
+        //   Initialize cluster prototype start values using InitClusterable 
+        //   object
         this.cpInit = cp;
-
-        /* 
-        *   Initialize cluster index array. While iterative clustering, the 
-        *   cluster to
-        *   which a data point belongs to will be stored here. 
-        */
+ 
+        //   Initialize cluster index array. While iterative clustering, the 
+        //   cluster to
+        //   which a data point belongs to will be stored here. 
         this.ci = new int[mat.getRowSize()];
 
-        /*
-        *   Init distance matrix that will store distance of each point to every other.
-        */
+        //   Init distance matrix that will store distance of each point to every other.
         this.distanceMatrix = new DistanceMatrix(this.m,this.distCalc);
 
     }
@@ -171,16 +161,12 @@ public class Kmediod implements Clusterable{
     *   into.
     */
     public void setK(int kval){
-        
-        /* 
-        *   Set K value 
-        */
+         
+        //   Set K value 
         this.k = kval;
-        
-        /* 
-        *   Init cluster size array. Stores number of points assigned to each 
-        *   cluster in step 1. 
-        */
+         
+        //   Init cluster size array. Stores number of points assigned to each 
+        //   cluster in step 1. 
         this.cs = new int[kval];
 
     }
@@ -226,14 +212,10 @@ public class Kmediod implements Clusterable{
     */
     public Matrix[] getClusters(){
 
-        /*
-        *   Initialize array with length k (one matrix per cluster)
-        */
+        //   Initialize array with length k (one matrix per cluster)
         Matrix [] clusters = new Matrix[this.k];
 
-        /*
-        *   Initialize each matrix object in clusters array with correct size
-        */
+        //   Initialize each matrix object in clusters array with correct size
         for (int i = 0;i<this.k;i++)
         {
             double[][] ca = new double[this.cs[i]][this.m.getColumnSize()];
@@ -241,29 +223,25 @@ public class Kmediod implements Clusterable{
             clusters[i] = cm;
         }
 
-        /*
-        *   Initialize array holding counter for each cluster (incremented as 
-        *   add row to matrix)
-        */
+        //   Initialize array holding counter for each cluster (incremented as 
+        //   add row to matrix)
         int [] inClustCount = new int[this.k];
 
 
-        /*
-        *   Iterate through each row in the expression data matrix.
-        *   Place the row into the cluster it belongs to
-        */
+        //   Iterate through each row in the expression data matrix.
+        //   Place the row into the cluster it belongs to
         for (int i=0;i<this.m.getRowSize();i++)
         {
             for(int j=0; j<this.m.getColumnSize(); j++)
             {
-                /*
-                *   in ci is stored index of cluster to which current row 
-                *   (of expression values/single gene) belongs to
-                *   that index corresponds to :
-                *       1. index in clusters Matrix
-                *       2. index in inClustCount (counter for iteration)
-                *   set value of each 'column' in row in Matrix
-                */
+    
+                //   in ci is stored index of cluster to which current row 
+                //   (of expression values/single gene) belongs to
+                //   that index corresponds to :
+                //       1. index in clusters Matrix
+                //       2. index in inClustCount (counter for iteration)
+                //   set value of each 'column' in row in Matrix
+    
                 clusters[this.ci[i]].setValueAtIndex(inClustCount[this.ci[i]],j,
                     this.m.getValueAtIndex(i,j));
             }
@@ -279,15 +257,11 @@ public class Kmediod implements Clusterable{
     */
     public ArrayList<ArrayList<Integer>> getClusterIndices(){
         
-        /*
-        *   Initialize a two dimensional array with k subarrays/rows
-        */
+        //   Initialize a two dimensional array with k subarrays/rows
         ArrayList<ArrayList<Integer>> clusterIndices = new ArrayList<ArrayList<Integer>>();
 
-        /*
-        *   Initialize the subarrays/columns with cluster sizes (which was 
-        *   counted during cluster assignment)
-        */
+        //   Initialize the subarrays/columns with cluster sizes (which was 
+        //   counted during cluster assignment)
         for (int i = 0;i<this.k;i++)
         {
             ArrayList<Integer> list = new ArrayList<Integer>();
@@ -295,17 +269,15 @@ public class Kmediod implements Clusterable{
         }
 
     
-        /*
-        *   Iterate through cluster indices (holds index of cluster to which 
-        *   each row of expression matrix is assigned to)
-        *   Row index determined by cluster index (ith value in clusterIndices
-        *   (ci) array)
-        *   Column index determined by counter, want next 'empty'/unassigned 
-        *   field, namely the count of values which have been added until this 
-        *   point
-        *   Value is i, the index of the data point to which the current cluster
-        *   assignment corresponds to
-        */
+        //   Iterate through cluster indices (holds index of cluster to which 
+        //   each row of expression matrix is assigned to)
+        //   Row index determined by cluster index (ith value in clusterIndices
+        //   (ci) array)
+        //   Column index determined by counter, want next 'empty'/unassigned 
+        //   field, namely the count of values which have been added until this 
+        //   point
+        //   Value is i, the index of the data point to which the current cluster
+        //   assignment corresponds to
         for (int i=0; i<this.ci.length; i++)
         {
             ArrayList<Integer> list = clusterIndices.get(this.ci[i]);
@@ -355,10 +327,8 @@ public class Kmediod implements Clusterable{
     */
     public void doClustering(){
 
-        /*
-        *   Initialize the cluster prototypes using specified or default 
-        *   intialization method.
-        */
+        //   Initialize the cluster prototypes using specified or default 
+        //   intialization method.
 
         this.cpInit.initClusters(this.k,this.m,this.distCalc);
         this.cp = this.cpInit.getClusterPrototypes();
@@ -367,25 +337,18 @@ public class Kmediod implements Clusterable{
         int finishClustering = 0;
         int i = 0;
 
-        for ( i =0; i<this.cp.length; i++){
-            System.out.printf("%f %f    %d\n",this.cp[i][0],this.cp[i][1],this.cpi[i]);
-        }
-        System.out.printf("\n\n");
-
-        /*
-        *   Iterate cluster assignments until less than 1% of points move during
-        *   cluster assignment, or maximum repetition number is reached
-        */
+        //   Iterate cluster assignments until less than 1% of points move during
+        //   cluster assignment, or maximum repetition number is reached
         while(finishClustering == 0 && i< maxRep)
         {
-            /*
-            *   Step 1 : assign data points to nearest cluster
-            */
+
+            //   Step 1 : assign data points to nearest cluster
+
             finishClustering = assignPointsToCluster();
 
-            /*
-            *   Step 2 : recalculate cluster center/prototype
-            */
+
+            //   Step 2 : recalculate cluster center/prototype
+
             calcClusterMean();
 
             i++;
@@ -406,49 +369,37 @@ public class Kmediod implements Clusterable{
     */
     private int assignPointsToCluster(){
 
-        /*
-        *   Init array where the calculated distances of one row to every 
-        *   cluster will be stored.
-        */
+        //   Init array where the calculated distances of one row to every 
+        //   cluster will be stored.
         double[] allDists = new double[this.k];
 
-        /*
-        *   Reinit arrays to store size of clusters (cs) sum of squared error
-        *   (sse)
-        */
+        //   Reinit arrays to store size of clusters (cs) sum of squared error
+        //   (sse)
         this.cs = new int[this.k];
         this.sses = new double[this.k];
         this.ciorg = new ArrayList<ArrayList<Integer>>();
         for(int i = 0; i<this.k; i++){
             this.ciorg.add(new ArrayList<Integer>());
         }
-        /*
-        *   Init counter of points which do not change cluster assignment
-        */
+        //   Init counter of points which do not change cluster assignment
         int countUnmoved = 0;
 
-        /*
-        *   assign each row(gene) to the nearest cluster
-        */
+        //   assign each row(gene) to the nearest cluster
         for (int i=0; i<this.m.getRowSize(); i++) 
         {
+            //   For each cluster prototype, calculate distance to current row 
 
-            /*
-            *   For each cluster prototype, calculate distance to current row 
-            */
             for (int j=0; j<this.k; j++) 
             {
-                /*
-                *   Calculate distance and store in allDistances array 
-                */
+                //   Calculate distance and store in allDistances array 
                 allDists[j] = this.distanceMatrix.getValueAtIndex(i,this.cpi[j]);
             }
 
-            /*
-            *   Find index corresponding to minimum distance (this is the 
-            *   cluster assignment) and store in cluster indices array (ci) at 
-            *   index i (current row in expression data)
-            */
+
+            //   Find index corresponding to minimum distance (this is the 
+            //   cluster assignment) and store in cluster indices array (ci) at 
+            //   index i (current row in expression data)
+
             int clusterIndexOfMinDist = 0;
             double minDist = allDists[0];
 
@@ -462,10 +413,10 @@ public class Kmediod implements Clusterable{
 
             }
 
-            /*
-            *   Check if just found cluster assignment has changed from previous
-            *   iteration through all data points. I
-            */
+
+            //   Check if just found cluster assignment has changed from previous
+            //   iteration through all data points. I
+
             if(this.ci[i] == clusterIndexOfMinDist)
             {
                 countUnmoved ++;
@@ -473,41 +424,37 @@ public class Kmediod implements Clusterable{
             else
             {
                 this.ci[i] = clusterIndexOfMinDist;
-                /*
-                *   Store index of data point (i) currently viewing in 
-                *   array list corresponding to cluster assignment
-                */
+    
+                //   Store index of data point (i) currently viewing in 
+                //   array list corresponding to cluster assignment
+    
             }
             List<Integer> currentCluster = this.ciorg.get(clusterIndexOfMinDist);
             if (!currentCluster.contains(i)) {
                 currentCluster.add(i);
             }
 
-            /*
-            *   Increment cluster size variable for found cluster
-            */
+
+            //   Increment cluster size variable for found cluster
+
             this.cs[clusterIndexOfMinDist]+=1;
 
-            /*
-            *   Add squared error (distance squared) to sse for found cluster 
-            */
+
+            //   Add squared error (distance squared) to sse for found cluster 
+
             this.sses[clusterIndexOfMinDist] += Math.pow(minDist,2);
         }
 
-        /*
-        *   Check for empty cluster. If found then assign empty cluster a data
-        *   point and continue clustering
-        */
+        //   Check for empty cluster. If found then assign empty cluster a data
+        //   point and continue clustering
         boolean emptyClusterFound = checkForEmptyClusterAndReassign();
         if (emptyClusterFound) 
         {
             return 0;
         }
 
-        /*
-        *   If less than 1% of data points change cluster assignment, end 
-        *   clustering
-        */
+        //   If less than 1% of data points change cluster assignment, end 
+        //   clustering
         if (countUnmoved > .99*this.ci.length)
         {
             return 1;
@@ -522,24 +469,22 @@ public class Kmediod implements Clusterable{
     */
     private void calcClusterMean(){
 
-        /*
-        *   For each cluster
-        */
+        //   For each cluster
         for(int i = 0; i<this.ciorg.size(); i++)
         {
-            /*
-            *   For each datapoint (identified by index in expression values) assigned to cluster
-            *   find distance of every other data point in cluster
-            *   store sum of distances of point i to every other point in array
-            */
+
+            //   For each datapoint (identified by index in expression values) assigned to cluster
+            //   find distance of every other data point in cluster
+            //   store sum of distances of point i to every other point in array
+
             List<Integer> currentList = this.ciorg.get(i);
             if (currentList.size() > 0) {
                 
                 
                 double[] sumD = new double[currentList.size()];
-                /*
-                *   Sum distances of every other data point in cluster to 
-                */
+    
+                //   Sum distances of every other data point in cluster to 
+    
                 for(int j = 0; j<currentList.size(); j++)
                 {
                     sumD[j] = 0;
@@ -550,9 +495,9 @@ public class Kmediod implements Clusterable{
                     }
                 }
 
-                /*
-                *   Find minimum distance. Assign cluster centroid to that point
-                */
+    
+                //   Find minimum distance. Assign cluster centroid to that point
+    
                 double minD = sumD[0];
                 int indexMinD = 0;
                 for(int j = 1; j<sumD.length; j++){
@@ -574,21 +519,16 @@ public class Kmediod implements Clusterable{
     *   point from largest sse cluster to empty cluster prototype
     */
     private boolean checkForEmptyClusterAndReassign(){
-        /*
-        *   Iterate through each cluster size integer
-        */
+
+        //   Iterate through each cluster size integer
         for (int i=0; i<this.cs.length; i++)
         {
-            /*
-            *   If a cluster is empty, reinitialize the cluster prototype with a
-            *   point belonging to the cluster witht he highest SSE (the cluster
-            *   with the largest scatter)
-            */
+            //   If a cluster is empty, reinitialize the cluster prototype with a
+            //   point belonging to the cluster witht he highest SSE (the cluster
+            //   with the largest scatter)
             if (this.cs[i] == 0 )
             {
-                /*
-                *   Find cluster with the largest sse
-                */
+                //  Find cluster with the largest sse
                 int idxMaxSSE = 0;
                 double maxSSE = this.sses[0];
 
@@ -601,21 +541,9 @@ public class Kmediod implements Clusterable{
                     }
                 }
 
-                /*
-                *   Pick a random row from cluster with largest SSE
-                */
-                /*Random rand = new Random();
-                ArrayList<Integer> pointsForMaxSSECluster = this.ciorg.get(idxMaxSSE);
-                int idxRand = (int)(pointsForMaxSSECluster.size() * rand.nextDouble());
-
-                System.out.println("setting new : size of points in " +idxMaxSSE+" : "+pointsForMaxSSECluster.size() + " :rand int + "+idxRand );
-                int indexOfNewCP = pointsForMaxSSECluster.get(idxRand);
-*/
-
                 int indexOfNewCP = findIndexOfMostDistantPointInCluster(idxMaxSSE);
-                /*
-                *   Set empty cluster cluster prototype to that point
-                */
+
+                //   Set empty cluster cluster prototype to that point
                 for (int j=0; j<this.cp[0].length; j++)
                 {
                     this.cp[i][j] = this.m.getValueAtIndex(indexOfNewCP,j);
@@ -653,13 +581,12 @@ public class Kmediod implements Clusterable{
         double currentDist = 0;
         int indexMaxDistFromCurrent = 0;
         
-        for(int i = 0; i<pointsInCluster.size(); i++){
-            /*  Set all distance variables to 0 */
-        
-            /*  Calculate distance from mean of previous */
+        for(int i = 0; i<pointsInCluster.size(); i++){        
+            //  Calculate distance from mean of previous 
             currentDist = this.distCalc.calculateProximity
                 (sum,m.getRowAtIndex(pointsInCluster.get(i)));
-            /*  Check if furthest away and set current max if it is */
+            
+            //  Check if furthest away and set current max if it is
             if (currentDist > maxDist) 
             {
                 indexMaxDistFromCurrent = pointsInCluster.get(i);

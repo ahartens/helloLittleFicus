@@ -1,4 +1,4 @@
-package allen2hpo.clustering.kmeans;
+package allen2hpo.clustering.kmeans.algorithms.kmeans_parallel;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package allen2hpo.clustering.kmeans;
+package allen2hpo.clustering.kmeans.algorithms;
 
 import org.junit.Test;
 import org.junit.AfterClass;
@@ -37,7 +37,7 @@ public class KmediodTest{
     /**
     *   Check clustering of big matrix using gap stat
     */
-    @Test
+    //@Test
     public void testClustering(){
 
         DistComputable dc = new DistEuclidean();
@@ -98,15 +98,15 @@ public class KmediodTest{
             for(int j =0; j<actualClusters.length;j++)
             {
                 if (Math.abs(clusterPrototypes[i][0]-actualClusters[j][0])<=.2) {
-                    System.out.printf("{");
+                    //System.out.printf("{");
 
                     for(int x =0; x<clusterPrototypes[0].length;x++)
                     {
-                        System.out.printf("%f,",clusterPrototypes[i][x]);
+                        //System.out.printf("%f,",clusterPrototypes[i][x]);
 
                         Assert.assertEquals(clusterPrototypes[i][x],actualClusters[j][x],.2);
                     }
-                    System.out.printf("},");
+                    //System.out.printf("},");
 
                 }
             }

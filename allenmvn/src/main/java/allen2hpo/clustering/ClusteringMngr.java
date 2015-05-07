@@ -5,11 +5,11 @@ import allen2hpo.matrix.Matrix;
 
 import allen2hpo.matrix.FileWriter;
 
-import allen2hpo.clustering.kmeans.Kmeans;
+import allen2hpo.clustering.kmeans.algorithms.Kmeans;
 import allen2hpo.clustering.kmeans.calck.GapStat;
 import allen2hpo.clustering.kmeans.initclust.*;
 import allen2hpo.clustering.kmeans.distance.*;
-import allen2hpo.clustering.kmeans.KmeansParallel;
+import allen2hpo.clustering.kmeans.algorithms.kmeans_parallel.KmeansParallel;
 import allen2hpo.clustering.kmeans.calck.GapStatParallel;
 
 import org.apache.log4j.Logger;

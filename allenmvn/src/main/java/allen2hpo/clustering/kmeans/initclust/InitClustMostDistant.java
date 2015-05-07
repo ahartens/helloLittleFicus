@@ -40,7 +40,6 @@ public class InitClustMostDistant implements InitClusterable{
 
        	Random rand = new Random();
        	int randVal = (int)(m.getRowSize() * rand.nextDouble());
-       	System.out.println("rand value is : "+randVal);
 
 		//	Select first point in data matrix as initial cluster
         this.cp[0] = m.getRowAtIndex(randVal);

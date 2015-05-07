@@ -1,4 +1,4 @@
-package allen2hpo.clustering.kmeans;
+package allen2hpo.clustering.kmeans.algorithms.kmeans_parallel;
 
 import org.junit.Test;
 import org.junit.AfterClass;
@@ -42,18 +42,26 @@ public class KmeansParallelTest{
          /*
         *   Do gap stat to find k. should return 3
         */
-        GapStatParallel gap = new GapStatParallel(bigMatrix,dc,ic,2);
-        Assert.assertEquals(3,gap.getK());
+        int repeats = 10;
+        int sum = 0;
+        for (int i = 0; i<repeats; i++){
+            GapStatParallel gap = new GapStatParallel(bigMatrix,dc,ic,2);
+            sum += gap.getK();
+        }
+        int finalGap = (int)Math.floor(sum/repeats);
+        System.out.println("FLOOR WAS : "+finalGap);
+        Assert.assertEquals(3,finalGap);
 
         
         //   Do kmeans clustering with k found by gap stat and get resulting clusters
         
-        KmeansParallel km = new KmeansParallel(bigMatrix,gap.getK(),dc,ic);
+        KmeansParallel km = new KmeansParallel(bigMatrix,finalGap,dc,ic);
         km.doClustering();
         double[][] clusterPrototypes = km.getClusterPrototypes();
 
 
         
+                
         //   Best cluster centroids
         
         double[][] actualClusters = {{41.1,41.7},{11.9,37.8},{33.7,17.6}};

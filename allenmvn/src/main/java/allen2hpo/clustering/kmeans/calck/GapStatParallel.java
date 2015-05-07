@@ -1,7 +1,7 @@
 package allen2hpo.clustering.kmeans.calck;
 
 import allen2hpo.matrix.*;
-import allen2hpo.clustering.kmeans.KmeansParallel;
+import allen2hpo.clustering.kmeans.algorithms.kmeans_parallel.KmeansParallel;
 import allen2hpo.clustering.kmeans.distance.*;
 import allen2hpo.clustering.kmeans.initclust.*;
 

@@ -1,4 +1,4 @@
-package allen2hpo.clustering.kmeans;
+package allen2hpo.clustering.kmeans.algorithms.kmeans_parallel;
 
 import allen2hpo.matrix.Matrix;
 import java.util.Random;
@@ -15,10 +15,10 @@ import allen2hpo.clustering.Clusterable;
 import allen2hpo.clustering.kmeans.calck.*;
 import allen2hpo.clustering.kmeans.distance.*;
 import allen2hpo.clustering.kmeans.initclust.*;
-import allen2hpo.clustering.kmeans.KmeansStepOneReturnObj;
+import allen2hpo.clustering.kmeans.algorithms.kmeans_parallel.KmeansStepOneReturnObj;
 
-import allen2hpo.clustering.kmeans.KmeansStepOne;
-import allen2hpo.clustering.kmeans.KmeansStepTwo;
+import allen2hpo.clustering.kmeans.algorithms.kmeans_parallel.KmeansStepOne;
+import allen2hpo.clustering.kmeans.algorithms.kmeans_parallel.KmeansStepTwo;
 
 import allen2hpo.matrix.Matrix;
 
