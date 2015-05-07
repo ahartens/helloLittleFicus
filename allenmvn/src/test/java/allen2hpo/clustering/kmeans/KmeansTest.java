@@ -31,7 +31,7 @@ public class KmeansTest{
     /**
     *   Check clustering of big matrix using gap stat
     */
-    @Test
+   /* @Test
     public void testClustering(){
 
         DistComputable dc = new DistEuclidean();
