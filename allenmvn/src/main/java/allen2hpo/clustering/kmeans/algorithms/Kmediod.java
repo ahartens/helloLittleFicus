@@ -11,7 +11,6 @@ import allen2hpo.clustering.kmeans.calck.*;
 import allen2hpo.clustering.kmeans.distance.*;
 import allen2hpo.clustering.kmeans.initclust.*;
 
-import allen2hpo.matrix.DistanceMatrix;
 
 //import org.apache.log4j.Logger;
 

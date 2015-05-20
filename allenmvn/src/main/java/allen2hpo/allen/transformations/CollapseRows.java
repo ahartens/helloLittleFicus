@@ -55,8 +55,10 @@ public class CollapseRows{
             *   Each gene is a unique array of ints, 
             *   Each int is the index of expression value in original data matrix
             */
-            List<List<Number>> indices = createCollapsedIndicesArray(geneIds, geneNames);
+            //List<List<Number>> indices = createCollapsedIndicesArray(geneIds, geneNames);
             
+            List<List<Number>> indices = searchForRepeatGenesAndCreateCollapsedIndicesArray(geneIds, geneNames);
+
             /**
             *   Average across rows that correspond to one gene
             */
@@ -215,5 +217,68 @@ public class CollapseRows{
             *   Create matrix object wrapper for condensed data
             */
             this.condData = new Matrix(condensedData);
+
         }
+
+        public void searchForRepeatGenes(ArrayList<String> geneNames){
+
+            for (int i=0 ; i<geneNames.size(); i++){
+                for(int j=0; j<geneNames.size(); j++){
+                    if (geneNames.get(i).equals(geneNames.get(j))) {
+                        System.out.println(geneNames.get(i) + " is equal to "+geneNames.get(j));
+                    }
+                }
+            }
+        }
+
+
+        /**
+        *   Iterates through probes and compares gene ids, placing indices of probes
+        *   with identical gene ids into array at index of unique gene id
+        *   @param  int[] array of gene names with repeated gene ids
+        *   @return List<List<Number>> 2d array where each row is a unique gene and each column is the index of expressionvalue that corresponds to gene
+        */
+        private List<List<Number>> searchForRepeatGenesAndCreateCollapsedIndicesArray(ArrayList<Integer> geneIds, ArrayList<String> geneNames){
+
+            
+            //   Init 2d array list that will contain one array per gene
+            //   each array containg indices of expression values in original 
+            //   expression matrix (referring to that gene)  
+            List<List<Number>> condensedIndices = new ArrayList<List<Number>>();
+
+            
+            //   Init condensed names array list
+            this.condNames = new ArrayList<String>();
+
+            
+            for (int i=0 ; i<geneNames.size(); i++)
+            {
+                //  Haven't come across this gene yet
+
+                if (!this.condNames.contains(geneNames.get(i))) 
+                {
+                    //  Add current gene name and index of current expression
+                    this.condNames.add(geneNames.get(i));
+                    List<Number> indicesForCurrent = new ArrayList<Number>();
+                    indicesForCurrent.add(i);
+
+                    //  Search through list distal to this point for repeats of gene
+
+                    for(int j=i; j<geneNames.size(); j++)
+                    {
+
+                        if (geneNames.get(i).equals(geneNames.get(j))) 
+                        {
+                            indicesForCurrent.add(j);
+                            System.out.println(geneNames.get(i) + " is equal to "+geneNames.get(j));
+                        }
+                    }
+
+                    condensedIndices.add(indicesForCurrent);
+                }
+                
+            }
+            return condensedIndices;
+        }
+
 }

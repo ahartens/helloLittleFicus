@@ -4,12 +4,13 @@ import allen2hpo.allen.*;
 import allen2hpo.allen.ontology.*;
 import allen2hpo.clustering.ClusteringMngr;
 import allen2hpo.matrix.*;
-
-import allen2hpo.hpo.HPOMngr;
+import allen2hpo.hpo.*;
 
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.io.File;
+import java.io.PrintWriter;
+
 
 /** Command line parser from apache */
 import org.apache.commons.cli.CommandLine;
@@ -103,7 +104,7 @@ public class Allen2HPO {
         int status = allen2hpo.checkAllAllenBrainFilesPresent(parentDir);
         if (status != 2) 
         {
-            allen2hpo.doSingleDonorAnalysis(parentDir,status);
+            allen2hpo.doSingleDonorAnalysis(parentDir);
             donorCount ++;
         }
 
@@ -130,7 +131,7 @@ public class Allen2HPO {
 
                     if (status != 2) 
                     {
-                        allen2hpo.doSingleDonorAnalysis(child,status);
+                        allen2hpo.doSingleDonorAnalysis(child);
                         donorCount++;
                     }
                 }
@@ -143,8 +144,10 @@ public class Allen2HPO {
             System.out.println("No compatible Allen Brain directories found");
         }
 
-
-
+        /*String developmentalDataPath = allen2hpo.getDevelopmentalDataPath();
+        if (developmentalDataPath != null) {
+            allen2hpo.doDevelopmentalAnalysis(new File(developmentalDataPath));
+        }*/
     }
 
 
@@ -158,6 +161,9 @@ public class Allen2HPO {
     *   data and sample/probe annotations (OR subdirectories containing said) */
     private String dataPath = null;
 
+    private String developmentalDataPath = null;
+
+
     /** Optional input parsed from command line. If not specified will print 
     *   into dataPath given in Clusters_OUTPUT.csv*/
     private String outputPath = null;
@@ -166,10 +172,17 @@ public class Allen2HPO {
     private String hpoGeneToPhenotypePath = null;
     private String hpoPhenotypeToGenePath = null;
 
+    private enum DirectoryType {DEVELOPMENTAL,SINGLE_DONOR};
+
 
     /** Returns path to allen brain data as parsed from command line */
     public String getDataPath(){
         return this.dataPath;
+    }
+
+    /** Returns path to allen brain data as parsed from command line */
+    public String getDevelopmentalDataPath(){
+        return this.developmentalDataPath;
     }
 
     /** Logger object to output info/warnings */
@@ -207,28 +220,93 @@ public class Allen2HPO {
     *   </ol>
     *   </p>
     */
-    private void doSingleDonorAnalysis(File dir, int serializedDataFound){
+    private void doSingleDonorAnalysis(File dir){
         
-        //AllenDataMngr brainDataMngr = null;
-        
-        AllenDataMngr brainDataMngr = getAllenDataFromDirectory(dir,serializedDataFound);
-        
-        clusterAllenBrainData(brainDataMngr,dir);
-       // ClusteringMngr clusteringMngr = new ClusteringMngr(brainDataMngr);
-        //clusteringMngr.writePopulationGenesToFile("/Users/ahartens/Desktop/population.txt");
-        
-        //doHpoTermAnalysis(brainDataMngr,dir);
-       // brainDataMngr.calculateDistanceMatrixForTissueLocations();
+        //  Get data either by deserializing or parsing        
+        AllenDataMngr brainDataMngr = getAllenDataFromDirectory(dir,DirectoryType.SINGLE_DONOR);
 
-        //OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
-       
-        //brainDataMngr.collapseTissuesToSelectedParents(ontology);
+        
+        //  Print normalized and collapsed expression data
+        Matrix data = brainDataMngr.getExpression();
+        data.printToFile("/Users/ahartens/Desktop/NormalizedBrainExpression2.csv");
+        data = null;
+
+        //  Print row annotations to nromalized and collapsed expressiond ata 
+        ArrayList <String> names = brainDataMngr.getAllGenes();
+        PrintWriter writer = null;
+        try{
+            writer = new PrintWriter("/Users/ahartens/Desktop/NormalizedBrainExpressionRowAnnots2.txt", "UTF-8");
+        }
+        catch(Exception e){
+        }
+        for (int i = 0; i<names.size(); i++){
+            writer.printf("%s\n",names.get(i));
+        }
+        writer.close();
+        writer = null; 
+        
+
+        
+        //  Analyze P values outputed from R
+        /*PvalueTableAnalyzer analyzer = new PvalueTableAnalyzer(brainDataMngr.getTissueNames());
+        analyzer.readPvalueTable();
+        analyzer.findSignificantPvaluesAndOutput(.000000001);
+
+        /*
+        //  Cluster data and print out
+        clusterAllenBrainData(brainDataMngr,dir);*/
+
+        
+        //  Parse hpo data and cluster 
+        //doHpoTermAnalysis(brainDataMngr,dir);
+        
+        //brainDataMngr.calculateDistanceMatrixForTissueLocations();
+
+        /*
+        //  Parse brain tissue ontology data
+        OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
+        brainDataMngr.collapseTissuesToSelectedParents(ontology);*/
 
         
     }
 
-        //  If serialized data present deserialize to use for clustering
-    private AllenDataMngr getAllenDataFromDirectory(File dir, int serializedDataFound){
+    private void doDevelopmentalAnalysis(File dir){
+        
+        //  Get data either by deserializing or parsing        
+        AllenDataMngr brainDataMngr = getAllenDataFromDirectory(dir,DirectoryType.DEVELOPMENTAL);
+        
+
+
+        //  Analyze P values outputed from R
+        PvalueTableAnalyzer analyzer = new PvalueTableAnalyzer(brainDataMngr.getTissueNames(),brainDataMngr.getTimepoints());
+        analyzer.readPvalueTable();
+        analyzer.findSignificantPvaluesAndOutput(.000000001);
+        
+        /*
+        //  Cluster data and print out
+        clusterAllenBrainData(brainDataMngr,dir);*/
+
+        /*
+        //  Parse hpo data and cluster 
+        doHpoTermAnalysis(brainDataMngr,dir);*/
+
+        /*//  Parse brain tissue ontology data
+        OntologyDataMngr ontology = new OntologyDataMngr(dir.getPath());
+        brainDataMngr.collapseTissuesToSelectedParents(ontology);*/
+
+        
+    }
+
+    /**  
+    *   Encapsulates expression and metadata in allenDataMngr object, either
+    *   by parsing files in directory provided or deserializing already created
+    *   object
+    *   @param File containing necessary files
+    *   @param DirectoryType specification if developmental data or single donor, 
+    *   which changes how files are parsed 
+    */
+    private AllenDataMngr getAllenDataFromDirectory(File dir, 
+                                                    DirectoryType type){
         
         AllenDataMngr brainDataMngr = null;
         
@@ -237,15 +315,21 @@ public class Allen2HPO {
 
         boolean deserializeSuccessful = false;
 
-        if (serializedDataFound == 1) {
-            brainDataMngr = deserializeData(serializedDataPath);
-            if(brainDataMngr != null){
-                deserializeSuccessful = true;
-                log.info("Serialized data found and could be successfully read");
-            }
-            else
-            {
-                log.info("Found serialized data, using for clustering");
+        for(String fileName : dir.list()){
+            if (fileName.equals("SerializedAllenDataMngr.bin")){
+                
+                brainDataMngr = deserializeData(serializedDataPath);
+                
+                if(brainDataMngr != null){
+                    deserializeSuccessful = true;
+                    log.info("Serialized data found and could be successfully read");
+                }
+                else
+                {
+                    log.info("Found serialized data but could not be read. Reparsing");
+                }
+
+                break;
             }
         }
 
@@ -261,25 +345,26 @@ public class Allen2HPO {
 
             brainDataMngr = new AllenDataMngr(dir);
 
-            //  Parse directory 
+            if (type == DirectoryType.DEVELOPMENTAL){
+                //  Parse directory 
+                brainDataMngr.parseDevelopmentalExpressionAndAnnotations();
+            }
+            else{
+                //  Parse directory 
+                brainDataMngr.parseExpressionAndAnnotations();
+                
+                //  Remove probes where gene name and probe name are identical
+                brainDataMngr.removeUnknownProbeData();
 
-            brainDataMngr.parseExpressionAndAnnotations();
-
-            //  Remove probes where gene name and probe name are identical
+                //  Average expression of probes with same gene name to create 
+                //  unique gene-expression pairs
+                brainDataMngr.collapseRepeatProbesToUniqueGenes();
+            }
            
-            brainDataMngr.removeUnknownProbeData();
-            
-            //  Average expression of probes with same gene name to create 
-            //  unique gene-expression pairs
-           
-            brainDataMngr.collapseRepeatProbesToUniqueGenes();
-
             //  Normalize the data
-
             brainDataMngr.meanNormalizeData();
 
             //  Serialize data and save to directory
-
             serializeDataToFile(brainDataMngr,serializedDataPath);
         }
         
@@ -344,7 +429,6 @@ public class Allen2HPO {
         hpoMngr.getExpressionDataForHpoAnnotatedGenes(brainDataMngr);
         hpoMngr.ptg_organizeHPOAnnotatedExpressionDataByHpo();
         hpoMngr.gtp_organizeHPOAnnotatedExpressionDataByHpo();
-        //hpoMngr.organizeParsedData();
 
         //hpoMngr.getExpressionDataForHpoAnnotatedGenes(brainDataMngr);
 
@@ -503,6 +587,8 @@ public class Allen2HPO {
             Options options = new Options();
 
             options.addOption(new Option("D","data",true,"Path to data"));
+            options.addOption(new Option("T","timepoints",true,"Path to developmental data"));
+
             options.addOption(new Option("G","hpo",true,"genes to phenotype Hpo annotation file path"));
             options.addOption(new Option("P","hpo",true,"phenotype to genes Hpo annotation file path"));
 
@@ -523,6 +609,9 @@ public class Allen2HPO {
             } 
             if (cmd.hasOption("P")) {
                 this.hpoPhenotypeToGenePath = cmd.getOptionValue("P");
+            } 
+            if (cmd.hasOption("T")) {
+                this.developmentalDataPath = cmd.getOptionValue("T");
             } 
 
         }

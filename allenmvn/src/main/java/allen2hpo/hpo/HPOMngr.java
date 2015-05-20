@@ -83,7 +83,10 @@ public class HPOMngr implements Serializable{
     //  Public Methods                              
     //__________________________________________________________________________
 
-
+	/**
+	*	Parse Two hpo files (gene to phenotype and phenotype to gene)
+	*	Organize resulting phenotype/gene lists
+	*/
 	public void parseHPO(){
 		//	Read file line by line, storing column 2 + 3 in gene names and terms		
 		log.info("Started parsing genes to phenotype");		
@@ -176,7 +179,7 @@ public class HPOMngr implements Serializable{
         Matrix dataMtrx = new Matrix(expressionForAnnotatedGenes);
 
         //	Write to file
-        dataMtrx.printToFile("/Users/ahartens/Desktop/HpoannotatedTerms.csv");
+        //dataMtrx.printToFile("/Users/ahartens/Desktop/HpoannotatedTerms.csv");
 
 
         this.hpoAnnotatedGeneExpressionMngr = new AllenDataMngr();
@@ -608,12 +611,13 @@ public class HPOMngr implements Serializable{
         	writer.writeString(genes.get(i));
         	writer.writeDelimit();
         	int j;
-        	for(j = 0; j<m.getColumnSize()-2; j++){
+        	System.out.println("SIZE OF MATRIX IS "+m.getColumnSize());
+        	for(j = 0; j<m.getColumnSize()-1; j++){
         		writer.writeDouble(m.getValueAtIndex(i,j));
         		writer.writeDelimit();
         	}
-        	writer.writeDouble(m.getValueAtIndex(i,j+1));
 
+        	writer.writeDouble(m.getValueAtIndex(i,j));
         	writer.writeNextLine();
         }
 

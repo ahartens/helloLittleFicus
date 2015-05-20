@@ -1,3 +1,222 @@
+20 May 2015
+	QUESTIONS
+********************************************************************************
+********************************************************************************
+	
+	1) Creates data frame with true and false data and corresponding response 
+	dependent variable
+
+	2) Creates formula for model with same number of variables as columns
+	(one variable per column)
+
+	3) Perform GLM
+
+********************************************************************************
+
+
+	truetable = read.table('/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/Abnormal_CNS_myelination.csv',  header=FALSE,	sep=",",	fill=TRUE,	skip = 2,	row.names=1)
+
+
+	falsetable = read.table('/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/Abnormal_morphology_of_bones_of_the_upper_limbs.csv',header=FALSE,sep=",",fill=TRUE,	skip = 2,	row.names=1)
+	falsetableCombined = falsetable
+
+	falsetable = read.table('/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/Abnormality_of_circulating_enzyme_level.csv',header=FALSE,sep=",",fill=TRUE,	skip = 2,	row.names=1)
+	falsetableCombined = rbind(falsetableCombined,falsetable)
+
+
+	falsetable = read.table('/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/Abnormality_of_the_genitourinary_system.csv',header=FALSE,sep=",",fill=TRUE,	skip = 2,	row.names=1)
+	falsetableCombined = rbind(falsetableCombined,falsetable)
+
+
+
+	allForTest = rbind(truetable,falsetableCombined)
+
+
+	y = matrix(nrow=nrow(allForTest),ncol=1)
+	for(i in 1:nrow(truetable)){
+	  y[i] = 1
+	}
+	for(i in 1:nrow(falsetableCombined)){
+	  y[nrow(truetable)+i] = 0;
+	}
+
+
+	vars = paste("V",2:ncol(allForTest)+1,sep="")
+	allVars = paste(vars,collapse="+")
+	fmla = as.formula(paste("y~",allVars))
+
+	model = glm(fmla,allForTest,family=binomial)
+
+********************************************************************************
+********************************************************************************
+
+********************************************************************************
+********************************************************************************
+	
+	Goes through all random normalized data and uses model created to predict
+	if gene a member of 'true' group. prints results out
+
+********************************************************************************
+
+
+	data = read.table('/Users/ahartens/Desktop/NormalizedBrainExpression2.csv',header=FALSE,sep=",")
+	
+	names = read.table('/Users/ahartens/Desktop/NormalizedBrainExpressionRowAnnots2.csv',header=FALSE,sep=",")
+	names = as.matrix(names)
+	
+	results = matrix(nrow=30,ncol=2)
+	results = as.data.frame(results)
+	for (i in 1:nrow(results)){
+	  results[i,1] = names[i,1]
+	  response = predict(model,data[i,],type="response")
+	  results[i,2] = response[[1]]
+	}
+	write.table(results, file="/Users/ahartens/Desktop/tryPredict2.csv",append=TRUE, sep=",",col.names = F, row.names = F);
+
+********************************************************************************
+********************************************************************************
+
+
+
+
+
+
+
+
+
+16 May 2015
+	
+********************************************************************************
+
+
+	//	Programatically imput data tables
+	truetable = read.table('/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/Abnormal_CNS_myelination.csv',header=FALSE,sep=",",fill=TRUE)
+	truetable = truetable[-1,-1]
+
+	falsetable = read.table('/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/Abnormal_morphology_of_bones_of_the_upper_limbs.csv',header=FALSE,sep=",",fill=TRUE)
+	falsetableClipped = falsetable[-1,-1]
+	falsetableCombined = falsetableClipped
+
+	falsetable = read.table('/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/Abnormality_of_circulating_enzyme_level.csv',header=FALSE,sep=",",fill=TRUE)
+	falsetableClipped = falsetable[-1,-1]
+	falsetableCombined = rbind(falsetableCombined,falsetableClipped)
+
+
+	falsetable = read.table('/Users/ahartens/Desktop/Robinson/RESULTS/hpoData/ptg/Abnormality_of_the_genitourinary_system.csv',header=FALSE,sep=",",fill=TRUE)
+	falsetableClipped = falsetable[-1,-1]
+	falsetableCombined = rbind(falsetableCombined,falsetableClipped)
+
+	allForTest = rbind(truetable,falsetableCombined)
+
+
+	testMatrix = matrix(nrow=nrow(allForTest),ncol=ncol(allForTest))
+	for (i in 1:nrow(allForTest)){
+	  for(j in 1:ncol(allForTest)){
+	    testMatrix[i,j] = allForTest[i,j] 
+	  }
+	}
+	testMatrix = as.data.frame(testMatrix)
+
+	//	Programatically create response values
+	y = matrix(nrow=nrow(testMatrix),ncol=1)
+	for(i in 1:nrow(truetable)){
+	  y[i] = 1
+	}
+	n
+	for(i in 1:nrow(falsetableCombined)){
+	  y[nrow(truetable)+i] = 0;
+	}
+
+
+	//	Create variables
+	vars = paste("V",1:ncol(testMatrix),sep="")
+	allVars = paste(vars,collapse="+")
+	fmla = as.formula(paste("y~",allVars))
+
+	//	Create model
+	model = glm(fmla,testMatrix,family=binomial)
+
+	****************************************************************************
+
+
+
+
+15 May 2015
+
+	
+	****************************************************************************
+	/*
+	*	Use model created on 13.15 to predict membership of genes in 'nail color' to 'abnormal CNS mylenation' (to which model was created)
+	*		
+	*/
+
+	try = read.table('/Volumes/Transcend/lab/ptg_singleDonor/Abnormality_of_nail_color.csv',header=FALSE,sep=",")
+	asMatrix = as.matrix(try)
+	names = asMatrix[,1]
+	data = matrix(nrow=nrow(try)-1,ncol=ncol(try)-1)
+	for (i in 2:nrow(try)){
+	  for(j in 2:ncol(try)){
+	    data[i-1,j-1] = try[i,j] 
+	  }
+	}
+	data = as.data.frame(data)
+
+	results = matrix(nrow=nrow(data),ncol=2)
+	for (i in 1:nrow(data)){
+	  results[i,1] = names[i+1]
+	  results[i,2] = predict(model,data[i,],type="response")
+	}
+	write.table(results, file="/Users/ahartens/Desktop/tryPredict.csv",append=TRUE, sep=",",col.names = F, row.names = F);
+
+
+	****************************************************************************
+13.	May 2015
+	
+	true.csv =  "Abnormal_CNS_myelination.csv" = true
+	false.csv = "Abnormal_morphology_of_bones_of_the_upper_limbs.csv" + "Abnormality_of_circulating_enzyme_level.csv"
+	column 946 has all 1s for true, all 0s for false
+
+	in r make table = rbind (true + false)
+	seen = table[,946]
+	data = table[,c(1:945)]
+
+	//	NEED TO MAKE A FORMULA
+	xname = paste("V",1:945,sep="")
+	fmla = as.formula(paste("y~",paste(xname,collapse="+")))
+	
+	//	MAKE MODEL
+	model = glm(fmla,data,family=binomial)
+
+	//	MAKE PREDICATIONS BASED ON MODEL
+	predict(huh,data[1,])
+
+
+	//	TRY NLS : DOESN'T WORK BECAUSE DON'T HAVE NOISE! EITHER 'TRUE OR FALSE', 0 OR 1 APPARENTLY GIVE WARNING : 
+	"Error in nls(tryform, data) : singular gradient"
+	tryform = "seen~a/(1+exp(-(b+ t1*V1 + t2*V2 + t3*V3)/c))"
+	why = nls(tryform,data)
+
+	- MABYE PER GENE, IF IT IS MEMBER OF ONLY ONE HPO TERM THEN IT IS A TRUE '1'
+	THE MORE HPO TERMS IT IS A MEMBER OF, THE LOWER IS SCORE
+
+	true = read.table("/Users/ahartens/Desktop/true.csv",sep=",",header=FALSE)
+	false = read.table("/Users/ahartens/Desktop/false.csv",sep=",",header=FALSE)
+	all = rbind(true,false)
+	y = all[,946]
+	all=all[,c(1:945)]
+
+	myvars = paste("t", 1:945, sep="")
+	vvars = paste("V",1:945,sep="")
+	for (i in 1:945)
+	    vvars[i] = paste(myvars[i],vvars[i],sep="*")
+
+	allVars = paste(vvars,collapse="+")
+
+	form = paste("y~a/(1+exp(-(b+",allVars)
+	form = paste(form,")))")
+	form = as.formula(form)
+	why = nls(form,data)
+
 30. January 2015
 	DONE TODAY :
 	uploaded everything to svn, as well as cleaned up svn directory

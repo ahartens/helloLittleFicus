@@ -54,6 +54,10 @@ public class AllenDataMngr implements Serializable{
 	*	SampleAnnot.csv. Order == columns in microarrayexpression.csv */
 	private ArrayList<String> tissueNames = null;
 
+	/** Ordered array of all timepoints (ie tissue) names derived from 
+	*	columns_metadata.csv */
+	private ArrayList<String> timepoints = null;
+
 	/**	Ordered array of MRI voxels for tissues parsed from SampleAnnot */
 	private double[][] tissueLocations = null;
 
@@ -145,6 +149,56 @@ public class AllenDataMngr implements Serializable{
 
     }
 
+    /** 
+    *   Parse 3 major files in Allen Brain directory. 
+    *	<br>(Probes.csv, SampleAnnot.csv, MicroarrayExpression.csv)
+    */
+	public void parseDevelopmentalExpressionAndAnnotations(){
+		
+		/**
+		*	Parse Probes.csv and set gene Ids and names
+		*/
+		log.info("Begin parsing developmental probe annotation");
+
+		ReadAnnots probes = 
+			new ReadDevelopmentalProbeAnnots(this.dataPath.getAbsolutePath()
+            +this.dataPath.separator+"rows_metadata.csv");
+		this.geneIds = probes.getIds();
+		this.geneNames = probes.getNames();
+        log.info("Finished parsing probe annotations : " + this.geneIds.size());
+
+
+		/**
+		*	Parse SampleAnnot.csv and set tissue ids and names
+		*/
+		log.info("Begin parsing developmental sample annotation");
+		ReadDevelopmentalTissueAnnots tissues = 
+			new ReadDevelopmentalTissueAnnots(this.dataPath.getAbsolutePath()
+            +this.dataPath.separator+"columns_metadata.csv");
+		//this.tissueIds = tissues.getIds();
+		this.tissueNames = tissues.getNames();
+		this.timepoints = tissues.getTimepoints();
+        log.info("Finished parsing sample annotations : " + this.tissueNames.size() 
+        	+ " timepoints : "+this.timepoints.size());
+
+		/**
+		*	Parse MicroarrayExpression.csv
+		*	Uses length of probes.csv and sampleannot.csv to specify dimensions 
+		*	of Matrix array storing data
+		*	True because first column is a header specifying probe id (should 
+		*	be parsed and stored separately frome expression data)
+		*/
+		log.info("Begin parsing microarry expression");
+		ReadExpression expression = 
+			new ReadExpression(this.dataPath.getAbsolutePath()
+            +this.dataPath.separator+"expression_matrix.csv",
+				this.geneNames.size(),this.tissueNames.size(),true);
+		this.data = expression.getData();
+        log.info("Finished parsing expression matrix : " 
+        		+ this.data.getRowSize() + " x " +this.data.getColumnSize());
+
+    }
+
    
 
 	/**
@@ -168,6 +222,7 @@ public class AllenDataMngr implements Serializable{
 		this.data = collapser.getData();
 		this.geneNames = collapser.getGeneNames();
 
+		collapser.searchForRepeatGenes(this.geneNames);
 
 		log.info("Number of unique genes : "
 			+ this.data.getRowSize());
@@ -209,6 +264,12 @@ public class AllenDataMngr implements Serializable{
 	}
 
 	public void removeUnknownProbeData(){
+		/*this.indicesUnknownProbes = new ArrayList<Integer>();
+		for (int i = 0 ; i<this.geneNames.size(); i++){
+			if (this.geneNames.get(i).con) {
+				
+			}
+		}*/
 		log.info("Number of unknown probes (probes beginning with A_) : "
 				+ this.indicesUnknownProbes.size());
 		log.info("Dimensions before removal : Gene names : "
@@ -269,6 +330,13 @@ public class AllenDataMngr implements Serializable{
 	*/
 	public ArrayList<String> getTissueNames(){
 		return this.tissueNames;
+	}
+
+	/** 
+	*
+	*/
+	public ArrayList<String> getTimepoints(){
+		return this.timepoints;
 	}
 
 	/**

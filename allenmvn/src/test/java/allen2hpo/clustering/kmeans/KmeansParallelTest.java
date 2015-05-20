@@ -31,7 +31,7 @@ public class KmeansParallelTest{
     /**
     *   Check clustering of big matrix using gap stat
     */
-    @Test
+    //@Test
     public void testClustering(){
 
         DistComputable dc = new DistEuclidean();
@@ -42,7 +42,7 @@ public class KmeansParallelTest{
          /*
         *   Do gap stat to find k. should return 3
         */
-        int repeats = 10;
+        int repeats = 5;
         int sum = 0;
         for (int i = 0; i<repeats; i++){
             GapStatParallel gap = new GapStatParallel(bigMatrix,dc,ic,2);

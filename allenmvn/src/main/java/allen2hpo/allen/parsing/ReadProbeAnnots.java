@@ -37,7 +37,7 @@ public class ReadProbeAnnots extends ReadAnnots{
 
 		this.indicesOfUnknownProbes = new ArrayList<Integer>();
 
-     	this.pattern =  Pattern.compile("^(A_)+");;
+     	this.pattern =  Pattern.compile("A_+");;
 
 		/*
 		*	Begin reading file line by line. Line is handled here.
